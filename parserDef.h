@@ -14,7 +14,7 @@
 //#include "symbolTable.h" 
 struct tablePointer ; 
  
-#define NONTERMINAL_OFFSET 12345
+// #define NONTERMINAL_OFFSET 12345
 #define NO_OF_TERMINALS 56
 #define NO_OF_NONTERMINALS 50
 #define MAX_RULE_LEN 10
@@ -27,6 +27,21 @@ typedef struct
 	int numRules;
 	int** rules;
 }nonTerminal;
+
+// rules[stmts] ----> struct {
+// 	pointer, int first
+// }
+
+// struct node {
+// 	union symbol;
+// 	int tag;
+// 	node *next;
+// }
+
+// union symbol {
+// 	terminalId;
+// 	nonTerminalId;
+// }
 
 typedef nonTerminal* Grammar;
 typedef struct{
@@ -45,7 +60,7 @@ typedef first* FollowSet;
 typedef tableEntry Table[NO_OF_NONTERMINALS][NO_OF_TERMINALS];
 
 typedef enum { 
-	program = NONTERMINAL_OFFSET,
+	program,
 	mainFunction,
 	otherFunctions,
 	function,
