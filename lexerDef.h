@@ -1,18 +1,7 @@
-/* 
- * Group 08
- * Shubham Lather		2016A7PS0006P
- * Devyash Parihar		2016A7PS0066P
- * Rahul Khandelwal		2016A7PS0128P
- * Aniruddha Karve		2016A7PS0042P
- */
- 
-
-
-
 #ifndef LEXERDEF
 #define LEXERDEF
 
-#define MAX_LEXEME_SIZE 200 
+#define MAX_LEXEME_SIZE 32
 
 typedef enum 
 {
@@ -23,7 +12,7 @@ typedef enum
     TK_NUM, 
     TK_RNUM, 
     TK_FUNID, 
-    TK_RECORDID, 
+    TK_RUID, 
     TK_WITH, 
     TK_PARAMETERS, 
     TK_END, 
@@ -69,6 +58,10 @@ typedef enum
     TK_GT, 
     TK_GE, 
     TK_NE,
+    TK_UNION,
+    TK_ENDUNION,
+    TK_DEFINETYPE,
+    TK_AS,
     TK_EOF,
     eps, 
     TK_ERROR
@@ -98,7 +91,6 @@ typedef struct lookUp LookUpTable;
 
 
 typedef struct {
-
     char lexeme[MAX_LEXEME_SIZE];
     unsigned long long lineNum;
     terminalId tokenType;

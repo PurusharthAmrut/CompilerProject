@@ -18,8 +18,6 @@
  */
 
 
-
-
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -34,14 +32,10 @@
 unsigned long long lineNum = 1;		// the "current line" in the source file
 char inputBuffer[MAX_BUFFER_SIZE];	// the input buffer
 int bufIndex; 				
-int bufSize = -1; 					
+int bufSize = -1; 	
 
-/*
- * function to remove the comments
- * and printing the result on console 
- */
- LookUpTable* createLookUpTable(int num_pos)
-{
+LookUpTable* createLookUpTable(int num_pos) {
+
 	LookUpTable* lookUpTable = (LookUpTable*)malloc(sizeof(LookUpTable));
 	lookUpTable->num_pos = num_pos;
 	lookUpTable->positions = (List**)malloc(num_pos*sizeof(List*));
@@ -105,6 +99,10 @@ void fillLookUpTable(LookUpTable* lookUpTable)
 	insertNodeElement( lookUpTable, "call", TK_CALL);
 	insertNodeElement( lookUpTable, "record", TK_RECORD);
 	insertNodeElement( lookUpTable, "endrecord", TK_ENDRECORD);
+	insertNodeElement( lookUpTable, "union", TK_UNION);
+	insertNodeElement( lookUpTable, "definetype", TK_DEFINETYPE);
+	insertNodeElement( lookUpTable, "as", TK_AS);
+	insertNodeElement( lookUpTable, "endunion", TK_ENDUNION);
 	insertNodeElement( lookUpTable, "else", TK_ELSE);
 }
 
@@ -272,356 +270,359 @@ void getNextToken(FILE *fp, tokenInfo *t)
 
 		switch(state)
 		{
-			case 0:
+			case 1:
 				switch(c)
 				{
-						case '%':
-								state=1;
-								break;
-						case '<':
-								state=2;
-								break;
-						case '&':
-								state=5;
-								break;
-						case '@':
-								state=7;
-								break;
-						case '[': // TK_SQL found
-								t->tokenType = TK_SQL;
-								t->lexeme[count]='\0';
-								return;
-						case ']': // TK_SQR found
-								t->tokenType = TK_SQR;
-								t->lexeme[count]='\0';
-								return;
-		                		case ',': // TK_COMMA found
-				                t->tokenType = TK_COMMA;
-				                t->lexeme[count]='\0';
-								return;						
-						case ';': // TK_SEM found
-								t->tokenType = TK_SEM;
-								t->lexeme[count]='\0';
-								return;
-						case ':': // TK_COLON found
-								t->tokenType = TK_COLON;
-								t->lexeme[count]='\0';
-								return;
-						case '.': // TK_DOT found
-								t->tokenType = TK_DOT;
-								t->lexeme[count]='\0';
-						        return;
-		                case '(': // TK_OP found
-				                t->tokenType = TK_OP;
-				                t->lexeme[count]='\0';
-				                return;
-		                case ')': // TK_CL found
-				                t->tokenType = TK_CL;
-				                t->lexeme[count]='\0';
-				                return;
-		                case '+': // TK_PLUS found
-				                t->tokenType = TK_PLUS;
-				                t->lexeme[count]='\0';
-				                return;
-		                case '-': // TK_MINUS found
-				                t->tokenType = TK_MINUS;
-				                t->lexeme[count]='\0';
-				                return;
-		                case '*': // TK_MUL found
-				                t->tokenType = TK_MUL;
-				                t->lexeme[count]='\0';
-				                return;
-		                case '/': // TK_DIV found
-				                t->tokenType = TK_DIV;
-				                t->lexeme[count]='\0';
-				                return;
-						case '~': // TK_NOT found
-								t->tokenType = TK_NOT;
-								t->lexeme[count]='\0';
-								return;
-		                case '=':
-				                state = 9;
-				                break;			        
-		                case '>':
-				                state = 10;
-				                break;	
-		                case '!':
-				                state = 11;
-				                break;	
-		                case 'b':
-		                case 'c':
-		                case 'd':
-				                state = 12;
-				                break;
-		                case 'a':
-		                case 'e':
-		                case 'f':
-		                case 'g':
-		                case 'h':
-		                case 'i':
-		                case 'j':
-		                case 'k':
-		                case 'l':
-		                case 'm':
-		                case 'n':
-		                case 'o':
-		                case 'p':
-		                case 'q':
-		                case 'r':
-		                case 's':
-		                case 't':
-		                case 'u':
-		                case 'v':
-		                case 'w':
-		                case 'x':
-		                case 'y':
-		                case 'z':
-				                state = 13;
-				                break;
-		                case '0':
-		                case '1':
-		                case '2':
-		                case '3':
-		                case '4':
-		                case '5':
-		                case '6':
-		                case '7':
-		                case '8':
-		                case '9':
-				                state = 16;
-				                break;						
-				case '_':
-								state = 19;
-								break;
-				case '#':
-								state = 22;
-								break;
-		                case '\n':
-		                    	lineNum++;
-		                case ' ':
-		                case '\t':
-		                case '\r':
-				                state = 24;
-				                break;
-		                case 26: // End Of File (26 is ASCII value of EOF)
-				                t->tokenType = TK_EOF;
-				                sprintf(t->lexeme, "End of File");
-				                //t->lexeme[count]='\0';
-				                return;
-		                default: // invalid starting character
-				                sprintf(t->lexeme, "Unknown Symbol %c", c); // storing the error message in t->lexeme
-				                t->tokenType = TK_ERROR;
-				               // t->lexeme[count]='\0';//---------------------------                    
-		                    return;
+					case '%':
+						state = 55;
+						break;
+					case '<':
+						state=20;
+						break;
+					case '&':
+						state=45;
+						break;
+					case '@':
+						state=48;
+						break;
+					case '[': // TK_SQL found
+						t->tokenType = TK_SQL;
+						t->lexeme[count]='\0';
+						return;
+					case ']': // TK_SQR found
+						t->tokenType = TK_SQR;
+						t->lexeme[count]='\0';
+						return;
+					case ',': // TK_COMMA found
+						t->tokenType = TK_COMMA;
+						t->lexeme[count]='\0';
+						return;						
+					case ';': // TK_SEM found
+						t->tokenType = TK_SEM;
+						t->lexeme[count]='\0';
+						return;
+					case ':': // TK_COLON found
+						t->tokenType = TK_COLON;
+						t->lexeme[count]='\0';
+						return;
+					case '.': // TK_DOT found
+						t->tokenType = TK_DOT;
+						t->lexeme[count]='\0';
+						return;
+					case '(': // TK_OP found
+						t->tokenType = TK_OP;
+						t->lexeme[count]='\0';
+						return;
+					case ')': // TK_CL found
+						t->tokenType = TK_CL;
+						t->lexeme[count]='\0';
+						return;
+					case '+': // TK_PLUS found
+						t->tokenType = TK_PLUS;
+						t->lexeme[count]='\0';
+						return;
+					case '-': // TK_MINUS found
+						t->tokenType = TK_MINUS;
+						t->lexeme[count]='\0';
+						return;
+					case '*': // TK_MUL found
+						t->tokenType = TK_MUL;
+						t->lexeme[count]='\0';
+						return;
+					case '/': // TK_DIV found
+						t->tokenType = TK_DIV;
+						t->lexeme[count]='\0';
+						return;
+					case '~': // TK_NOT found
+						t->tokenType = TK_NOT;
+						t->lexeme[count]='\0';
+						return;
+					case '=':
+						state = 29;
+						break;			        
+					case '>':
+						state = 26;
+						break;	
+					case '!':
+						state = 31;
+						break;	
+					case 'b':
+						state = 6;
+						break;
+					case 'c':
+					case 'd':
+						state = 5;
+						break;
+					case 'a':
+					case 'e':
+					case 'f':
+					case 'g':
+					case 'h':
+					case 'i':
+					case 'j':
+					case 'k':
+					case 'l':
+					case 'm':
+					case 'n':
+					case 'o':
+					case 'p':
+					case 'q':
+					case 'r':
+					case 's':
+					case 't':
+					case 'u':
+					case 'v':
+					case 'w':
+					case 'x':
+					case 'y':
+					case 'z':
+							state = 2;
+							break;
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+						state = 10;
+						break;
+					case '_':
+						state = 33;
+						break;
+					case '#':
+						state = 42;
+						break;
+					case '\n':
+						lineNum++;
+						break;
+					// case ' ':
+					// case '\t':
+					// case '\r':
+					//     state = 24;
+					//     break;
+					case 26: // End Of File (26 is ASCII value of EOF)
+						t->tokenType = TK_EOF;
+						sprintf(t->lexeme, "End of File");
+						return;
+					default: // invalid starting character
+							sprintf(t->lexeme, "Unknown Symbol %c", c); // storing the error message in t->lexeme
+							t->tokenType = TK_ERROR;
+							// t->lexeme[count]='\0';//---------------------------                    
+						return;
 				}
 				break;		                       
 		                    
-			case 1:	// comment starts and read till encounter a new line
+			case 55:	// comment starts and read till encounter a new line
 				switch(c) 
 				{
-		                case '\n':
-		                	bufIndex--;
-		                	t->lexeme[count-1]='\0';
-		                	state = 0; //after end of comment return to state 0
-		                    count = 0;	
-		                    //lineNum++;
-		                    t->tokenType = TK_COMMENT;		                                        
-		                    return;
-		                
-		                default:
-		                    ;
+					case '\n':
+						bufIndex--;
+						t->lexeme[count-1]='\0';
+						state = 0; //after end of comment return to state 0
+						count = 0;
+						// comment, though ignored is still counted as a line	
+						lineNum++;
+						t->tokenType = TK_COMMENT;		                                        
+						return;
+					
+					default:
+						;//do not change state
 				}
 				break;
 
-			case 2:
+			case 20:
 				switch(c) 
 				{
-						case '-':
-		                    state = 3;
-		                    break;
-		                case '=': // token TK_LE found
-		                    t->tokenType = TK_LE;
-		                    t->lexeme[count]='\0';
-		                    return;
-		                default:
-		                    t->tokenType = TK_LT;                  
-		                    bufIndex--; // push back the extra read character in buffer(retract)
-		                    t->lexeme[count-1]='\0';		                    
-		                    return;
+					case '-':
+						state = 21;
+						break;
+					case '=': // token TK_LE found
+						t->tokenType = TK_LE;
+						t->lexeme[count]='\0';
+						return;
+					default:
+						t->tokenType = TK_LT;                  
+						bufIndex--; // push back the extra read character in buffer(retract)
+						t->lexeme[count-1]='\0';		                    
+						return;
 				}
 				break;
 				
-			case 3:
+			case 21:
 				switch(c) 
 				{
-		                case '-':
-		                    state = 4;
-		                    break;
-		                default:
-		                    bufIndex--;
-		                    t->tokenType = TK_ERROR;	
-		                    strcpy(t->lexeme, "Unknown pattern <-");// storing the error message in t->lexeme
-		                    return;
+					case '-':
+						state = 22;
+						break;
+					default:
+						bufIndex--;
+						t->tokenType = TK_ERROR;	
+						strcpy(t->lexeme, "Unknown pattern <-");// storing the error message in t->lexeme
+						return;
 				}
 				break;
 				
-			case 4:
+			case 22:
 				switch(c) 
 				{
-		                case '-': // TK_ASSIGNOP found
-		                    t->tokenType = TK_ASSIGNOP;
-		                    t->lexeme[count]='\0';
-		                    return;
-		                default:
-		                    bufIndex--;
-		                    t->tokenType = TK_ERROR;
-		                    strcpy(t->lexeme, "Unknown pattern <--");// storing the error message in t->lexeme		                    	
-		                    return;
+					case '-': // TK_ASSIGNOP found
+						t->tokenType = TK_ASSIGNOP;
+						t->lexeme[count]='\0';
+						return;
+					default:
+						bufIndex--;
+						t->tokenType = TK_ERROR;
+						strcpy(t->lexeme, "Unknown pattern <--");// storing the error message in t->lexeme		                    	
+						return;
 				}
 				break;
 				
-			case 5:
+			case 45:
 				switch(c) 
 				{
-		                case '&':
-		                    state = 6;
-		                    break;
-		                default:    
-		                    t->tokenType = TK_ERROR;
-		                    if(c=='\n')
-		                    {
-		                    	lineNum++;
-		                    	return;
-		                    }
-		                    if(c=='\t' || c=='\r' || c == ' ')
-		                    	return;
-		                    sprintf(t->lexeme, "Unknown pattern &");// storing the error message in t->lexeme
-		                    bufIndex--;
-		                    return;
+					case '&':
+						state = 46;
+						break;
+					default:    
+						t->tokenType = TK_ERROR;
+						if(c=='\n')
+						{
+							lineNum++;
+							return;
+						}
+						if(c=='\t' || c=='\r' || c == ' ')
+							return;
+						sprintf(t->lexeme, "Unknown pattern &");// storing the error message in t->lexeme
+						bufIndex--;
+						return;
 				}
 				break;					
 						
-			case 6:
+			case 46:
 				switch(c) 
 				{
-		                case '&': // TK_AND found
-		                    t->tokenType = TK_AND;
-		                    t->lexeme[count]='\0';
-		                    return;
-		                default:
-		                    sprintf(t->lexeme, "Unknown pattern &&");// storing the error message in t->lexeme
-		                    t->tokenType = TK_ERROR;
-		                    if(c=='\n')
-		                    {
-		                    	lineNum++;
-		                    	return;
-		                    }
-		                    if(c=='\t' || c=='\r' || c == ' ')
-		                    	return;
-		                    bufIndex--;
-		                    return;
+					case '&': // TK_AND found
+						t->tokenType = TK_AND;
+						t->lexeme[count]='\0';
+						return;
+					default:
+						sprintf(t->lexeme, "Unknown pattern &&");// storing the error message in t->lexeme
+						t->tokenType = TK_ERROR;
+						if(c=='\n')
+						{
+							lineNum++;
+							return;
+						}
+						if(c=='\t' || c=='\r' || c == ' ')
+							return;
+						bufIndex--;
+						return;
 				}
 				break;							
 				
-			case 7:
+			case 48:
 				switch(c) 
 				{
-		                case '@':
-		                    state = 8;
-		                    break;
-		                default:
-		                    sprintf(t->lexeme, "Unknown pattern @");// storing the error message in t->lexeme
-		                    t->tokenType = TK_ERROR;
-		                    if(c=='\n')
-		                    {
-		                    	lineNum++;
-		                    	return;
-		                    }
-		                    if(c=='\t' || c=='\r' || c == ' ')
-		                    	return;
-		                    bufIndex--;
-		                    return;
+					case '@':
+						state = 49;
+						break;
+					default:
+						sprintf(t->lexeme, "Unknown pattern @");// storing the error message in t->lexeme
+						t->tokenType = TK_ERROR;
+						if(c=='\n')
+						{
+							lineNum++;
+							return;
+						}
+						if(c=='\t' || c=='\r' || c == ' ')
+							return;
+						bufIndex--;
+						return;
 				}
 				break;	
 		
-			case 8:
+			case 49:
 				switch(c) 
 				{
-		                case '@': // TK_OR found
-		                    t->tokenType = TK_OR;
-		                    t->lexeme[count]='\0';
-		                    return;
-		                default:
-		                    sprintf(t->lexeme, "Unknown pattern @@");
-		                    t->tokenType = TK_ERROR;
-		                    if(c=='\n')
-		                    {
-		                    	lineNum++;
-		                    	return;
-		                    }
-		                    if(c=='\t' || c=='\r' || c == ' ')
-		                    	return;
-		                    bufIndex--;
-		                    return;
+					case '@': // TK_OR found
+						t->tokenType = TK_OR;
+						t->lexeme[count]='\0';
+						return;
+					default:
+						sprintf(t->lexeme, "Unknown pattern @@");
+						t->tokenType = TK_ERROR;
+						if(c=='\n')
+						{
+							lineNum++;
+							return;
+						}
+						if(c=='\t' || c=='\r' || c == ' ')
+							return;
+						bufIndex--;
+						return;
 				}
 				break;	
 		
-			case 9:
+			case 29:
 				switch(c) 
 				{
-		                case '=': // TK_EQ found
-		                    t->tokenType = TK_EQ;
-		                    t->lexeme[count]='\0';
-		                    return;
-		                default:
-		                    sprintf(t->lexeme,"Unknown pattern =");
-		                    t->tokenType = TK_ERROR;
-		                    if(c=='\n')
-		                    {
-		                    	lineNum++;
-		                    	return;
-		                    }
-		                    if(c=='\t' || c=='\r' || c == ' ')
-		                    	return;
-		                    bufIndex--;
-		                    return;
+					case '=': // TK_EQ found
+						t->tokenType = TK_EQ;
+						t->lexeme[count]='\0';
+						return;
+					default:
+						sprintf(t->lexeme,"Unknown pattern =");
+						t->tokenType = TK_ERROR;
+						if(c=='\n')
+						{
+							lineNum++;
+							return;
+						}
+						if(c=='\t' || c=='\r' || c == ' ')
+							return;
+						bufIndex--;
+						return;
 				}
 				break;	
 				
-			case 10:
+			case 26:
 				switch(c) 
 				{
-		                case '=': // TK_GE found
-		                    t->tokenType = TK_GE;
-		                    t->lexeme[count]='\0';
-		                    return;
-		                default: // TK_GT found
-		                    bufIndex--;
-		                    t->lexeme[count-1]='\0';
-		                    t->tokenType = TK_GT;
-		                    return;
+					case '=': // TK_GE found
+						t->tokenType = TK_GE;
+						t->lexeme[count]='\0';
+						return;
+					default: // TK_GT found
+						bufIndex--;
+						t->lexeme[count-1]='\0';
+						t->tokenType = TK_GT;
+						return;
 				}
 				break;			
 		
-			case 11:
+			case 31:
 				switch(c) 
 				{
-		                case '=': // TK_NE found
-		                    t->tokenType = TK_NE;
-		                    t->lexeme[count]='\0';
-		                    return;
-		                default:
-		                    sprintf(t->lexeme, "Unknown pattern !");// storing the error message in t->lexeme
-		                    t->tokenType = TK_ERROR;
-		                    if(c=='\n')
-		                    {
-		                    	lineNum++;
-		                    	return;
-		                    }
-		                    if(c=='\t' || c=='\r' || c == ' ')
-		                    	return;
-		                    bufIndex--;
-		                    return;
+					case '=': // TK_NE found
+						t->tokenType = TK_NE;
+						t->lexeme[count]='\0';
+						return;
+					default:
+						sprintf(t->lexeme, "Unknown pattern !");// storing the error message in t->lexeme
+						t->tokenType = TK_ERROR;
+						if(c=='\n')
+						{
+							lineNum++;
+							return;
+						}
+						if(c=='\t' || c=='\r' || c == ' ')
+							return;
+						bufIndex--;
+						return;
 				}
 				break;	
 		
