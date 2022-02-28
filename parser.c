@@ -29,11 +29,12 @@ void getGram(char *fname, Grammar g)
 	}
 	
 	int i=0;
-	while(i<g->numRules)
+	while(i<NO_OF_NONTERMINALS)
 	{
 		fscanf(gf,"%d",&(g[i]->numRules));
 		g[i]->heads = (rhsCharNode*)malloc(sizeof(rhsCharNode));		
 		g[i]->first = 0;
+		
 		g[i].rules=(int**)malloc((g[i].numRules)*sizeof(int*));
     		for (int j=0; j<g[i].numRules; j++) 
         	 g[i].rules[j]= (int *)malloc((MAX_RULE_LEN+1) * sizeof(int));	
