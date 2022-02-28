@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     extern int bufSize;
     extern unsigned long long lineNum;
     Grammar g;
-    g = malloc(sizeof(nonTerminal) * NO_OF_NONTERMINALS);
+    g = malloc(sizeof(lhsChar) * NO_OF_NONTERMINALS);
     getGram("grammar.txt", g);
     FirstSet firstSet=(FirstSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
     FollowSet followSet=(FollowSet)malloc(NO_OF_NONTERMINALS*sizeof(first));

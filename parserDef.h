@@ -30,16 +30,18 @@ typedef union symbol* symbol;
 
 struct rhsCharNode {
 	symbol s;
-	int tag;
+	unsigned int : 1 tag;
 	struct rhsCharNode* next;
 };
 typedef struct rhsCharNode* rhsCharNode;
 
-struct rules {
-	rhsCharNode head;
-	int first;
+struct lhsChar {
+	rhsCharNode* heads;
+	int numRules;
+	long first;
 };
-typedef struct rules** Grammar;
+typedef struct lhsChar* lhsChar;
+typedef lhsChar* Grammar;
 
 typedef struct tableEntry
 {

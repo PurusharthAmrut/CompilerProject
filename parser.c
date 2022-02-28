@@ -20,17 +20,20 @@
 bool check[NO_OF_NONTERMINALS];
 
 void getGram(char *fname, Grammar g)
-{
-     int i=0;
-	
+{    
+	g = (Grammar)calloc(NO_OF_NONTERMINALS, sizeof(lhsChar));
 	FILE* gf;
 	gf=fopen(fname,"r");
 	if(gf==NULL){
 		return;
 	}
-	while(i<NO_OF_NONTERMINALS)
+	
+	int i=0;
+	while(i<g->numRules)
 	{
-		fscanf(gf,"%d",&(g[i].numRules));
+		fscanf(gf,"%d",&(g[i]->numRules));
+		g[i]->heads = (rhsCharNode*)malloc(sizeof(rhsCharNode));		
+		g[i]->first = 0;
 		g[i].rules=(int**)malloc((g[i].numRules)*sizeof(int*));
     		for (int j=0; j<g[i].numRules; j++) 
         	 g[i].rules[j]= (int *)malloc((MAX_RULE_LEN+1) * sizeof(int));	
@@ -39,9 +42,10 @@ void getGram(char *fname, Grammar g)
 		char temp[MAX_ID_SIZE];
 		char tempo[MAX_ID_SIZE];
 		
-		for(int j=0;j<(g[i].numRules);j++)
-		{
+		for(int j=0;j<(g[i]->numRules);j++) {
+
 			fscanf(gf,"%s%d",temp,&k);
+			
 			g[i].rules[j][0]=k;
 			for(int m=1;m<k+1;m++)
 			{
