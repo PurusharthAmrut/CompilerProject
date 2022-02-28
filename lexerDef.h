@@ -65,7 +65,7 @@ typedef enum
     TK_EOF,
     eps, 
     TK_ERROR
-} terminalId;
+} terminal;
 
 //lookuptable structure
 struct node{
