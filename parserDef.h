@@ -14,39 +14,32 @@
 //#include "symbolTable.h" 
 struct tablePointer ; 
  
-// #define NONTERMINAL_OFFSET 12345
-#define NO_OF_TERMINALS 56
+#define NONTERMINAL_OFFSET 12345
+#define NO_OF_TERMINALS 60
 #define NO_OF_NONTERMINALS 50
 #define MAX_RULE_LEN 10
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
 #define RECORD_DATATYPE 50000
 
-typedef struct
-{
-	int numRules;
-	int** rules;
-}nonTerminal;
+union symbol {
+	terminal t;
+	nonTerminal nt;
+};
+typedef union symbol* symbol;
 
-// rules[stmts] ----> struct {
-// 	pointer, int first
-// }
+struct rhsCharNode {
+	symbol s;
+	int tag;
+	struct rhsCharNode* next;
+};
+typedef struct rhsCharNode* rhsCharNode;
 
-// struct node {
-// 	union symbol;
-// 	int tag;
-// 	node *next;
-// }
-
-// union symbol {
-// 	terminalId;
-// 	nonTerminalId;
-// }
-
-typedef nonTerminal* Grammar;
-typedef struct{
-	int* first;
-} first;
+struct rules {
+	rhsCharNode head;
+	int first;
+};
+typedef struct rules** Grammar;
 
 typedef struct tableEntry
 {
@@ -110,7 +103,7 @@ typedef enum {
 	optionalReturn,
 	idList,
 	more_ids
-}nonTermIds;
+}nonTerminal;
 
 typedef struct parsetree
 {
