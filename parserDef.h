@@ -35,6 +35,7 @@ struct rhsCharNode {
 	struct rhsCharNode* next;
 };
 typedef struct rhsCharNode* rhsCharNode;
+// rhsCharNode rcn = (rhsCharNode)malloc(sizeof(struct rhsCharNode));
 
 struct lhsChar {
 	rhsCharNode* heads;
