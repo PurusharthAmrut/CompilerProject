@@ -14,9 +14,10 @@
 //#include "symbolTable.h" 
 struct tablePointer ; 
  
+// #define NONTERMINAL_OFFSET 12345
+#define NO_OF_NONTERMINALS 52
 #define NONTERMINAL_OFFSET 12345
 #define NO_OF_TERMINALS 60
-#define NO_OF_NONTERMINALS 50
 #define MAX_RULE_LEN 10
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
@@ -71,6 +72,7 @@ typedef enum {
 	typeDefinition,
 	defineTypeStmt,
 	defineTypeStmts,
+	A,
 	fieldDefinition,
 	fieldDefinitions,
 	moreFields,

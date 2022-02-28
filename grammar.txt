@@ -20,18 +20,29 @@ dataType 1 constructedDatatype
 2
 primitiveDatatype 1 TK_INT
 primitiveDatatype 1 TK_REAL
-1
-constructedDatatype 2 TK_RECORD TK_RECORDID
+3
+constructedDatatype 2 TK_RECORD TK_RUID
+constructedDatatype 2 TK_UNION TK_RUID
+constructedDatatype 1 TK_RUID
 2
 remaining_list 2 TK_COMMA parameter_list
 remaining_list 1 eps
 1
-stmts 4 typeDefinitions declarations otherStmts returnStmt
+stmts 5 typeDefinitions defineTypeStmts declarations otherStmts returnStmt
 2
 typeDefinitions 2 typeDefinition typeDefinitions
 typeDefinitions 1 eps
+2
+typeDefinition 4 TK_RECORD TK_RECORDID fieldDefinitions TK_ENDRECORD
+typeDefinition 4 TK_UNION TK_RUID fieldDefinitions TK_ENDUNION
 1
-typeDefinition 5 TK_RECORD TK_RECORDID fieldDefinitions TK_ENDRECORD TK_SEM
+defineTypeStmt 6 TK_DEFINETYPE A TK_RUID TK_AS TK_RUID TK_SEM
+2
+defineTypeStmts 2 defineTypeStmt defineTypeStmts
+defineTypeStmt 1 eps
+2
+A 1 TK_RECORD
+A 1 TK_UNION
 1
 fieldDefinitions 3 fieldDefinition fieldDefinition moreFields
 1
@@ -59,10 +70,15 @@ stmt 1 funCallStmt
 1
 assignmentStmt 4 singleOrRecId TK_ASSIGNOP arithmeticExpression TK_SEM
 1
-singleOrRecId 2 TK_ID singleOrRecIdPrime
+singleOrRecId 2 TK_ID option_single_constructed
 2
-singleOrRecIdPrime 2 TK_DOT TK_FIELDID
-singleOrRecIdPrime 1 eps
+option_single_constructed 1 eps
+option_single_constructed 2 oneExpansion moreExpansions
+1 
+oneExpansion 2 TK_DOT TK_FIELDID
+2 
+moreExpansions 2 oneExpansion moreExpansions
+moreExpansions 1 eps
 1
 funCallStmt 7 outputParameters TK_CALL TK_FUNID TK_WITH TK_PARAMETERS inputParameters TK_SEM
 2
@@ -78,12 +94,8 @@ conditionalStmt 8 TK_IF TK_OP booleanExpression TK_CL TK_THEN stmt otherStmts el
 elsePart 4 TK_ELSE stmt otherStmts TK_ENDIF
 elsePart 1 TK_ENDIF
 2
-ioStmt 5 TK_READ TK_OP singleOrRecId TK_CL TK_SEM
-ioStmt 5 TK_WRITE TK_OP allVar TK_CL TK_SEM
-3
-allVar 1 TK_NUM
-allVar 1 TK_RNUM
-allVar 1 singleOrRecId
+ioStmt 5 TK_READ TK_OP var TK_CL TK_SEM
+ioStmt 5 TK_WRITE TK_OP var TK_CL TK_SEM
 1
 arithmeticExpression 2 term expPrime
 2
@@ -96,7 +108,7 @@ termPrime 3 highPrecedenceOperators factor termPrime
 termPrime 1 eps
 2
 factor 3 TK_OP arithmeticExpression TK_CL
-factor 1 all
+factor 1 var
 2
 highPrecedenceOperators 1 TK_MUL
 highPrecedenceOperators 1 TK_DIV
@@ -104,18 +116,11 @@ highPrecedenceOperators 1 TK_DIV
 lowPrecedenceOperators 1 TK_PLUS
 lowPrecedenceOperators 1 TK_MINUS
 3
-all 1 TK_NUM
-all 1 TK_RNUM
-all 2 TK_ID temp
-2
-temp 1 eps
-temp 2 TK_DOT TK_FIELDID
-3
 booleanExpression 7 TK_OP booleanExpression TK_CL logicalOp TK_OP booleanExpression TK_CL
-booleanExpression 3 allVar relationalOp allVar
+booleanExpression 3 var relationalOp var
 booleanExpression 4 TK_NOT TK_OP booleanExpression TK_CL
 3
-var 1 TK_ID 
+var 1 singleOrRecId 
 var 1 TK_NUM
 var 1 TK_RNUM
 2
