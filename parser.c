@@ -78,6 +78,8 @@ void getGram(char *fname, Grammar g) {
         g[i].heads = malloc(numRules*sizeof(rhsCharNode));
         g[i].numRules = numRules;
         g[i].first = 0;
+        g[i].follow = 0;
+		g[i].isNullable = 0;
 
         for(int j=0; j<numRules; j++) {
             rhsCharNode curr = malloc(sizeof(struct rhsCharNode));
@@ -95,6 +97,8 @@ void getGram(char *fname, Grammar g) {
                 fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
 				exit(0);
             }
+
+			if(curr->s.nt==eps) g[i].isNullable = 1;
 
             rhsCharNode prev = curr;
 
