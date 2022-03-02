@@ -89,14 +89,15 @@ char *nonTermArr[] = {"program", "mainFunction", "otherFunctions", "function", "
 typedef union symbol {
 	terminal t;
 	nonTerminal nt;
-}symbol;
+} symbol;
 
 typedef struct rhsCharNode {
 	symbol s;
 	unsigned int tag : 1;
 	struct rhsCharNode* next;
-} rhsCharNode;
-// rhsCharNode rcn = (rhsCharNode)malloc(sizeof(struct rhsCharNode));
+};
+
+typedef struct rhsCharNode* rhsCharNode;
 
 struct lhsChar {
 	rhsCharNode* heads;
@@ -105,7 +106,8 @@ struct lhsChar {
 	long int follow;
 	unsigned int isNullable : 1;
 };
-typedef struct lhsChar* Grammar;
+typedef struct lhsChar* lhsChar;
+typedef lhsChar Grammar;
 
 typedef struct tableEntry
 {
