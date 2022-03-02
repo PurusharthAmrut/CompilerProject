@@ -19,44 +19,119 @@
 
 bool check[NO_OF_NONTERMINALS];
 
-void getGram(char *fname, Grammar g)
-{    
-	g = (Grammar)calloc(NO_OF_NONTERMINALS, sizeof(lhsChar));
-	FILE* gf;
-	gf=fopen(fname,"r");
-	if(gf==NULL){
-		return;
-	}
-	
-	int i=0;
-	while(i<NO_OF_NONTERMINALS)
-	{
-		fscanf(gf,"%d",&(g[i]->numRules));
-		g[i]->heads = (rhsCharNode*)malloc(sizeof(rhsCharNode));		
-		g[i]->first = 0;
-		
-		g[i].rules=(int**)malloc((g[i].numRules)*sizeof(int*));
-    		for (int j=0; j<g[i].numRules; j++) 
-        	 g[i].rules[j]= (int *)malloc((MAX_RULE_LEN+1) * sizeof(int));	
-		
-		int k,id;
-		char temp[MAX_ID_SIZE];
-		char tempo[MAX_ID_SIZE];
-		
-		for(int j=0;j<(g[i]->numRules);j++) {
+char* getTermString(terminal term) {
+	return termArr[term];
+}
 
-			fscanf(gf,"%s%d",temp,&k);
-			
-			g[i].rules[j][0]=k;
-			for(int m=1;m<k+1;m++)
-			{
-				fscanf(gf,"%s",tempo);
-				id=parseIdStr(tempo);
-				g[i].rules[j][m]=id;				
-			}			
-		}
-		i++;
+char* getNonTermString(nonTerminal nonTerm) {
+	return nonTermArr[nonTerm];
+}
+
+terminal checkTerminal(char *tokenArr) {
+	terminal curr = TK_ASSIGNOP;
+	for(int i=0; i<NO_OF_TERMINALS; i++, curr++) {
+		if(strcmp(termArr[i], tokenArr)==0) return curr;
 	}
+	return -1;
+	// fprintf(stderr, "%s - Terminal does not exist in ENUM\n", tokenArr);
+	// exit(0);
+}
+
+nonTerminal checkNonTerminal(char *tokenArr) {
+	nonTerminal curr = program;
+	for(int i=0; i<NO_OF_NONTERMINALS; i++, curr++) {
+		if(strcmp(nonTermArr[i], tokenArr)==0) return curr;
+	}
+	return -1;
+	// fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", tokenArr);
+	// exit(0);
+}
+
+void printGram(Grammar g) {
+	for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+		printf("%d\n", g[i].numRules);
+		for(int j=0; j<g[i].numRules; j++) {
+			rhsCharNode curr = g[i].heads[j];
+			while(curr!=NULL) {
+				if(curr->tag==0) printf("%s ", getTermString(curr->s.t));
+				else printf("%s ", getNonTermString(curr->s.nt));
+				curr = curr->next;
+			}
+			printf("\n");
+		}
+	}
+}
+
+void getGram(char *fname, Grammar g) {
+    FILE *fp;
+    fp = fopen(filepath, "r");
+    if(fp==NULL) {
+        fprintf(stderr, "File %s file not found error\n", fname);
+        exit(0);
+    }
+
+    for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+        int numRules;
+        fscanf(fp, "%d", &numRules);
+        // printf("%d\n", numRules);
+
+        g[i].heads = malloc(numRules*sizeof(rhsCharNode));
+        g[i].numRules = numRules;
+        g[i].first = 0;
+
+        for(int j=0; j<numRules; j++) {
+            rhsCharNode curr = malloc(sizeof(struct rhsCharNode));
+            curr->next = NULL;
+
+            char *nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
+            fscanf(fp, "%s", nonTerm);
+            int numTokens;
+            fscanf(fp, "%d", &numTokens);
+            // printf("%s %d ", nonTerm, numTokens);
+
+            curr->tag = 1;
+            curr->s.nt = checkNonTerminal(nonTerm);
+            if(curr->s.nt==-1) {
+                fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
+				exit(0);
+            }
+
+            rhsCharNode prev = curr;
+
+            for(int k=0; k<numTokens; k++) {
+                rhsCharNode tmp = malloc(sizeof(struct rhsCharNode));
+                tmp->next = NULL;
+
+                char *token = malloc(MAX_TOKEN_LENGTH*sizeof(char));
+                fscanf(fp, "%s", token);
+                // printf("%s ", token);
+
+                int tokenIdx = checkTerminal(token);
+                if(tokenIdx!=-1) {
+                    tmp->tag = 0;
+                    tmp->s.t = tokenIdx;
+                }else {
+                    tokenIdx = checkNonTerminal(token);
+                    if(tokenIdx==-1) {
+                        fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", token);
+						exit(0);
+                    }
+                    tmp->tag = 1;
+                    tmp->s.nt = tokenIdx;
+                }
+
+                prev->next = tmp;
+                prev = tmp;
+            }
+            g[i].heads[j] = curr;
+
+            // printf("\n");
+        }
+    }
+
+	printf("Loaded Grammar!!!\n");
+
+    fclose(fp);
 }
 //------------------------------------------------------------
 

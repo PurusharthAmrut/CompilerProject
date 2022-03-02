@@ -17,6 +17,11 @@
 int* calculateFirst(int production, Grammar g, FirstSet firstSet);
 int* add(int* ans, int* addit);
 void buildFirstSet(Grammar g, FirstSet firstSet);
+char* getTermString(terminal term);
+char* getNonTermString(nonTerminal nonTerm);
+terminal checkTerminal(char *tokenArr);
+nonTerminal checkNonTerminal(char *tokenArr);
+void printGram(Grammar g);
 void getGram(char *fname, Grammar g);
 void getFollowSets(Grammar g, FollowSet fw, FirstSet fr);
 void findFollow(int NonTerminalNo, int productionNo, Grammar g, FollowSet fw, FirstSet fr,int* flag);
