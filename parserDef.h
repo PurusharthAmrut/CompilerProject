@@ -11,11 +11,12 @@
 
 #include <stdbool.h>
 #include "lexerDef.h"
-//#include "symbolTable.h" 
-struct tablePointer ; 
+//#include "symbolTable.h"
+struct tablePointer;
  
 #define NONTERMINAL_OFFSET 12345
-#define NO_OF_TERMINALS 59 //excluding TK_ERROR
+#define NO_OF_TERMINALS 59 //excluding TK_ERROR and dollar
+#define N0_OF_NONTERMINALS 52
 #define MAX_RULE_LEN 10
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
@@ -81,22 +82,21 @@ typedef union symbol {
 	nonTerminal nt;
 }symbol;
 
-struct rhsCharNode {
+typedef struct rhsCharNode {
 	symbol s;
 	unsigned int tag : 1;
 	struct rhsCharNode* next;
-};
-typedef struct rhsCharNode* rhsCharNode;
+} rhsCharNode;
 // rhsCharNode rcn = (rhsCharNode)malloc(sizeof(struct rhsCharNode));
 
 struct lhsChar {
 	rhsCharNode* heads;
 	int numRules;
 	long int first;
+	long int follow;
 	unsigned int isNullable : 1;
 };
-typedef struct lhsChar* lhsChar;
-typedef lhsChar* Grammar;
+typedef struct lhsChar* Grammar;
 
 typedef struct tableEntry
 {
