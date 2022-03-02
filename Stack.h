@@ -13,7 +13,8 @@ typedef struct element* Element;
 //typedef int parseTree;
 typedef struct key* Key;
 struct key{
-	int id;
+	symbol id;
+	unsigned int tag : 1;
 	parseTree parent;
 };
 

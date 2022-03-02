@@ -224,57 +224,93 @@ void getFollowSets(Grammar g, FollowSet fw, FirstSet fr){
 	}        
 }
 
-void createParseTable(FirstSet firstSet,FollowSet followSet,Grammar g,Table t)
-{
-	int beta[MAX_RULE_LEN];
-	int** rules;
-	int* rule;
-	int ruleNumber=0;
+// void createParseTable(FirstSet firstSet,FollowSet followSet,Grammar g,Table t)
+// {
+// 	int beta[MAX_RULE_LEN];
+// 	int** rules;
+// 	int* rule;
+// 	int ruleNumber=0;
+// 	// intitializing the parse table
+// 	for(int i = 0; i < NO_OF_NONTERMINALS; i++)
+//         for(int j = 0; j < NO_OF_TERMINALS; j++)
+//         {
+//         	t[i][j].nonTerm = -1;
+//         	t[i][j].productionNum= -1;
+//         	t[i][j].syn=-1;
+//         }	
+// 	for(int i=0;i<NO_OF_NONTERMINALS;i++)
+// 	{
+// 		nonTerminal nonTerm=g[i];
+// 		rules=nonTerm.rules;
+// 		int* followRule=followSet[i].first;
+// 		for(int j=0;j<nonTerm.numRules;j++)
+// 		{
+// 			rule=rules[j];
+// 			int* firstRule=malloc(sizeof(int)*NO_OF_TERMINALS);
+// 			int index=0,flag=0;
+// 			for(int k=1;k<=rule[0];k++)
+// 				beta[index++]=rule[k];
+// 			firstString(beta,firstRule,index,firstSet);
+			
+// 			for(int k=0;k<NO_OF_TERMINALS;k++)
+// 				if(firstSet[i].first[k])
+// 					t[i][k].syn=0;	
+					
+// 			for(int k=0;k<NO_OF_TERMINALS;k++)
+// 				if(followSet[i].first[k])
+// 					t[i][k].syn=1;	
+			
+// 		        for(int k=0;k<NO_OF_TERMINALS;k++)
+// 		        if(firstRule[k] && k!=eps)
+// 		        {
+// 		        	t[i][k].nonTerm = i;
+//         			t[i][k].productionNum= j;
+//         		}
+// 		        if(firstRule[eps])
+// 		        {
+// 		        	for(int k=0;k<NO_OF_TERMINALS;k++)
+// 		        	if(followRule[k] && k!=eps)
+// 		        	{
+// 					t[i][k].nonTerm = i;
+// 					t[i][k].productionNum= j;
+//         			}
+// 		        }
+// 		        ruleNumber++;
+// 		}
+// 	}
+// }
+
+void createParseTable(Grammar g, int[][] t) {
 	for(int i = 0; i < NO_OF_NONTERMINALS; i++)
         for(int j = 0; j < NO_OF_TERMINALS; j++)
         {
-        	t[i][j].nonTerm = -1;
-        	t[i][j].productionNum= -1;
-        	t[i][j].syn=-1;
-        }	
-	for(int i=0;i<NO_OF_NONTERMINALS;i++)
-	{
-		nonTerminal nonTerm=g[i];
-		rules=nonTerm.rules;
-		int* followRule=followSet[i].first;
-		for(int j=0;j<nonTerm.numRules;j++)
-		{
-			rule=rules[j];
-			int* firstRule=malloc(sizeof(int)*NO_OF_TERMINALS);
-			int index=0,flag=0;
-			for(int k=1;k<=rule[0];k++)
-				beta[index++]=rule[k];
-			firstString(beta,firstRule,index,firstSet);
-			
-			for(int k=0;k<NO_OF_TERMINALS;k++)
-				if(firstSet[i].first[k])
-					t[i][k].syn=0;	
-					
-			for(int k=0;k<NO_OF_TERMINALS;k++)
-				if(followSet[i].first[k])
-					t[i][k].syn=1;	
-			
-		        for(int k=0;k<NO_OF_TERMINALS;k++)
-		        if(firstRule[k] && k!=eps)
-		        {
-		        	t[i][k].nonTerm = i;
-        			t[i][k].productionNum= j;
-        		}
-		        if(firstRule[eps])
-		        {
-		        	for(int k=0;k<NO_OF_TERMINALS;k++)
-		        	if(followRule[k] && k!=eps)
-		        	{
-					t[i][k].nonTerm = i;
-					t[i][k].productionNum= j;
-        			}
-		        }
-		        ruleNumber++;
+        	t[i][j] = -1;
+        }
+
+	int shiftFirst;
+	int shiftFollow;
+	long int first;
+	long int follow;
+	for (int i=0; i<NO_OF_NONTERMINALS; i++) {
+		for (int j=0; j<g[i]->numRules; j++) {
+			first = g[i].first;
+			follow = g[i].follow;
+			for (shiftFirst = 0; shiftFirst<NO_OF_TERMINALS; shiftFirst++) {
+				if ((first>>shiftFirst) & 1 == 1) {
+					t[i][shiftFirst] = j;
+				}
+			}
+			if((first>>eps) & 1 == 1){
+				for (shiftFollow= 0; shiftFollow<NO_OF_TERMINALS; shiftFollow++)
+				{
+					if((follow>>shiftFollow) & 1 == 1){
+						t[i][shiftFollow] = j;
+					}
+				}
+			}
+			if(((first>>eps) & 1 == 1) && ((follow>>dollar)  & 1 == 1)){
+				t[i][dollar] = j;
+			}
 		}
 	}
 }
@@ -392,6 +428,51 @@ void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int*
 			}
 		}
 	} while(token.tokenType!=TK_EOF);
+}
+
+void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree root, int* error){
+	Stack stack=newStack();
+	Stack tempStack = newStack();
+	tokenInfo token;
+	Key start;
+	Key dollar;
+	start.id = program;
+	start.tag = 1;
+	dollar.id = dollar;
+	dollar.tag = 0;
+	push(stack,dollar,leaf);
+	push(stack,program,root);
+	Key k;
+	int productionIndex;
+	rhsCharNode rcn;
+	do {
+		getNextToken(sourceFile, &token);
+		k = top1(stack);
+		if((k.id == token.tokenType) && (token.tokenType == dollar)){
+			break;
+		} else if((k.id == token.tokenType) && (token.tokenType == dollar)){
+			pop(stack);
+			continue;
+		} else if(k.tag == 1){
+			if(t[k.id][token.tokenType] > 0) {
+				productionIndex = t[k.id][token.tokenType];
+				pop(stack);
+				rcn = g[k.id].heads[productionIndex];
+				while (rcn->next != NULL) {
+					push(tempStack, rcn->s, leaf);
+					rcn = rcn->next;
+				}
+				while(top1(tempStack)){
+					Key prod = top1(tempStack);
+					pop(tempStack);
+					push(stack, prod.id, leaf);
+				}
+			} else {
+				error();
+			}
+		}
+	} while (token.tokenType != TK_EOF);
+
 }
 
 void printParseTree(parseTree root)

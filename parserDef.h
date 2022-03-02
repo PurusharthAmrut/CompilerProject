@@ -15,7 +15,8 @@
 struct tablePointer ; 
  
 #define NONTERMINAL_OFFSET 12345
-#define NO_OF_TERMINALS 59 //excluding TK_ERROR
+#define NO_OF_TERMINALS 59 //excluding TK_ERROR and dollar
+#define NO_OF_NONTERMINALS 52
 #define MAX_RULE_LEN 10
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
@@ -93,6 +94,7 @@ struct lhsChar {
 	rhsCharNode* heads;
 	int numRules;
 	long int first;
+	long int follow;
 	unsigned int isNullable : 1;
 };
 typedef struct lhsChar* lhsChar;

@@ -64,7 +64,8 @@ typedef enum
     TK_AS,
     TK_EOF,
     eps, 
-    TK_ERROR
+    dollar,
+    TK_ERROR,
 } terminal;
 
 //lookuptable structure
