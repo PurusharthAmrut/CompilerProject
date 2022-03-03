@@ -127,16 +127,6 @@ void removeComments(char *testcaseFile, char *cleanFile) {
 	free(inputBuffer);
 	fclose(src);
 	fclose(dst);
-
-	// printing the comment free code on console from file
-	read = fopen(cleanFile, "r");
-	if (read == NULL) {
-		fprintf(stderr, "Cannot open %s file\n", cleanFile);
-		exit(0);
-	}
-	char ch;
-	while((ch=fgetc(read))!=EOF) printf("%c", ch);
-	fclose(read);
 }
 
 FILE *getStream(FILE *fp, char *c) {
@@ -175,8 +165,17 @@ FILE *getStream(FILE *fp, char *c) {
 
 // function to print the tokens on console
 void printToken(tokenInfo *t) {
-	printf("Line %llu--> |%s|\t\t|%s|", t->lineNum, getTermString(t->tokenType), t->lexeme);
-	printf("\n");
+    printf("Line no. %lld\t", t->lineNum);
+    if(t->tokenType!=TK_ERROR) printf("Lexeme %s\t\tToken %s\n", t->lexeme, getTermString(t->tokenType));
+    else {
+        printf("Error:\t");
+        if(strlen(t->lexeme)==PERMITED_LEXEME_SIZE) {
+            printf("Function Identifier is longer than the prescribed length of 30 characters.\n");
+        }else if(strlen(t->lexeme)==PERMITED_ID_SIZE) {
+            printf("Variable Identifier is longer than the prescribed length of 20 characters.\n");
+        }else if(strlen(t->lexeme)==1) printf("Unknown Symbol <%s>\n", t->lexeme);
+        else printf("Unknown Pattern <%s>\n", t->lexeme);
+    }
 }
 
 void printTokenizedCode(char *filepath) {
@@ -185,8 +184,9 @@ void printTokenizedCode(char *filepath) {
     token->tokenType = 0;
     while(1) {
         getNextToken(fp, token);
-        printToken(token);
+        if(token->tokenType==TK_COMMENT) continue;
         if(token->tokenType==TK_EOF) break;
+        printToken(token);
     }
     free(token);
     fclose(fp);
@@ -209,8 +209,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
 
         if(count==PERMITED_LEXEME_SIZE) {
             t->tokenType = TK_ERROR;
-            t->lexeme[count-1] = '\0';
-            sprintf(t->lexeme, "%s Lexeme is longer than prescribed length of 20 characters", t->lexeme);
+            t->lexeme[count] = '\0';
             bufIndex--;
             return;
         }
@@ -355,9 +354,10 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         // overwriting ' ' or '\t' or '\r' so to not store that in lexeme
                         count--;
                         break;
-                    default:										// invalid starting character
-                        sprintf(t->lexeme, "Unknown Symbol %c", c); // storing the error message in t->lexeme
+                    default: 
+                        // invalid starting character
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count] = '\0';
                         return;
                 }
                 break;
@@ -438,14 +438,41 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "expecting [2-7] or [a-z]");
-                        if(c=='\n' || c=='\t' || c=='\r' || c==' ') return;
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
                 break;
             case 6:
                 switch(c) {
+                    case 'a':
+                    case 'b':
+                    case 'c':
+                    case 'd':
+                    case 'e':
+                    case 'f':
+                    case 'g':
+                    case 'h':
+                    case 'i':
+                    case 'j':
+                    case 'k':
+                    case 'l':
+                    case 'm':
+                    case 'n':
+                    case 'o':
+                    case 'p':
+                    case 'q':
+                    case 'r':
+                    case 's':
+                    case 't':
+                    case 'u':
+                    case 'v':
+                    case 'w':
+                    case 'x':
+                    case 'y':
+                    case 'z':
+                        state = 2;
+                        break;
                     case '2':
                     case '3':
                     case '4':
@@ -456,8 +483,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "expecting [2-7]");
-                        if(c=='\n' || c=='\t' || c=='\r' || c==' ') return;
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -467,6 +493,14 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                     case 'b':
                     case 'c':
                     case 'd':
+                        if(count==PERMITED_ID_SIZE) {
+                            while('b'<=c && c<='d') fp = getStream(fp, &c);
+                            while('2'<=c && c<='7') fp = getStream(fp, &c);
+                            t->lexeme[count] = '\0';
+                            t->tokenType = TK_ERROR;
+                            bufIndex--;
+                            return;
+                        }
                         // retain state
                         break;
                     case '2':
@@ -475,6 +509,13 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                     case '5':
                     case '6':
                     case '7':
+                        if(count==PERMITED_ID_SIZE) {
+                            while('2'<=c && c<='7') fp = getStream(fp, &c);
+                            t->lexeme[count] = '\0';
+                            t->tokenType = TK_ERROR;
+                            bufIndex--;
+                            return;
+                        }
                         state = 8;
                         break;
                     default: // TK_ID found
@@ -492,6 +533,13 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                     case '5':
                     case '6':
                     case '7':
+                        if(count==PERMITED_ID_SIZE) {
+                            while('2'<=c && c<='7') fp = getStream(fp, &c);
+                            t->lexeme[count] = '\0';
+                            t->tokenType = TK_ERROR;
+                            bufIndex--;
+                            return;
+                        }
                         // retain state
                         break;
                     default:   // TK_ID found
@@ -539,9 +587,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         state = 12;
                         break;
                     default:
-                        t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count - 1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -561,9 +608,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         state = 13;
                         break;
                     default:
-                        t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count - 1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -599,9 +645,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         state = 16;
                         break;
                     default:
-                        t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count - 1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -621,9 +666,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         state = 16;
                         break;
                     default:
-                        t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count - 1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -644,9 +688,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         t->tokenType = TK_RNUM;
                         return;
                     default:
-                        t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count - 1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -674,7 +717,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "Unknown pattern <-");
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -687,7 +730,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         return;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "Unknown pattern <--");
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -712,8 +755,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         t->lexeme[count] = '\0';
                         return;
                     default:
-                        sprintf(t->lexeme, "Unknown pattern =");
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -726,8 +769,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         return;
                     default:
                         // storing the error message in t->lexeme
-                        sprintf(t->lexeme, "Unknown pattern !"); 
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -793,7 +836,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "expecting alphabet after underscore for function name");
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -966,7 +1009,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "expecting alphanumeral for function name");
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1043,7 +1086,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "expecting alphanumeral for function name");
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1120,7 +1163,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "expecting alphanumeral for function name");
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1232,7 +1275,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        strcpy(t->lexeme, "expecting [a-z] for RUID");
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1281,7 +1324,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->tokenType = TK_ERROR;
-                        sprintf(t->lexeme, "Unknown pattern &"); // storing the error message in t->lexeme
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1293,8 +1336,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         t->lexeme[count] = '\0';
                         return;
                     default:
-                        sprintf(t->lexeme, "Unknown pattern &&"); // storing the error message in t->lexeme
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1306,8 +1349,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         // storing the error message in t->lexeme
-                        sprintf(t->lexeme, "Unknown pattern @");
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1319,8 +1362,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         t->lexeme[count] = '\0';
                         return;
                     default: // error
-                        sprintf(t->lexeme, "Unknown pattern @@");
                         t->tokenType = TK_ERROR;
+                        t->lexeme[count-1] = '\0';
                         bufIndex--;
                         return;
                 }
@@ -1336,7 +1379,6 @@ void getNextToken(FILE *fp, tokenInfo *t) {
             default:
                 t->tokenType = TK_ERROR;
                 t->lexeme[count-1] = '\0';
-                sprintf(t->lexeme, "%s Unkown Pattern", t->lexeme);
                 return;
         }
     }
