@@ -34,6 +34,9 @@ typedef struct lhsChar{
 	long int follow;
 	unsigned int isNullable : 1;
 }lhsChar;
+
+
+
 typedef lhsChar* Grammar;
 
 // typedef struct tableEntry
