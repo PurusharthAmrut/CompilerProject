@@ -344,41 +344,68 @@ void createParseTable(Grammar g, int t[][]) {
 // }
 
 void parseInputSourceCode(FILE* sourceFile, int t[][], Grammar g, parseTree root, int* error){
-	Stack stack=newStack();
+	Stack parseStack=newStack();
 	Stack tempStack = newStack();
 	tokenInfo token;
+	parseTree leaf=NULL, current, parent;
 	Key start = newKey(program, 1, root);
 	Key end = newKey(dollar, 1, NULL);
-	push(stack, start, root);
-	push(stack, end, NULL);
-	Key k;
-	int productionIndex;
+	push(parseStack, end);
+	push(parseStack, start);
+	Key k, child, temp;
+	int productionIndex, ruleLen, i;
 	rhsChar rcn;
 	do {
 		getNextToken(sourceFile, &token);
-		k = top1(stack);
-		if((k.id == token.tokenType) && (token.tokenType == dollar)){
-			break;
-		} else if((k.id == token.tokenType) && (token.tokenType == dollar)){
-			pop(stack);
-			continue;
-		} else if(k.tag == 1){
-			if(t[k.id][token.tokenType] > 0) {
-				productionIndex = t[k.id][token.tokenType];
-				pop(stack);
-				rcn = g[k.id].heads[productionIndex];
+		k = top1(parseStack);
+		//top of stack is a nonTerminal
+		if (k->tag==1) {		
+			if(t[(k->id).nt][token.tokenType] > 0) {
+				//this parsetree node is now going to expand and
+				//bear children, hence naming it parent :)
+				parent = k->subtree;
+				parent->nt = (k->id).nt;
+				productionIndex = t[(k->id).nt][token.tokenType];
+				pop(parseStack);
+				rcn = g[(k->id).nt].heads[productionIndex];
+				ruleLen = 0;
 				while (rcn->next != NULL) {
-					push(tempStack, rcn->s, leaf);
+					//currently, there is no parsetree corresponding
+					//to this ky object
+					//pushing into temporary stack for order reversal
+					push(tempStack, newKey(rcn->s, rcn->tag, NULL));
+					ruleLen++;
 					rcn = rcn->next;
 				}
-				while(top1(tempStack)){
-					Key prod = top1(tempStack);
+				parent->children = (parsetree*)malloc(ruleLen*sizeof(parsetree));
+				for (int i=ruleLen-1; i>=0; i--) {
+					child = top1(tempStack);
 					pop(tempStack);
-					push(stack, prod.id, leaf);
+					//storing the location of this node
+					//(in the parsetree) in the key object
+					child->subtree = &(parent->children)[i];
+					//populating the parsetree data structure
+					//using the key obtained from the stack
+					if (child->tag == 0) {
+						(parent->children)[i].terminal = child->id.t;
+						(parent->children)[i].numChild = 0;
+						(parent->children)[i].nt = -1;
+						(parent->children)[i].children = NULL;
+					} else
+						(parent->children)[i].nt = child->id.nt;
+					push(parseStack, child);
 				}
 			} else {
+				//enter recovery mode
 				*error = 1;
 			}
+		} else {
+			if (k->id.t == token.tokenType)
+				pop(parseStack);
+			else {
+				//enter recovery mode
+				*error = 1;
+			}				
 		}
 	} while (token.tokenType != TK_EOF);
 

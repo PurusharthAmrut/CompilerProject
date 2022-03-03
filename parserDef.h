@@ -45,11 +45,11 @@ typedef lhsChar* Grammar;
 // typedef tableEntry Table[NO_OF_NONTERMINALS][NO_OF_TERMINALS];
 
 typedef struct parsetree
-{
+{	
 	int numChild;
 	tokenInfo* terminal;
 	int ruleNo;
-	int nonTerminal;
+	int nt;
 	struct parsetree* children;
 	struct tablePointer* tp;
 } parsetree;

@@ -55,7 +55,6 @@ void delete_at_front(Stack s){
 		Element curr = s->head;
 		s->head = NULL;
 		s->tail = NULL;
-		free(curr);
 		s->count = 0;
 	}
 	else if(s->count > 1){
@@ -63,7 +62,6 @@ void delete_at_front(Stack s){
 		Element curr = s->head;
 		s->head = enext;
 		curr->next = NULL;
-		free(curr);
 		s->count--;
 	}
 }
@@ -86,14 +84,14 @@ Element newElement(Key k)
 
 }		   
 
-Key newKey(int id, unsigned int tag, parseTree pt){
+Key newKey(symbol id, unsigned int tag, parseTree pt){
 	Key k = malloc(sizeof(struct key));
 	(k)->id = id;
-	(k)->parent = pt;
+	(k)->subtree = pt;
 	return k;
 }
 		
-void push(Stack s, Key key, parseTree pt){
+void push(Stack s, Key key){
 	Element e = newElement(key);
 	insert_at_front(s, e);
 }

@@ -10,11 +10,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 typedef struct element* Element;
-struct key{
+typedef struct key{
 	symbol id;
 	unsigned int tag : 1;
-	parseTree parent;
-};
+	parseTree subtree;
+}key;
 typedef struct key* Key;
 
 struct element{
@@ -37,8 +37,8 @@ void insert_at_end(Stack s, Element e);
 
 void delete_at_front(Stack s);
 
-void push(Stack s, int id, parseTree pt);
+void push(Stack s, Key key);
 void pop(Stack s);
 Key top1(Stack s);
 Element newElement(Key k);
-Key newKey(int id, parseTree pt);
+Key newKey(symbol id, unsigned int tag, parseTree pt);
