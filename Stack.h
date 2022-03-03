@@ -10,13 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 typedef struct element* Element;
-//typedef int parseTree;
-typedef struct key* Key;
 struct key{
 	symbol id;
 	unsigned int tag : 1;
 	parseTree parent;
 };
+typedef struct key* Key;
 
 struct element{
 	Key k;

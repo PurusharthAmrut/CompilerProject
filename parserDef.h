@@ -99,15 +99,14 @@ struct rhsCharNode {
 
 typedef struct rhsCharNode* rhsChar;
 
-struct lhsChar{
+typedef struct lhsChar{
 	rhsChar heads;
 	int numRules;
 	long int first;
 	long int follow;
 	unsigned int isNullable : 1;
-};
-typedef struct lhsChar* lhs;
-typedef lhs Grammar;
+}lhsChar;
+typedef lhsChar* Grammar;
 
 // typedef struct tableEntry
 // {
