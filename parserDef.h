@@ -109,14 +109,14 @@ struct lhsChar {
 typedef struct lhsChar* lhsChar;
 typedef lhsChar Grammar;
 
-typedef struct tableEntry
-{
-	int nonTerm;
-	int productionNum;
-	int syn;
-}tableEntry;
+// typedef struct tableEntry
+// {
+// 	int nonTerm;
+// 	int productionNum;
+// 	int syn;
+// }tableEntry;
 
-typedef tableEntry Table[NO_OF_NONTERMINALS][NO_OF_TERMINALS];
+// typedef tableEntry Table[NO_OF_NONTERMINALS][NO_OF_TERMINALS];
 
 typedef struct parsetree
 {
