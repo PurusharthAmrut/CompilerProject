@@ -18,6 +18,7 @@
 #include "parser.h"
 #include "parserDef.h"
 #include "symbolTable.h"
+#include "utils.h"
 
 
 int main(int argc, char *argv[]) 
