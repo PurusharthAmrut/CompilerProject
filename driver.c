@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     tokenInfo currentToken;
     extern int bufSize;
     extern unsigned long long lineNum;
-    struct lhsChar firstnfollow = (struct lhsChar)malloc(sizeof(struct lhsChar));
+    struct lhsChar* firstnfollow = (struct lhsChar)malloc(sizeof(struct lhsChar));
     Grammar g;
     g = malloc(sizeof(firstnfollow) * NO_OF_NONTERMINALS);
     getGram("grammar.txt", g);
