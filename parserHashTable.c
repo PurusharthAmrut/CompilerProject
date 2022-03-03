@@ -25,7 +25,7 @@ parserTable* createParserHashTable(int num_pos)
 	return lookUpTable;
 }
 
-void insertElementPHT(parserTable* lookUpTable, char* key, terminalId tokentype)
+void insertElementPHT(parserTable* lookUpTable, char* key, terminal tokentype)
 {
 	int hashvalue =  hashFuncPHT(key,lookUpTable->num_pos);
 	parserElement* entry = (parserElement*)malloc(sizeof(parserElement));
@@ -162,7 +162,7 @@ void fillPHT(parserTable* lookUpTable)
 
 
 
-terminalId getTokenTypePHT(char* key, parserTable* lookUpTable)
+terminal getTokenTypePHT(char* key, parserTable* lookUpTable)
 {
 	int hashvalue = hashFuncPHT(key, lookUpTable->num_pos);
 	parserElement* temp = lookUpTable->positions[hashvalue]->head;

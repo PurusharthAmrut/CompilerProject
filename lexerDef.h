@@ -76,7 +76,7 @@ char *termArr[] = {"TK_ASSIGNOP", "TK_COMMENT", "TK_FIELDID", "TK_ID", "TK_NUM",
 
 //lookuptable structure
 struct node{
-	terminalId type;
+	terminal type;
 	char* lexeme;
 	struct node* next;
 };
@@ -100,7 +100,7 @@ typedef struct lookUp LookUpTable;
 typedef struct {
     char lexeme[MAX_LEXEME_SIZE];
     unsigned long long lineNum;
-    terminalId tokenType;
+    terminal tokenType;
 } tokenInfo;
 
 #endif

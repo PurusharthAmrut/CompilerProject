@@ -49,7 +49,7 @@ LookUpTable *createLookUpTable(int num_pos)
 	return lookUpTable;
 }
 
-void insertNodeElement(LookUpTable *lookUpTable, char *key, terminalId tokentype)
+void insertNodeElement(LookUpTable *lookUpTable, char *key, terminal tokentype)
 {
 	int hashvalue = hashFuncLUT(key, lookUpTable->num_pos);
 	NodeElement *entry = (NodeElement *)malloc(sizeof(NodeElement));
@@ -109,7 +109,7 @@ void fillLookUpTable(LookUpTable *lookUpTable)
 	insertNodeElement(lookUpTable, "else", TK_ELSE);
 }
 
-terminalId getTokenType(char *key, LookUpTable *lookUpTable)
+terminal getTokenType(char *key, LookUpTable *lookUpTable)
 {
 	int hashvalue = hashFuncLUT(key, lookUpTable->num_pos);
 

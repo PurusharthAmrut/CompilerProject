@@ -14,7 +14,7 @@
 #include "lexerDef.h"
 
 struct element{
-	terminalId type;
+	terminal type;
 	char* lexeme;
 	struct element* next;
 };
@@ -36,9 +36,9 @@ typedef struct parser parserTable;
 
 //Function Declarations
 parserTable* createParserHashTable(int num_pos);
-void insertElementPHT(parserTable* lookUpTable, char* key, terminalId tokentype);
+void insertElementPHT(parserTable* lookUpTable, char* key, terminal tokentype);
 int hashFuncPHT(char* key, int num_pos);
 void fillPHT(parserTable* lookUpTable);
-terminalId getTokenTypePHT(char* key, parserTable* lookUpTable);
+terminal getTokenTypePHT(char* key, parserTable* lookUpTable);
 
 
