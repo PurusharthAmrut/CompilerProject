@@ -20,6 +20,7 @@ Stack newStack(){
 
 
 void insert_at_front(Stack s, Element e){
+	//pushing into the stack
 	if(s->count == 0){
 		s->head = e;
 		s->tail=e;
@@ -86,15 +87,14 @@ Element newElement(Key k)
 
 }		   
 
-Key newKey(int id, parseTree pt){
+Key newKey(int id, unsigned int tag, parseTree pt){
 	Key k = malloc(sizeof(struct key));
 	(k)->id = id;
 	(k)->parent = pt;
 	return k;
 }
 		
-void push(Stack s, int id, parseTree pt){
-	Key key = newKey(id, pt);
+void push(Stack s, Key key, parseTree pt){
 	Element e = newElement(key);
 	insert_at_front(s, e);
 }

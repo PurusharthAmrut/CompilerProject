@@ -347,14 +347,10 @@ void parseInputSourceCode(FILE* sourceFile, int t[][], Grammar g, parseTree root
 	Stack stack=newStack();
 	Stack tempStack = newStack();
 	tokenInfo token;
-	Key start;
-	Key dollar;
-	start.id = program;
-	start.tag = 1;
-	dollar.id = dollar;
-	dollar.tag = 0;
-	push(stack,dollar,leaf);
-	push(stack,program,root);
+	Key start = newKey(program, 1, root);
+	Key end = newKey(dollar, 1, NULL);
+	push(stack, start, root);
+	push(stack, end, NULL);
 	Key k;
 	int productionIndex;
 	rhsChar rcn;
