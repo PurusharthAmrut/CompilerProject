@@ -97,7 +97,7 @@ for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
 		    		printf("\n\n------------------------------------------------------------------\n\n");
 				    sourceFile = fopen(argv[1], "r");
 				    dstFile = fopen(argv[2], "w");
-				    removeComments(&sourceFile, &dstFile);
+				    removeComments(argv[1], argv[2]);
 		    case 2:
 		    			printf("\n\n------------------------------------------------------------------\n\n");
 		    			sourceFile = fopen(argv[1], "r");
