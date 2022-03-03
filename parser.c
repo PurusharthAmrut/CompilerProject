@@ -1,9 +1,10 @@
 /* 
- * Group 08
- * Shubham Lather		2016A7PS0006P
- * Devyash Parihar		2016A7PS0066P
- * Rahul Khandelwal		2016A7PS0128P
- * Aniruddha Karve		2016A7PS0042P
+ * Group 05
+ * Kush Mehta			2018B5A70956P
+ * Purusharth Amrut		2018B5A70897P
+ * Patel Darsh Rajesh		2018B4A70532P
+ * Harsh Jhunjhunwala		2018B5A70691P
+ * Jatin Aggarwal		2018B4A70884P
  */
  
 
@@ -224,61 +225,6 @@ void getFollowSets(Grammar g, FollowSet fw, FirstSet fr){
 	}        
 }
 
-// void createParseTable(FirstSet firstSet,FollowSet followSet,Grammar g,Table t)
-// {
-// 	int beta[MAX_RULE_LEN];
-// 	int** rules;
-// 	int* rule;
-// 	int ruleNumber=0;
-// 	// intitializing the parse table
-// 	for(int i = 0; i < NO_OF_NONTERMINALS; i++)
-//         for(int j = 0; j < NO_OF_TERMINALS; j++)
-//         {
-//         	t[i][j].nonTerm = -1;
-//         	t[i][j].productionNum= -1;
-//         	t[i][j].syn=-1;
-//         }	
-// 	for(int i=0;i<NO_OF_NONTERMINALS;i++)
-// 	{
-// 		nonTerminal nonTerm=g[i];
-// 		rules=nonTerm.rules;
-// 		int* followRule=followSet[i].first;
-// 		for(int j=0;j<nonTerm.numRules;j++)
-// 		{
-// 			rule=rules[j];
-// 			int* firstRule=malloc(sizeof(int)*NO_OF_TERMINALS);
-// 			int index=0,flag=0;
-// 			for(int k=1;k<=rule[0];k++)
-// 				beta[index++]=rule[k];
-// 			firstString(beta,firstRule,index,firstSet);
-			
-// 			for(int k=0;k<NO_OF_TERMINALS;k++)
-// 				if(firstSet[i].first[k])
-// 					t[i][k].syn=0;	
-					
-// 			for(int k=0;k<NO_OF_TERMINALS;k++)
-// 				if(followSet[i].first[k])
-// 					t[i][k].syn=1;	
-			
-// 		        for(int k=0;k<NO_OF_TERMINALS;k++)
-// 		        if(firstRule[k] && k!=eps)
-// 		        {
-// 		        	t[i][k].nonTerm = i;
-//         			t[i][k].productionNum= j;
-//         		}
-// 		        if(firstRule[eps])
-// 		        {
-// 		        	for(int k=0;k<NO_OF_TERMINALS;k++)
-// 		        	if(followRule[k] && k!=eps)
-// 		        	{
-// 					t[i][k].nonTerm = i;
-// 					t[i][k].productionNum= j;
-//         			}
-// 		        }
-// 		        ruleNumber++;
-// 		}
-// 	}
-// }
 
 void createParseTable(Grammar g, int[][] t) {
 	for(int i = 0; i < NO_OF_NONTERMINALS; i++)
@@ -315,120 +261,120 @@ void createParseTable(Grammar g, int[][] t) {
 	}
 }
 
-void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int* error)
-{
-	root->nonTerminal=program;
-	root->numChild=2;
-	parseTree leaf=NULL,parent=NULL,current;
-	Stack stack=newStack();
-	tokenInfo token ;
-	push(stack,TK_EOF,leaf);
-	push(stack,program,root);
-	int flag=1,terminal,nonTermID,productionNo,ruleLen;
-	Key top;
-	int* rule;
-	do{
-		if(flag)
-		getNextToken(sourceFile,&token);
-		if(token.tokenType==TK_ERROR)
-		{
-			printf("\n\nLEXICAL ERROR AT LINE NO: %lld   %s\n",token.lineNum,token.lexeme);
-			//if(top1(stack)->parent->id < NO_OF_TERMINALS)
-			//{
-				pop(stack);
-				continue;
-			///}
-		}
-		if(token.tokenType==TK_COMMENT)
-		continue;
-		if(token.tokenType==TK_EOF)
-		break ;
-		flag=0 ;
-		top=top1(stack) ;
-		terminal=token.tokenType ;
-		current=top->parent;
-		if(top->id<NO_OF_TERMINALS)
-		{
-			if(top->id!=terminal && top->id!=eps)
-			{
-				printf("\n\nPARSER ERROR AT LINE NO: %lld The token %s for lexeme %s does not match with the expected token %s\n",token.lineNum,tokenRepr(terminal),token.lexeme,tokenRepr(top->id));
-				*error=1;
-				pop(stack);
-			}
-			else{
-				pop(stack);
-				current->terminal->lineNum=token.lineNum;
-				current->terminal->tokenType=top->id;
-				if(top->id==eps)
-				{
-					continue;
-				}
-				int lenn=0;
-				while(token.lexeme[lenn]!='\0')
-				{
-					current->terminal->lexeme[lenn]=token.lexeme[lenn];
-					lenn++;
-				}
-				for(int i=lenn;i<MAX_LEXEME_SIZE;i++)
-				current->terminal->lexeme[i]='\0';
-				flag=1;
-			}
-		}
-		else{
-			nonTermID=t[top->id-NONTERMINAL_OFFSET][terminal].nonTerm;
-			productionNo=t[top->id-NONTERMINAL_OFFSET][terminal].productionNum;
-			if(nonTermID==-1 || productionNo==-1)
-			{
-				printf("\n\nPARSING ERROR AT LINE NO: %lld\n",token.lineNum);
-				*error =1;
-				getNextToken(sourceFile,&token);
-				if(token.tokenType==TK_ERROR)
-				printf("\n\nERROR2:LINE NO: %lld\n",token.lineNum);
-				while(token.tokenType!=TK_EOF && t[top->id-NONTERMINAL_OFFSET][token.tokenType].syn==-1)
-				{
-					getNextToken(sourceFile,&token);
-					if(token.tokenType==TK_ERROR)
-					printf("\n\nERROR2:LINE NO: %lld\n",token.lineNum);
-				}
+// void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int* error)
+// {
+// 	root->nonTerminal=program;
+// 	root->numChild=2;
+// 	parseTree leaf=NULL,parent=NULL,current;
+// 	Stack stack=newStack();
+// 	tokenInfo token ;
+// 	push(stack,TK_EOF,leaf);
+// 	push(stack,program,root);
+// 	int flag=1,terminal,nonTermID,productionNo,ruleLen;
+// 	Key top;
+// 	int* rule;
+// 	do{
+// 		if(flag)
+// 		getNextToken(sourceFile,&token);
+// 		if(token.tokenType==TK_ERROR)
+// 		{
+// 			printf("\n\nLEXICAL ERROR AT LINE NO: %lld   %s\n",token.lineNum,token.lexeme);
+// 			//if(top1(stack)->parent->id < NO_OF_TERMINALS)
+// 			//{
+// 				pop(stack);
+// 				continue;
+// 			///}
+// 		}
+// 		if(token.tokenType==TK_COMMENT)
+// 		continue;
+// 		if(token.tokenType==TK_EOF)
+// 		break ;
+// 		flag=0 ;
+// 		top=top1(stack) ;
+// 		terminal=token.tokenType ;
+// 		current=top->parent;
+// 		if(top->id<NO_OF_TERMINALS)
+// 		{
+// 			if(top->id!=terminal && top->id!=eps)
+// 			{
+// 				printf("\n\nPARSER ERROR AT LINE NO: %lld The token %s for lexeme %s does not match with the expected token %s\n",token.lineNum,tokenRepr(terminal),token.lexeme,tokenRepr(top->id));
+// 				*error=1;
+// 				pop(stack);
+// 			}
+// 			else{
+// 				pop(stack);
+// 				current->terminal->lineNum=token.lineNum;
+// 				current->terminal->tokenType=top->id;
+// 				if(top->id==eps)
+// 				{
+// 					continue;
+// 				}
+// 				int lenn=0;
+// 				while(token.lexeme[lenn]!='\0')
+// 				{
+// 					current->terminal->lexeme[lenn]=token.lexeme[lenn];
+// 					lenn++;
+// 				}
+// 				for(int i=lenn;i<MAX_LEXEME_SIZE;i++)
+// 				current->terminal->lexeme[i]='\0';
+// 				flag=1;
+// 			}
+// 		}
+// 		else{
+// 			nonTermID=t[top->id-NONTERMINAL_OFFSET][terminal].nonTerm;
+// 			productionNo=t[top->id-NONTERMINAL_OFFSET][terminal].productionNum;
+// 			if(nonTermID==-1 || productionNo==-1)
+// 			{
+// 				printf("\n\nPARSING ERROR AT LINE NO: %lld\n",token.lineNum);
+// 				*error =1;
+// 				getNextToken(sourceFile,&token);
+// 				if(token.tokenType==TK_ERROR)
+// 				printf("\n\nERROR2:LINE NO: %lld\n",token.lineNum);
+// 				while(token.tokenType!=TK_EOF && t[top->id-NONTERMINAL_OFFSET][token.tokenType].syn==-1)
+// 				{
+// 					getNextToken(sourceFile,&token);
+// 					if(token.tokenType==TK_ERROR)
+// 					printf("\n\nERROR2:LINE NO: %lld\n",token.lineNum);
+// 				}
 				
-				if(token.tokenType==TK_EOF)
-					return;
+// 				if(token.tokenType==TK_EOF)
+// 					return;
 				
-				if(t[top->id-NONTERMINAL_OFFSET][token.tokenType].syn==1)
-				pop(stack);
-				continue;
-			}
-			rule=g[nonTermID].rules[productionNo];
-			ruleLen=rule[0];
-			current->children = malloc(ruleLen*sizeof(parsetree));
-			current->numChild = ruleLen;
-			current->numChildAST = ruleLen;
-			current->nonTerminal=top->id;
+// 				if(t[top->id-NONTERMINAL_OFFSET][token.tokenType].syn==1)
+// 				pop(stack);
+// 				continue;
+// 			}
+// 			rule=g[nonTermID].rules[productionNo];
+// 			ruleLen=rule[0];
+// 			current->children = malloc(ruleLen*sizeof(parsetree));
+// 			current->numChild = ruleLen;
+// 			current->numChildAST = ruleLen;
+// 			current->nonTerminal=top->id;
 			
-			for(int i=1;i<=ruleLen;i++)
-			{
-				if(rule[i]<NO_OF_TERMINALS)
-				{
-					current->children[i-1].terminal=malloc(sizeof(tokenInfo));
-					current->children[i-1].numChild=0 ;
-					current->children[i-1].numChildAST=0;
-					current->children[i-1].nonTerminal=-1;
-					current->children[i-1].children=NULL;
-					current->children[i-1].tp = NULL;
-				}
-				else{
-					current->children[i].nonTerminal=rule[i];
-				}
-			}
-			pop(stack);
-			for(int i=ruleLen;i>0;i--)
-			{
-				//if(rule[i]!=eps)
-				push(stack,rule[i],&(current->children[i-1]));
-			}
-		}
-	} while(token.tokenType!=TK_EOF);
-}
+// 			for(int i=1;i<=ruleLen;i++)
+// 			{
+// 				if(rule[i]<NO_OF_TERMINALS)
+// 				{
+// 					current->children[i-1].terminal=malloc(sizeof(tokenInfo));
+// 					current->children[i-1].numChild=0 ;
+// 					current->children[i-1].numChildAST=0;
+// 					current->children[i-1].nonTerminal=-1;
+// 					current->children[i-1].children=NULL;
+// 					current->children[i-1].tp = NULL;
+// 				}
+// 				else{
+// 					current->children[i].nonTerminal=rule[i];
+// 				}
+// 			}
+// 			pop(stack);
+// 			for(int i=ruleLen;i>0;i--)
+// 			{
+// 				//if(rule[i]!=eps)
+// 				push(stack,rule[i],&(current->children[i-1]));
+// 			}
+// 		}
+// 	} while(token.tokenType!=TK_EOF);
+// }
 
 void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree root, int* error){
 	Stack stack=newStack();
@@ -471,7 +417,7 @@ void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree roo
 					push(stack, prod.id, leaf);
 				}
 			} else {
-				error();
+				*error = 1;
 			}
 		}
 	} while (token.tokenType != TK_EOF);
