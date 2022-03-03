@@ -23,7 +23,7 @@ terminal checkTerminal(char *tokenArr);
 nonTerminal checkNonTerminal(char *tokenArr);
 void printGram(Grammar g);
 void getGram(char *fname, Grammar g);
-void first(Grammar g, rhsCharNode rcn, long int* firstBitString);
+void first(Grammar g, rhsChar rcn, long int* firstBitString);
 void computeFirst(Grammar g, nonTerminal nt, long int* firstBitString);
 void computeFollow(Grammar g, nonTerminal nt);
 // void getFollowSets(Grammar g, FollowSet fw, FirstSet fr);

@@ -97,17 +97,17 @@ struct rhsCharNode {
 	struct rhsCharNode* next;
 };
 
-typedef struct rhsCharNode* rhsCharNode;
+typedef struct rhsCharNode* rhsChar;
 
-struct lhsChar {
-	rhsCharNode* heads;
+struct lhsChar{
+	rhsChar heads;
 	int numRules;
 	long int first;
 	long int follow;
 	unsigned int isNullable : 1;
 };
-typedef struct lhsChar* lhsChar;
-typedef lhsChar Grammar;
+typedef struct lhsChar* lhs;
+typedef lhs Grammar;
 
 // typedef struct tableEntry
 // {
