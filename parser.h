@@ -28,9 +28,11 @@ void computeFirst(Grammar g, nonTerminal nt, long int* firstBitString);
 void computeFollow(Grammar g, nonTerminal nt);
 // void getFollowSets(Grammar g, FollowSet fw, FirstSet fr);
 // void findFollow(int NonTerminalNo, int productionNo, Grammar g, FollowSet fw, FirstSet fr,int* flag);
-void createParseTable(FirstSet firstSet,FollowSet followSet,Grammar g,Table t);
+// void createParseTable(FirstSet firstSet,FollowSet followSet,Grammar g,Table t);
+void createParseTable(Grammar g, int[][] t);
 // void add2(int* ans,int* add,int* flag);
-void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int* error);
+// void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int* error);
+void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree root, int* error);
 void printParseTree(parseTree root);
 
 
