@@ -23,34 +23,6 @@
 
 bool check[NO_OF_NONTERMINALS];
 
-char* getTermString(terminal term) {
-	return termArr[term];
-}
-
-char* getNonTermString(nonTerminal nonTerm) {
-	return nonTermArr[nonTerm];
-}
-
-terminal checkTerminal(char *tokenArr) {
-	terminal curr = TK_ASSIGNOP;
-	for(int i=0; i<NO_OF_TERMINALS; i++, curr++) {
-		if(strcmp(termArr[i], tokenArr)==0) return curr;
-	}
-	return -1;
-	// fprintf(stderr, "%s - Terminal does not exist in ENUM\n", tokenArr);
-	// exit(0);
-}
-
-nonTerminal checkNonTerminal(char *tokenArr) {
-	nonTerminal curr = program;
-	for(int i=0; i<NO_OF_NONTERMINALS; i++, curr++) {
-		if(strcmp(nonTermArr[i], tokenArr)==0) return curr;
-	}
-	return -1;
-	// fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", tokenArr);
-	// exit(0);
-}
-
 void printGram(Grammar g) {
 	for(int i=0; i<NO_OF_NONTERMINALS; i++) {
 		printf("%d\n", g[i].numRules);
