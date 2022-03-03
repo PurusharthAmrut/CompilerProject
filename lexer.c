@@ -29,12 +29,7 @@ LookUpTable* createLookUpTable(int num_pos) {
 	return lookUpTable;
 }
 
-<<<<<<< HEAD
 void insertNodeElement(LookUpTable *lookUpTable, char *key, terminal tokentype) {
-=======
-void insertNodeElement(LookUpTable *lookUpTable, char *key, terminal tokentype)
-{
->>>>>>> 95346c189b04b9527dc2d851d67d919d1adf594d
 	int hashvalue = hashFuncLUT(key, lookUpTable->num_pos);
 	NodeElement *entry = (NodeElement*)malloc(sizeof(NodeElement));
 	entry->type = tokentype;
