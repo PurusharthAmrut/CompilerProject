@@ -29,10 +29,11 @@ int main(int argc, char *argv[])
     tokenInfo currentToken;
     extern int bufSize;
     extern unsigned long long lineNum;
+    struct lhsChar* firstnfollow = (struct lhsChar*)malloc(sizeof(struct lhsChar));
     Grammar g;
-    g = malloc(sizeof(lhs) * NO_OF_NONTERMINALS);
+    g = malloc(sizeof(firstnfollow) * NO_OF_NONTERMINALS);
     getGram("grammar.txt", g);
-    lhs firstnfollow = (lhs)malloc(sizeof(struct lhsChar));
+    
 //     FirstSet firstSet=(FirstSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
 //     FollowSet followSet=(FollowSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
 //     buildFirstSet(g,firstnfollow->first);
@@ -47,7 +48,7 @@ for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
     int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS+1];
     parseTree root=malloc(sizeof(parsetree)),ast=NULL;
     int error = 0;
-    createParseTable(firstnfollow->first,firstnfollow->first,g,t);
+    createParseTable(g,t);
     
     symbolTable st ;
     clock_t    start_time, end_time;
@@ -96,7 +97,7 @@ for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
 		    		printf("\n\n------------------------------------------------------------------\n\n");
 				    sourceFile = fopen(argv[1], "r");
 				    dstFile = fopen(argv[2], "w");
-				    removeComments(&sourceFile, &dstFile);
+				    removeComments(argv[1], argv[2]);
 		    case 2:
 		    			printf("\n\n------------------------------------------------------------------\n\n");
 		    			sourceFile = fopen(argv[1], "r");
