@@ -40,7 +40,7 @@ void printGram(Grammar g) {
 
 void getGram(char *fname, Grammar g) {
     FILE *fp;
-    fp = fopen(filepath, "r");
+    fp = fopen(fname, "r");
     if(fp==NULL) {
         fprintf(stderr, "File %s file not found error\n", fname);
         exit(0);
@@ -58,7 +58,7 @@ void getGram(char *fname, Grammar g) {
 		g[i].isNullable = 0;
 
         for(int j=0; j<numRules; j++) {
-            rhsChar curr = malloc(sizeof(struct rhsChar));
+            rhsChar curr = malloc(sizeof(struct rhsCharNode));
             curr->next = NULL;
 
             char *nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
@@ -79,7 +79,7 @@ void getGram(char *fname, Grammar g) {
             rhsChar prev = curr;
 
             for(int k=0; k<numTokens; k++) {
-                rhsChar tmp = malloc(sizeof(struct rhsChar));
+                rhsChar tmp = malloc(sizeof(struct rhsCharNode));
                 tmp->next = NULL;
 
                 char *token = malloc(MAX_TOKEN_LENGTH*sizeof(char));
@@ -103,7 +103,7 @@ void getGram(char *fname, Grammar g) {
                 prev->next = tmp;
                 prev = tmp;
             }
-            g[i].heads[j] = curr;
+            g[i].heads[j] = *curr;
 
             // printf("\n");
         }
