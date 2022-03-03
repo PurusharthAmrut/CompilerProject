@@ -221,7 +221,7 @@ void computeFollow(Grammar g, nonTerminal nt) {
 }
 
 
-void createParseTable(Grammar g, int[][] t) {
+void createParseTable(Grammar g, int t[][]) {
 	for(int i = 0; i < NO_OF_NONTERMINALS; i++)
         for(int j = 0; j < NO_OF_TERMINALS; j++)
         {
@@ -371,7 +371,7 @@ void createParseTable(Grammar g, int[][] t) {
 // 	} while(token.tokenType!=TK_EOF);
 // }
 
-void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree root, int* error){
+void parseInputSourceCode(FILE* sourceFile, int t[][], Grammar g, parseTree root, int* error){
 	Stack stack=newStack();
 	Stack tempStack = newStack();
 	tokenInfo token;

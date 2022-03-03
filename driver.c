@@ -39,13 +39,13 @@ for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
 	computeFirst(g, nt);
 }
 for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
-	if (g[nt]->isNullable)
+	if (g[nt].isNullable)
 	    computeFollow(g, nt);
 }
     int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS+1];
     parseTree root=malloc(sizeof(parsetree)),ast=NULL;
     int error = 0;
-    createParseTable(firstSet,followSet,g,t);
+    createParseTable(firstnfollow->first,firstnfollow->first,g,t);
     
     symbolTable st ;
     clock_t    start_time, end_time;
