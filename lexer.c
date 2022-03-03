@@ -9,9 +9,6 @@
 
 #include "lexer.h"
 
-#define MAX_BUFFER_SIZE 4096 // max buffer size --Standard Size
-#define MAX_ID_LENGTH 20
-
 unsigned long long lineNum = 1;	   // the "current line" in the source file
 char inputBuffer[MAX_BUFFER_SIZE]; // the input buffer
 int bufIndex;
@@ -210,6 +207,14 @@ void getNextToken(FILE *fp, tokenInfo *t) {
             return;
         }
 
+        if(count==PERMITED_LEXEME_SIZE) {
+            t->tokenType = TK_ERROR;
+            t->lexeme[count-1] = '\0';
+            sprintf(t->lexeme, "%s Lexeme is longer than prescribed length of 20 characters", t->lexeme);
+            bufIndex--;
+            return;
+        }
+
         switch(state) {
             case 1:
                 switch(c) {
@@ -384,14 +389,6 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                     case 'x':
                     case 'y':
                     case 'z':
-                        if(count==(MAX_ID_LENGTH+1)) {
-                            while(c>='a' && c<='z') fp = getStream(fp, &c);
-                            bufIndex--;
-                            t->tokenType = TK_ERROR;
-                            // storing the error message in t->lexeme
-                            sprintf(t->lexeme, "Identifier is longer than the prescribed length of 20 characters"); 
-                            return;
-                        }
                         break;
                     default:
                         t->lexeme[count-1] = '\0';
@@ -470,7 +467,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                     case 'b':
                     case 'c':
                     case 'd':
-                        break; // retain state
+                        // retain state
+                        break;
                     case '2':
                     case '3':
                     case '4':
@@ -494,7 +492,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                     case '5':
                     case '6':
                     case '7':
-                        break; // retain state
+                        // retain state
+                        break;
                     default:   // TK_ID found
                         t->lexeme[count-1] = '\0';
                         t->tokenType = TK_ID;
@@ -514,21 +513,6 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                     case '7':
                     case '8':
                     case '9':
-                        if(count==21) {
-                            while(c>='0' && c<='9') fp = getStream(fp, &c);
-                            if(c=='.') {
-                                while(c>='0' && c<='9') fp = getStream(fp, &c);
-                                if(c=='E') {
-                                    while(c=='+' || c=='-') fp = getStream(fp, &c);
-                                    while(c>='0' && c<='9') fp = getStream(fp, &c);
-                                }
-                            }
-                            t->tokenType = TK_ERROR;
-                            t->lexeme[count - 1] = '\0';
-                            sprintf(t->lexeme, "%s: number longer than prescribed length", t->lexeme);
-                            bufIndex--;
-                            return;
-                        }
                         break;
                     case '.':
                         state = 11;
@@ -556,7 +540,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "unknown pattern %s", t->lexeme);
+                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
                         bufIndex--;
                         return;
@@ -578,7 +562,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "unknown pattern %s", t->lexeme);
+                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
                         bufIndex--;
                         return;
@@ -616,7 +600,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "unknown pattern %s", t->lexeme);
+                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
                         bufIndex--;
                         return;
@@ -638,7 +622,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         break;
                     default:
                         t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "unknown pattern %s", t->lexeme);
+                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
                         bufIndex--;
                         return;
@@ -661,7 +645,7 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         return;
                     default:
                         t->lexeme[count - 1] = '\0';
-                        sprintf(t->lexeme, "unknown pattern %s", t->lexeme);
+                        sprintf(t->lexeme, "Unknown pattern %s", t->lexeme);
                         t->tokenType = TK_ERROR;
                         bufIndex--;
                         return;
@@ -741,7 +725,8 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                         t->lexeme[count] = '\0';
                         return;
                     default:
-                        sprintf(t->lexeme, "Unknown pattern !"); // storing the error message in t->lexeme
+                        // storing the error message in t->lexeme
+                        sprintf(t->lexeme, "Unknown pattern !"); 
                         t->tokenType = TK_ERROR;
                         bufIndex--;
                         return;
@@ -1341,23 +1326,18 @@ void getNextToken(FILE *fp, tokenInfo *t) {
                 }
                 break;
             case 55:
-                switch(c) {
-                    // comment starts and read until we encounter a new line
-                    case '\n':
-                        t->lexeme[count - 1] = '\0';
-                        state = 0; // after end of comment return to state 0
-                        count = 0;
-                        // comment, though ignored is still counted as a line
-                        lineNum++;
-                        t->tokenType = TK_COMMENT;
-                        return;
-                    default:
-                        // retain state
-                        break;
-                }
-                break;
+                while(c!='\n') fp = getStream(fp, &c);
+                t->tokenType = TK_COMMENT;
+                t->lexeme[count-1] = '\0';
+                state = 0;
+                count = 0;
+                bufIndex--;
+                return;
             default:
-                fprintf(stderr, "Found Some Error while getting the next token\n");
+                t->tokenType = TK_ERROR;
+                t->lexeme[count-1] = '\0';
+                sprintf(t->lexeme, "%s Unkown Pattern", t->lexeme);
+                return;
         }
     }
 }
