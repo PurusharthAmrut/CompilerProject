@@ -18,6 +18,9 @@
 #include "utils.h"
 #include "Stack.h"
 
+#define EXCLUDE_EPS -288230376151711745L
+#define INCLUDE_EPS 288230376151711744L
+
 bool check[NO_OF_NONTERMINALS];
 
 char* getTermString(terminal term) {
@@ -143,13 +146,13 @@ void getGram(char *fname, Grammar g) {
 
 void first(Grammar g, rhsCharNode rcn, long int* firstBitString) {
     // this funcyion assumes that the caller has already checked whether
-    // the first set for nt has been previosly computed before calling this function
+    // the first set for nt has been previosly computed before calling this function	
     if (rcn->tag==0) { //symbol is a terminal
         *firstBitString = *firstBitString | 1<<(rcn->s.t);
     } else { //symbol is a non-terminal => further digging needed
         lhsChar lc = g[rcn->s.nt];
         if (lc->first == 0) { //first set isn't initialized yet
-            computeFirst(g, rcn->s.nt, &(lc->first));
+            computeFirst(g, rcn->s.nt);
         }
         
         if (lc->isNullable) {
@@ -167,11 +170,11 @@ void first(Grammar g, rhsCharNode rcn, long int* firstBitString) {
     return;
 }
 
-void computeFirst(Grammar g, nonTerminal nt, long int* firstBitString) {
+void computeFirst(Grammar g, nonTerminal nt) {
     //this function assumes
     lhsChar lc = g[nt];
     for (int i=0; i<lc->numRules; i++) {
-        first(lc->heads[i], firstBitString);
+        first(g, lc->heads[i], &(lc->first));
     }
 }
 
