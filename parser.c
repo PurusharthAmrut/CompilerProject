@@ -425,9 +425,9 @@ void printParseTree(parseTree root)
 		current=&(root->children[i]);
 		if(!current)
 		printf("NULL\n");
-		if(current->numChild==0 && current->terminal->tokenType==eps)
+		if(current->numChildAST==0 && current->terminal->tokenType==eps)
 		continue;
-		if(current->numChild>0)
+		if(current->numChildAST>0)
 		{
 			printf("-------\t\t");
 			printf("-------\t\t");
@@ -443,7 +443,7 @@ void printParseTree(parseTree root)
 			else printf("-------\t\t");	
 		}
 		printf("%s\t\t",idRepr(root->nonTerminal));
-		if(current->numChild==0)
+		if(current->numChildAST==0)
 		{
 			printf("YES\t\t");
 			printf("-------\t\t");
