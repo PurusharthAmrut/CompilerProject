@@ -28,12 +28,13 @@ int main(int argc, char *argv[])
     extern int bufSize;
     extern unsigned long long lineNum;
     Grammar g;
-    g = malloc(sizeof(lhsChar) * NO_OF_NONTERMINALS);
+    g = malloc(sizeof(lhs) * NO_OF_NONTERMINALS);
     getGram("grammar.txt", g);
-    FirstSet firstSet=(FirstSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
-    FollowSet followSet=(FollowSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
-    buildFirstSet(g,firstSet);
-    getFollowSets(g, followSet,firstSet);
+    lhs firstnfollow = (lhs)malloc(sizeof(struct lhsChar));
+//     FirstSet firstSet=(FirstSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
+//     FollowSet followSet=(FollowSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
+    buildFirstSet(g,firstnfollow->first);
+    getFollowSets(g, firstnfollow->follow,firstnfollow->first);
     Table t;
     parseTree root=malloc(sizeof(parsetree)),ast=NULL;
     int error = 0;

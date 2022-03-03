@@ -55,7 +55,7 @@ void printGram(Grammar g) {
 	for(int i=0; i<NO_OF_NONTERMINALS; i++) {
 		printf("%d\n", g[i].numRules);
 		for(int j=0; j<g[i].numRules; j++) {
-			rhsCharNode curr = g[i].heads[j];
+			rhsChar curr = g[i].heads[j];
 			while(curr!=NULL) {
 				if(curr->tag==0) printf("%s ", getTermString(curr->s.t));
 				else printf("%s ", getNonTermString(curr->s.nt));
@@ -79,14 +79,14 @@ void getGram(char *fname, Grammar g) {
         fscanf(fp, "%d", &numRules);
         // printf("%d\n", numRules);
 
-        g[i].heads = malloc(numRules*sizeof(rhsCharNode));
+        g[i].heads = malloc(numRules*sizeof(rhsChar));
         g[i].numRules = numRules;
         g[i].first = 0;
         g[i].follow = 0;
 		g[i].isNullable = 0;
 
         for(int j=0; j<numRules; j++) {
-            rhsCharNode curr = malloc(sizeof(struct rhsCharNode));
+            rhsChar curr = malloc(sizeof(struct rhsChar));
             curr->next = NULL;
 
             char *nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
@@ -104,10 +104,10 @@ void getGram(char *fname, Grammar g) {
 
 			if(curr->s.nt==eps) g[i].isNullable = 1;
 
-            rhsCharNode prev = curr;
+            rhsChar prev = curr;
 
             for(int k=0; k<numTokens; k++) {
-                rhsCharNode tmp = malloc(sizeof(struct rhsCharNode));
+                rhsChar tmp = malloc(sizeof(struct rhsChar));
                 tmp->next = NULL;
 
                 char *token = malloc(MAX_TOKEN_LENGTH*sizeof(char));
@@ -144,13 +144,13 @@ void getGram(char *fname, Grammar g) {
 //------------------------------------------------------------
 //FIRST and FOLLOW
 
-void first(Grammar g, rhsCharNode rcn, long int* firstBitString) {
+void first(Grammar g, rhsChar rcn, long int* firstBitString) {
     // this funcyion assumes that the caller has already checked whether
     // the first set for nt has been previosly computed before calling this function	
     if (rcn->tag==0) { //symbol is a terminal
         *firstBitString = *firstBitString | 1<<(rcn->s.t);
     } else { //symbol is a non-terminal => further digging needed
-        lhsChar lc = g[rcn->s.nt];
+        lhs lc = g[rcn->s.nt];
         if (lc->first == 0) { //first set isn't initialized yet
             computeFirst(g, rcn->s.nt);
         }
@@ -172,7 +172,7 @@ void first(Grammar g, rhsCharNode rcn, long int* firstBitString) {
 
 void computeFirst(Grammar g, nonTerminal nt) {
     //this function assumes
-    lhsChar lc = g[nt];
+    lhs lc = g[nt];
     for (int i=0; i<lc->numRules; i++) {
         first(g, lc->heads[i], &(lc->first));
     }
@@ -181,7 +181,7 @@ void computeFirst(Grammar g, nonTerminal nt) {
 void computeFollow(Grammar g, nonTerminal nt) {
     // the function assumes that the caller has first checked if the follow set
     // of nt has already been computed
-    rhsCharNode rcn, nextrcn;
+    rhsChar rcn, nextrcn;
     long int firstOfNext;
     for (int i=0; i<NO_OF_NONTERMINALS; i++) {
         for (int j=0; j<g[i].numRules; j++) {
@@ -385,7 +385,7 @@ void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree roo
 	push(stack,program,root);
 	Key k;
 	int productionIndex;
-	rhsCharNode rcn;
+	rhsChar rcn;
 	do {
 		getNextToken(sourceFile, &token);
 		k = top1(stack);
