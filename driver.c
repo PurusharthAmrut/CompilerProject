@@ -18,6 +18,7 @@
 #include "parser.h"
 #include "parserDef.h"
 #include "symbolTable.h"
+#include "utils.h"
 
 
 int main(int argc, char *argv[]) 
@@ -33,12 +34,19 @@ int main(int argc, char *argv[])
     lhs firstnfollow = (lhs)malloc(sizeof(struct lhsChar));
 //     FirstSet firstSet=(FirstSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
 //     FollowSet followSet=(FollowSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
-    buildFirstSet(g,firstnfollow->first);
-    getFollowSets(g, firstnfollow->follow,firstnfollow->first);
-    Table t;
+//     buildFirstSet(g,firstnfollow->first);
+//     getFollowSets(g, firstnfollow->follow,firstnfollow->first);
+for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
+	computeFirst(g, nt);
+}
+for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
+	if (g[nt].isNullable)
+	    computeFollow(g, nt);
+}
+    int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS+1];
     parseTree root=malloc(sizeof(parsetree)),ast=NULL;
     int error = 0;
-    createParseTable(firstSet,followSet,g,t);
+    createParseTable(firstnfollow->first,firstnfollow->first,g,t);
     
     symbolTable st ;
     clock_t    start_time, end_time;

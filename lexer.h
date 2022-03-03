@@ -1,24 +1,20 @@
 #ifndef LEXER
 #define LEXER
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "lexerDef.h"
-
-
-
-
 
 //Function Declarations of lookuptable
 LookUpTable* createLookUpTable(int num_pos);
-void insertNodeElement(LookUpTable* lookUpTable, char* key, terminal tokentype);
-int hashFuncLUT(char* key, int num_pos);
-void fillLookUpTable(LookUpTable* lookUpTable);
-terminal getTokenType(char* key, LookUpTable* lookUpTable);
+void insertNodeElement(LookUpTable *lookUpTable, char *key, terminal tokentype);
+int hashFuncLUT(char *key, int num_pos);
+void fillLookUpTable(LookUpTable *lookUpTable);
+terminal getTokenType(char *key, LookUpTable *lookUpTable);
 
 //Function Declarations of lexer
+void removeComments(char *testcaseFile, char *cleanFile);
+FILE *getStream(FILE *fp, char *c);
 void printToken(tokenInfo *t);
+void printTokenizedCode(char *filepath);
 void getNextToken(FILE *fp, tokenInfo *t);
-void removeComments(char* testcaseFile,char* cleanFile);
 
 #endif
