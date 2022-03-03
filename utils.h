@@ -1,9 +1,10 @@
 /* 
- * Group 08
- * Shubham Lather		2016A7PS0006P
- * Devyash Parihar		2016A7PS0066P
- * Rahul Khandelwal		2016A7PS0128P
- * Aniruddha Karve		2016A7PS0042P
+ * Group 05
+ * Kush Mehta			    2018B5A70956P
+ * Purusharth Amrut		    2018B5A70897P
+ * Patel Darsh Rajesh		2018B4A70532P
+ * Harsh Jhunjhunwala		2018B5A70691P
+ * Jatin Aggarwal		    2018B4A70884P
  */
 
 /*
@@ -27,8 +28,10 @@
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
 #define RECORD_DATATYPE 50000
-#define MAX_LEXEME_SIZE 32
+#define MAX_LEXEME_SIZE 100
 #define MAX_TOKEN_LENGTH 30
+#define MAX_BUFFER_SIZE 4096 // max buffer size --Standard Size
+#define PERMITED_LEXEME_SIZE 20
 
 typedef enum {
     TK_ASSIGNOP, 
@@ -91,7 +94,7 @@ typedef enum {
     TK_EOF,
     eps, 
     dollar,
-    TK_ERROR,
+    TK_ERROR
 } terminal;
 
 typedef enum { 

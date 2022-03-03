@@ -1,9 +1,10 @@
 /* 
- * Group 08
- * Shubham Lather		2016A7PS0006P
- * Devyash Parihar		2016A7PS0066P
- * Rahul Khandelwal		2016A7PS0128P
- * Aniruddha Karve		2016A7PS0042P
+ * Group 05
+ * Kush Mehta			2018B5A70956P
+ * Purusharth Amrut		2018B5A70897P
+ * Patel Darsh Rajesh		2018B4A70532P
+ * Harsh Jhunjhunwala		2018B5A70691P
+ * Jatin Aggarwal		2018B4A70884P
  */
 
 
@@ -44,7 +45,7 @@ terminal checkTerminal(char *tokenArr) {
 
 nonTerminal checkNonTerminal(char *tokenArr) {
 	nonTerminal curr = program;
-	for(int i=0; i<N0_OF_NONTERMINALS; i++, curr++) {
+	for(int i=0; i<NO_OF_NONTERMINALS; i++, curr++) {
 		if(strcmp(nonTermArr[i], tokenArr)==0) return curr;
 	}
 	return -1;
