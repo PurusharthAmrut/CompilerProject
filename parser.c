@@ -433,6 +433,8 @@ void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int*
 void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree root, int* error){
 	Stack stack=newStack();
 	Stack tempStack = newStack();
+	root->numChild = 2;
+	root->nonTerminal = program;
 	tokenInfo token;
 	Key start;
 	Key dollar;
@@ -445,12 +447,13 @@ void parseInputSourceCode(FILE* sourceFile, int [][] t, Grammar g, parseTree roo
 	Key k;
 	int productionIndex;
 	rhsCharNode rcn;
+	parseTree leaf=NULL, parent=NULL, current;
 	do {
 		getNextToken(sourceFile, &token);
 		k = top1(stack);
 		if((k.id == token.tokenType) && (token.tokenType == dollar)){
 			break;
-		} else if((k.id == token.tokenType) && (token.tokenType == dollar)){
+		} else if((k.id == token.tokenType) && (token.tokenType != dollar)){
 			pop(stack);
 			continue;
 		} else if(k.tag == 1){
