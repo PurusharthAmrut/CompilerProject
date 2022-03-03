@@ -28,10 +28,11 @@
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
 #define RECORD_DATATYPE 50000
-#define MAX_LEXEME_SIZE 100
+#define MAX_LEXEME_SIZE 32
 #define MAX_TOKEN_LENGTH 30
 #define MAX_BUFFER_SIZE 4096 // max buffer size --Standard Size
-#define PERMITED_LEXEME_SIZE 20
+#define PERMITED_LEXEME_SIZE 30
+#define PERMITED_ID_SIZE 20
 
 typedef enum {
     TK_ASSIGNOP, 
