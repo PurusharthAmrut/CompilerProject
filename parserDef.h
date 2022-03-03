@@ -16,7 +16,7 @@ struct tablePointer;
  
 #define NONTERMINAL_OFFSET 12345
 #define NO_OF_TERMINALS 59 //excluding TK_ERROR and dollar
-#define N0_OF_NONTERMINALS 52
+#define NO_OF_NONTERMINALS 52
 #define MAX_RULE_LEN 10
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
