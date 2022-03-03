@@ -3,7 +3,7 @@
 #define EXCLUDE_EPS -288230376151711745L
 #define INCLUDE_EPS 288230376151711744L
 
-void first(Grammar g, rhsCharNode rcn, long int* firstBitString)
+void first(Grammar g, rhsCharNode rcn, long int* firstBitString);
 
 void computeFirst(Grammar g, nonTerminal nt, long int* firstBitString) {
     //this function assumes
