@@ -116,14 +116,11 @@ typedef struct tableEntry
 	int syn;
 }tableEntry;
 
-typedef FirstSet* first;
-typedef FollowSet* follow;
 typedef tableEntry Table[NO_OF_NONTERMINALS][NO_OF_TERMINALS];
 
 typedef struct parsetree
 {
 	int numChild;
-	int numChildAST;
 	tokenInfo* terminal;
 	int ruleNo;
 	int nonTerminal;
