@@ -91,7 +91,7 @@ typedef union symbol {
 	nonTerminal nt;
 } symbol;
 
-typedef struct rhsCharNode {
+struct rhsCharNode {
 	symbol s;
 	unsigned int tag : 1;
 	struct rhsCharNode* next;
