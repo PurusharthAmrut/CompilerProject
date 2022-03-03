@@ -45,7 +45,7 @@ terminal checkTerminal(char *tokenArr) {
 
 nonTerminal checkNonTerminal(char *tokenArr) {
 	nonTerminal curr = program;
-	for(int i=0; i<N0_OF_NONTERMINALS; i++, curr++) {
+	for(int i=0; i<NO_OF_NONTERMINALS; i++, curr++) {
 		if(strcmp(nonTermArr[i], tokenArr)==0) return curr;
 	}
 	return -1;
