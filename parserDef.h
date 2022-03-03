@@ -21,6 +21,7 @@ struct tablePointer;
 #define NO_OF_PRODUCTIONS 90
 #define MAX_ID_SIZE 30
 #define RECORD_DATATYPE 50000
+#define MAX_TOKEN_LENGTH 30
 
 typedef enum { 
 	program,
@@ -77,17 +78,26 @@ typedef enum {
 	more_ids
 }nonTerminal;
 
+char *nonTermArr[] = {"program", "mainFunction", "otherFunctions", "function", "input_par", "output_par", "parameter_list", 
+"dataType", "primitiveDatatype", "constructedDatatype", "remaining_list", "stmts", "typeDefinitions", "typeDefinition", 
+"defineTypeStmt", "defineTypeStmts", "A", "fieldDefinition", "fieldDefinitions", "moreFields", "declarations", "declaration", 
+"global_or_not", "otherStmts", "stmt", "assignmentStmt", "singleOrRecId", "option_single_constructed", "oneExpansion", 
+"moreExpansions", "funCallStmt", "outputParameters", "inputParameters", "iterativeStmt", "conditionalStmt", "elsePart", 
+"ioStmt", "arithmeticExpression", "expPrime", "term", "termPrime", "factor", "highPrecedenceOperators", "lowPrecedenceOperators", 
+"booleanExpression", "var", "logicalOp", "relationalOp", "returnStmt", "optionalReturn", "idList", "more_ids"}
+
 typedef union symbol {
 	terminal t;
 	nonTerminal nt;
-}symbol;
+} symbol;
 
 typedef struct rhsCharNode {
 	symbol s;
 	unsigned int tag : 1;
 	struct rhsCharNode* next;
-} rhsCharNode;
-// rhsCharNode rcn = (rhsCharNode)malloc(sizeof(struct rhsCharNode));
+};
+
+typedef struct rhsCharNode* rhsCharNode;
 
 struct lhsChar {
 	rhsCharNode* heads;
@@ -96,7 +106,8 @@ struct lhsChar {
 	long int follow;
 	unsigned int isNullable : 1;
 };
-typedef struct lhsChar* Grammar;
+typedef struct lhsChar* lhsChar;
+typedef lhsChar Grammar;
 
 typedef struct tableEntry
 {
