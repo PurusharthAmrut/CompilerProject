@@ -22,7 +22,7 @@
 
 int main(int argc, char *argv[]) 
 {
-    FILE *sourceFile,*parsetreeOutfile ;
+    FILE *sourceFile,*parsetreeOutfile, *dstFile;
     int choice;
     tokenInfo currentToken;
     extern int bufSize;
