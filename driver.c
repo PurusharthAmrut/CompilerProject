@@ -17,11 +17,8 @@
 #include "lexer.h"
 #include "parser.h"
 #include "parserDef.h"
-#include "AST.h"
 #include "symbolTable.h"
 
-int TypeChecker(parsetree root, symbolTable s);
-int checkFunctionSemantics(parseTree root, symbolTable s);
 
 int main(int argc, char *argv[]) 
 {
