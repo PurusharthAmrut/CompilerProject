@@ -199,19 +199,21 @@ void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS+1]) {
 
 	int shiftFirst;
 	int shiftFollow;
-	long int first;
-	long int follow;
+	long long int first;
+	long long int follow;
 	for (int i=0; i<NO_OF_NONTERMINALS; i++) {
 		for (int j=0; j<g[i].numRules; j++) {
 			first = g[i].first;
 			follow = g[i].follow;
-			for (shiftFirst = 0; shiftFirst<NO_OF_TERMINALS; shiftFirst++) {
+            //NO_OF_TERMINALS-1 in order to not consider eps while making parse table
+			for (shiftFirst = 0; shiftFirst<NO_OF_TERMINALS-1; shiftFirst++) {
 				if ((first>>shiftFirst) & 1 == 1) {
 					t[i][shiftFirst] = j;
 				}
 			}
+            // now shiftFirst has acquired the value of eps            
 			if((first>>eps) & 1 == 1){
-				for (shiftFollow= 0; shiftFollow<NO_OF_TERMINALS; shiftFollow++)
+				for (shiftFollow= 0; shiftFollow<NO_OF_TERMINALS-1; shiftFollow++)
 				{
 					if((follow>>shiftFollow) & 1 == 1){
 						t[i][shiftFollow] = j;
@@ -247,6 +249,8 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
 		if (k->tag==1) {
             if (token.tokenType == TK_EOF) {
                 printf("%d: end of file reached unexpectedly\n", token.lineNum);
+                printf("exiting parser...\n");
+                break;
             } else if(t[(k->id).nt][token.tokenType] > 0) {
 				//this parsetree node is now going to expand and
 				//bear children, hence naming it parent :)
