@@ -13,10 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parserDef.h"
-#include "lexer.h"
-#include "utils.h"
-#include "Stack.h"
 #include "parser.h"
 
 #define EXCLUDE_EPS -288230376151711745L
