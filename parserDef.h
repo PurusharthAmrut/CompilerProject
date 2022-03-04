@@ -28,13 +28,12 @@ struct rhsCharNode {
 typedef struct rhsCharNode* rhsChar;
 
 typedef struct lhsChar{
-	rhsChar heads;
+	rhsChar* heads;
 	int numRules;
 	long int first;
 	long int follow;
 	unsigned int isNullable : 1;
 }lhsChar;
-
 
 
 typedef lhsChar* Grammar;

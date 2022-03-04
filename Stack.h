@@ -10,9 +10,11 @@
 #include "parserDef.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 typedef struct element* Element;
 typedef struct key{
 	symbol id;
+	char *lexeme;
 	unsigned int tag : 1;
 	parseTree subtree;
 }key;
@@ -38,8 +40,8 @@ void insert_at_end(Stack s, Element e);
 
 void delete_at_front(Stack s);
 
-void push(Stack s, Key key);
+void push(Stack s, Key k);
 void pop(Stack s);
 Key top1(Stack s);
 Element newElement(Key k);
-Key newKey(symbol id, unsigned int tag, parseTree pt);
+Key newKey(symbol id, char* lexeme, unsigned int tag, parseTree pt);

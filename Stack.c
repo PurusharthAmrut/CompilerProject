@@ -85,15 +85,16 @@ Element newElement(Key k)
 
 }		   
 
-Key newKey(symbol id, unsigned int tag, parseTree pt){
+Key newKey(symbol id, char* lexeme, unsigned int tag, parseTree pt){
 	Key k = malloc(sizeof(struct key));
 	(k)->id = id;
 	(k)->subtree = pt;
+	strcpy(k->lexeme, lexeme);
 	return k;
 }
 		
-void push(Stack s, Key key){
-	Element e = newElement(key);
+void push(Stack s, Key k){
+	Element e = newElement(k);
 	insert_at_front(s, e);
 }
 
