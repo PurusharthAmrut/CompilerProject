@@ -1,10 +1,10 @@
 /* 
  * Group 05
- * Kush Mehta			2018B5A70956P
- * Purusharth Amrut		2018B5A70897P
+ * Kush Mehta			    2018B5A70956P
+ * Purusharth Amrut		    2018B5A70897P
  * Patel Darsh Rajesh		2018B4A70532P
  * Harsh Jhunjhunwala		2018B5A70691P
- * Jatin Aggarwal		2018B4A70884P
+ * Jatin Aggarwal   		2018B4A70884P
  */
  
 
@@ -17,6 +17,7 @@
 #include "lexer.h"
 #include "utils.h"
 #include "Stack.h"
+#include "parser.h"
 
 #define EXCLUDE_EPS -288230376151711745L
 #define INCLUDE_EPS 288230376151711744L
@@ -103,7 +104,7 @@ void getGram(char *fname, Grammar g) {
                 prev->next = tmp;
                 prev = tmp;
             }
-            g[i].heads[j] = *curr;
+            g[i].heads[j] = curr;
 
             // printf("\n");
         }
@@ -122,13 +123,13 @@ void first(Grammar g, rhsChar rcn, long int* firstBitString) {
     if (rcn->tag==0) { //symbol is a terminal
         *firstBitString = *firstBitString | 1<<(rcn->s.t);
     } else { //symbol is a non-terminal => further digging needed
-        lhs lc = g[rcn->s.nt];
-        if (lc->first == 0) { //first set isn't initialized yet
+        lhsChar lc = g[rcn->s.nt];
+        if (lc.first == 0) { //first set isn't initialized yet
             computeFirst(g, rcn->s.nt);
         }
         
-        if (lc->isNullable) {
-            *firstBitString = *firstBitString | (lc->first & EXCLUDE_EPS); //exclude eps
+        if (lc.isNullable) {
+            *firstBitString = *firstBitString | (lc.first & EXCLUDE_EPS); //exclude eps
             if (rcn->next != NULL)
                 first(g, rcn->next, firstBitString);
             else
@@ -136,7 +137,7 @@ void first(Grammar g, rhsChar rcn, long int* firstBitString) {
                 *firstBitString = *firstBitString | INCLUDE_EPS;            
         } else {
             //no need to compute first sets of further nonTerminals in the rule
-            *firstBitString = *firstBitString | (lc->first);
+            *firstBitString = *firstBitString | (lc.first);
         }
     }
     return;
@@ -144,9 +145,9 @@ void first(Grammar g, rhsChar rcn, long int* firstBitString) {
 
 void computeFirst(Grammar g, nonTerminal nt) {
     //this function assumes
-    lhs lc = g[nt];
-    for (int i=0; i<lc->numRules; i++) {
-        first(g, lc->heads[i], &(lc->first));
+    lhsChar lc = g[nt];
+    for (int i=0; i<lc.numRules; i++) {
+        first(g, lc.heads[i], &(lc.first));
     }
 }
 
@@ -193,7 +194,7 @@ void computeFollow(Grammar g, nonTerminal nt) {
 }
 
 
-void createParseTable(Grammar g, int t[][]) {
+void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS+1]) {
 	for(int i = 0; i < NO_OF_NONTERMINALS; i++)
         for(int j = 0; j < NO_OF_TERMINALS; j++)
         {
@@ -205,7 +206,7 @@ void createParseTable(Grammar g, int t[][]) {
 	long int first;
 	long int follow;
 	for (int i=0; i<NO_OF_NONTERMINALS; i++) {
-		for (int j=0; j<g[i]->numRules; j++) {
+		for (int j=0; j<g[i].numRules; j++) {
 			first = g[i].first;
 			follow = g[i].follow;
 			for (shiftFirst = 0; shiftFirst<NO_OF_TERMINALS; shiftFirst++) {
@@ -228,128 +229,16 @@ void createParseTable(Grammar g, int t[][]) {
 	}
 }
 
-// void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int* error)
-// {
-// 	root->nonTerminal=program;
-// 	root->numChild=2;
-// 	parseTree leaf=NULL,parent=NULL,current;
-// 	Stack stack=newStack();
-// 	tokenInfo token ;
-// 	push(stack,TK_EOF,leaf);
-// 	push(stack,program,root);
-// 	int flag=1,terminal,nonTermID,productionNo,ruleLen;
-// 	Key top;
-// 	int* rule;
-// 	do{
-// 		if(flag)
-// 		getNextToken(sourceFile,&token);
-// 		if(token.tokenType==TK_ERROR)
-// 		{
-// 			printf("\n\nLEXICAL ERROR AT LINE NO: %lld   %s\n",token.lineNum,token.lexeme);
-// 			//if(top1(stack)->parent->id < NO_OF_TERMINALS)
-// 			//{
-// 				pop(stack);
-// 				continue;
-// 			///}
-// 		}
-// 		if(token.tokenType==TK_COMMENT)
-// 		continue;
-// 		if(token.tokenType==TK_EOF)
-// 		break ;
-// 		flag=0 ;
-// 		top=top1(stack) ;
-// 		terminal=token.tokenType ;
-// 		current=top->parent;
-// 		if(top->id<NO_OF_TERMINALS)
-// 		{
-// 			if(top->id!=terminal && top->id!=eps)
-// 			{
-// 				printf("\n\nPARSER ERROR AT LINE NO: %lld The token %s for lexeme %s does not match with the expected token %s\n",token.lineNum,tokenRepr(terminal),token.lexeme,tokenRepr(top->id));
-// 				*error=1;
-// 				pop(stack);
-// 			}
-// 			else{
-// 				pop(stack);
-// 				current->terminal->lineNum=token.lineNum;
-// 				current->terminal->tokenType=top->id;
-// 				if(top->id==eps)
-// 				{
-// 					continue;
-// 				}
-// 				int lenn=0;
-// 				while(token.lexeme[lenn]!='\0')
-// 				{
-// 					current->terminal->lexeme[lenn]=token.lexeme[lenn];
-// 					lenn++;
-// 				}
-// 				for(int i=lenn;i<MAX_LEXEME_SIZE;i++)
-// 				current->terminal->lexeme[i]='\0';
-// 				flag=1;
-// 			}
-// 		}
-// 		else{
-// 			nonTermID=t[top->id-NONTERMINAL_OFFSET][terminal].nonTerm;
-// 			productionNo=t[top->id-NONTERMINAL_OFFSET][terminal].productionNum;
-// 			if(nonTermID==-1 || productionNo==-1)
-// 			{
-// 				printf("\n\nPARSING ERROR AT LINE NO: %lld\n",token.lineNum);
-// 				*error =1;
-// 				getNextToken(sourceFile,&token);
-// 				if(token.tokenType==TK_ERROR)
-// 				printf("\n\nERROR2:LINE NO: %lld\n",token.lineNum);
-// 				while(token.tokenType!=TK_EOF && t[top->id-NONTERMINAL_OFFSET][token.tokenType].syn==-1)
-// 				{
-// 					getNextToken(sourceFile,&token);
-// 					if(token.tokenType==TK_ERROR)
-// 					printf("\n\nERROR2:LINE NO: %lld\n",token.lineNum);
-// 				}
-				
-// 				if(token.tokenType==TK_EOF)
-// 					return;
-				
-// 				if(t[top->id-NONTERMINAL_OFFSET][token.tokenType].syn==1)
-// 				pop(stack);
-// 				continue;
-// 			}
-// 			rule=g[nonTermID].rules[productionNo];
-// 			ruleLen=rule[0];
-// 			current->children = malloc(ruleLen*sizeof(parsetree));
-// 			current->numChild = ruleLen;
-// 			current->numChildAST = ruleLen;
-// 			current->nonTerminal=top->id;
-			
-// 			for(int i=1;i<=ruleLen;i++)
-// 			{
-// 				if(rule[i]<NO_OF_TERMINALS)
-// 				{
-// 					current->children[i-1].terminal=malloc(sizeof(tokenInfo));
-// 					current->children[i-1].numChild=0 ;
-// 					current->children[i-1].numChildAST=0;
-// 					current->children[i-1].nonTerminal=-1;
-// 					current->children[i-1].children=NULL;
-// 					current->children[i-1].tp = NULL;
-// 				}
-// 				else{
-// 					current->children[i].nonTerminal=rule[i];
-// 				}
-// 			}
-// 			pop(stack);
-// 			for(int i=ruleLen;i>0;i--)
-// 			{
-// 				//if(rule[i]!=eps)
-// 				push(stack,rule[i],&(current->children[i-1]));
-// 			}
-// 		}
-// 	} while(token.tokenType!=TK_EOF);
-// }
-
-void parseInputSourceCode(FILE* sourceFile, int t[][], Grammar g, parseTree root, int* error){
+void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS+1], Grammar g, parseTree root, int* error){
 	Stack parseStack=newStack();
 	Stack tempStack = newStack();
 	tokenInfo token;
 	parseTree leaf=NULL, current, parent;
-	Key start = newKey(program, 1, root);
-	Key end = newKey(dollar, 1, NULL);
+	symbol begin, finish;
+	begin.nt = program;
+	finish.t = dollar;
+	Key start = newKey(begin, NULL, 1, root);
+	Key end = newKey(finish, NULL, 1, NULL);
 	push(parseStack, end);
 	push(parseStack, start);
 	Key k, child, temp;
@@ -371,9 +260,9 @@ void parseInputSourceCode(FILE* sourceFile, int t[][], Grammar g, parseTree root
 				ruleLen = 0;
 				while (rcn->next != NULL) {
 					//currently, there is no parsetree corresponding
-					//to this ky object
+					//to this key object
 					//pushing into temporary stack for order reversal
-					push(tempStack, newKey(rcn->s, rcn->tag, NULL));
+					push(tempStack, newKey(rcn->s, token.lexeme, rcn->tag, NULL));
 					ruleLen++;
 					rcn = rcn->next;
 				}
@@ -387,7 +276,8 @@ void parseInputSourceCode(FILE* sourceFile, int t[][], Grammar g, parseTree root
 					//populating the parsetree data structure
 					//using the key obtained from the stack
 					if (child->tag == 0) {
-						(parent->children)[i].terminal = child->id.t;
+						(parent->children)[i].terminal->tokenType = child->id.t;
+						strcpy((parent->children)[i].terminal->lexeme, child->lexeme);
 						(parent->children)[i].numChild = 0;
 						(parent->children)[i].nt = -1;
 						(parent->children)[i].children = NULL;
@@ -411,44 +301,44 @@ void parseInputSourceCode(FILE* sourceFile, int t[][], Grammar g, parseTree root
 
 }
 
-void printParseTree(parseTree root)
-{
-	parseTree current;
-	int class;
-	for(int i=0;i<root->numChild;i++)
-	{
-		current=&(root->children[i]);
-		if(!current)
-		printf("NULL\n");
-		if(current->numChild==0 && current->terminal->tokenType==eps)
-		continue;
-		if(current->numChild>0)
-		{
-			printf("-------\t\t");
-			printf("-------\t\t");
-			printf("-------\t\t");
-			printf("-------\t\t");
-		}
-		else{
-			printf("%s\t\t",current->terminal->lexeme);
-			printf("%lld\t\t",current->terminal->lineNum);
-			printf("%s\t\t",tokenRepr(current->terminal->tokenType));
-			if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
-				printf("%s\t\t",current->terminal->lexeme);
-			else printf("-------\t\t");	
-		}
-		printf("%s\t\t",idRepr(root->nonTerminal));
-		if(current->numChild==0)
-		{
-			printf("YES\t\t");
-			printf("-------\t\t");
-		}
-		else{
-			printf("NO\t\t");
-			printf("%s\t\t",idRepr(current->nonTerminal));
-		}
-		printf("\n");
-		printParseTree(current);
-	}
-}
+// void printParseTree(parseTree root)
+// {
+// 	parseTree current;
+// 	int class;
+// 	for(int i=0;i<root->numChild;i++)
+// 	{
+// 		current=&(root->children[i]);
+// 		if(!current)
+// 		printf("NULL\n");
+// 		if(current->numChild==0 && current->terminal->tokenType==eps)
+// 		continue;
+// 		if(current->numChild>0)
+// 		{
+// 			printf("-------\t\t");
+// 			printf("-------\t\t");
+// 			printf("-------\t\t");
+// 			printf("-------\t\t");
+// 		}
+// 		else{
+// 			printf("%s\t\t",current->terminal->lexeme);
+// 			printf("%lld\t\t",current->terminal->lineNum);
+// 			printf("%s\t\t",tokenRepr(current->terminal->tokenType));
+// 			if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
+// 				printf("%s\t\t",current->terminal->lexeme);
+// 			else printf("-------\t\t");	
+// 		}
+// 		printf("%s\t\t",idRepr(root->nonTerminal));
+// 		if(current->numChild==0)
+// 		{
+// 			printf("YES\t\t");
+// 			printf("-------\t\t");
+// 		}
+// 		else{
+// 			printf("NO\t\t");
+// 			printf("%s\t\t",idRepr(current->nonTerminal));
+// 		}
+// 		printf("\n");
+// 		printParseTree(current);
+// 	}
+// }
 

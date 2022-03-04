@@ -34,7 +34,7 @@ struct lookUp{
 
 typedef struct lookUp LookUpTable;
 
-typedef struct {
+typedef struct tokenInfo{
     char lexeme[MAX_LEXEME_SIZE];
     unsigned long long lineNum;
     terminal tokenType;

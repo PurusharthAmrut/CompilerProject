@@ -6,3 +6,4 @@ firstnfollow.c
 lexerTest.c
 output
 tc_in.txt
+*.exe
