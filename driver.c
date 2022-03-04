@@ -45,7 +45,8 @@ for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
 	if (g[nt].isNullable)
 	    computeFollow(g, nt);
 }
-    int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS+1];
+    
+    int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS];
     parseTree root=malloc(sizeof(parsetree)),ast=NULL;
     int error = 0;
     createParseTable(g,t);

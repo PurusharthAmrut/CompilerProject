@@ -1,5 +1,5 @@
 # edit: utils.o lexer.o lexerTest.o
-#   gcc -o lexerTest utils.o lexer.o lexerTest.o 
+# 	gcc -o lexerTest utils.o lexer.o lexerTest.o 
 
 # edit: utils.o lexer.o Stack.o parser.o parserTest.o
 #     gcc -o parserTest utils.o lexer.o Stack.o parser.o parserTest.o
