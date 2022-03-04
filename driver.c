@@ -27,27 +27,25 @@ int main(int argc, char *argv[])
     FILE *sourceFile,*parsetreeOutfile, *dstFile;
     int choice;
     tokenInfo currentToken;
-    extern int bufSize;
-    extern unsigned long long lineNum;
-    struct lhsChar* firstnfollow = (struct lhsChar*)malloc(sizeof(struct lhsChar));
+    unsigned long long lineNum;
     Grammar g;
     g = malloc(sizeof(firstnfollow) * NO_OF_NONTERMINALS);
     getGram("grammar.txt", g);
     
-//     FirstSet firstSet=(FirstSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
-//     FollowSet followSet=(FollowSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
-//     buildFirstSet(g,firstnfollow->first);
-//     getFollowSets(g, firstnfollow->follow,firstnfollow->first);
-for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
-	computeFirst(g, nt);
-}
-for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
-	if (g[nt].isNullable)
-	    computeFollow(g, nt);
-}
+	//     FirstSet firstSet=(FirstSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
+	//     FollowSet followSet=(FollowSet)malloc(NO_OF_NONTERMINALS*sizeof(first));
+	//     buildFirstSet(g,firstnfollow->first);
+	//     getFollowSets(g, firstnfollow->follow,firstnfollow->first);
+	for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
+		computeFirst(g, nt);
+	}
+	for (int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
+		if (g[nt].isNullable)
+			computeFollow(g, nt);
+	}
     
     int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS];
-    parseTree root=malloc(sizeof(parsetree)),ast=NULL;
+    parseTree root=malloc(sizeof(parsetree));
     int error = 0;
     createParseTable(g,t);
     
