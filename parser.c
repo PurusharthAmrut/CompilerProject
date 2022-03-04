@@ -26,7 +26,7 @@ bool check[NO_OF_NONTERMINALS];
 
 void printGram(Grammar g) {
 	for(int i=0; i<NO_OF_NONTERMINALS; i++) {
-		printf("%d\n", g[i].numRules);
+		printf("%d %lld %lld %d\n", g[i].numRules, g[i].first, g[i].follow, g[i].isNullable);
 		for(int j=0; j<g[i].numRules; j++) {
 			rhsChar curr = g[i].heads[j];
 			while(curr!=NULL) {
@@ -80,14 +80,14 @@ void getGram(char *fname, Grammar g) {
                 fscanf(fp, "%d", &numTokens);
             }
 
+            if(checkNonTerminal(nonTerm)==eps) g[i].isNullable = 1;
+
             curr->tag = 1;
             curr->s.nt = checkNonTerminal(nonTerm);
             if(curr->s.nt==-1) {
                 fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
 				exit(0);
             }
-
-			if(curr->s.nt==eps) g[i].isNullable = 1;
 
             rhsChar prev = curr;
 
@@ -103,6 +103,7 @@ void getGram(char *fname, Grammar g) {
                 if(tokenIdx!=-1) {
                     tmp->tag = 0;
                     tmp->s.t = tokenIdx;
+                    if(tokenIdx==eps) g[i].isNullable = 1;
                 }else {
                     tokenIdx = checkNonTerminal(token);
                     if(tokenIdx==-1) {
@@ -120,6 +121,69 @@ void getGram(char *fname, Grammar g) {
         }
     }
 
+    // for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+    //     int numRules;
+    //     fscanf(fp, "%d", &numRules);
+    //     // printf("%d\n", numRules);
+
+    //     g[i].heads = malloc(numRules*sizeof(rhsChar));
+    //     g[i].numRules = numRules;
+    //     g[i].first = 0;
+    //     g[i].follow = 0;
+	// 	g[i].isNullable = 0;
+
+    //     for(int j=0; j<numRules; j++) {
+    //         rhsChar curr = malloc(sizeof(struct rhsCharNode));
+    //         curr->next = NULL;
+
+    //         char *nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
+    //         fscanf(fp, "%s", nonTerm);
+    //         int numTokens;
+    //         fscanf(fp, "%d", &numTokens);
+    //         // printf("%s %d ", nonTerm, numTokens);
+
+    //         curr->tag = 1;
+    //         curr->s.nt = checkNonTerminal(nonTerm);
+    //         if(curr->s.nt==-1) {
+    //             fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
+	// 			exit(0);
+    //         }
+
+	// 		if(curr->s.nt==eps) g[i].isNullable = 1;
+
+    //         rhsChar prev = curr;
+
+    //         for(int k=0; k<numTokens; k++) {
+    //             rhsChar tmp = malloc(sizeof(struct rhsCharNode));
+    //             tmp->next = NULL;
+
+    //             char *token = malloc(MAX_TOKEN_LENGTH*sizeof(char));
+    //             fscanf(fp, "%s", token);
+    //             // printf("%s ", token);
+
+    //             int tokenIdx = checkTerminal(token);
+    //             if(tokenIdx!=-1) {
+    //                 tmp->tag = 0;
+    //                 tmp->s.t = tokenIdx;
+    //             }else {
+    //                 tokenIdx = checkNonTerminal(token);
+    //                 if(tokenIdx==-1) {
+    //                     fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", token);
+	// 					exit(0);
+    //                 }
+    //                 tmp->tag = 1;
+    //                 tmp->s.nt = tokenIdx;
+    //             }
+
+    //             prev->next = tmp;
+    //             prev = tmp;
+    //         }
+    //         g[i].heads[j] = curr;
+
+    //         // printf("\n");
+    //     }
+    // }
+
 	printf("Loaded Grammar!!!\n");
 
     fclose(fp);
@@ -132,7 +196,11 @@ void first(Grammar g, rhsChar rcn, long long int* firstBitString) {
     // the first set for nt has been previosly computed before calling this function
     if (rcn->tag==0) { //symbol is a terminal
         // fprintf(stderr, "%s#\n", getTermString(rcn->s.t));
+        // int tmp = *firstBitString;
+        // tmp |= 1<<(rcn->s.t);
+        // *firstBitString = tmp;
         *firstBitString = *firstBitString | 1<<(rcn->s.t);
+        // fprintf(stderr, "%d#%d#\n", rcn->s.t, *firstBitString);
     } 
     else { //symbol is a non-terminal => further digging needed
         lhsChar lc = g[rcn->s.nt];
@@ -148,9 +216,11 @@ void first(Grammar g, rhsChar rcn, long long int* firstBitString) {
             else
                 //This was the last symbol in the rule
                 *firstBitString = *firstBitString | INCLUDE_EPS;            
+                // fprintf(stderr, "%d*%d*\n", rcn->s.t, *firstBitString);
         } else {
             //no need to compute first sets of further nonTerminals in the rule
             *firstBitString = *firstBitString | (lc.first);
+            // fprintf(stderr, "%d$%d$\n", rcn->s.t, *firstBitString);
         }
     }
     return;
@@ -160,7 +230,10 @@ void computeFirst(Grammar g, nonTerminal nt) {
     lhsChar lc = g[nt];
     for (int i=0; i<lc.numRules; i++) {
         // fprintf(stderr, "%s:%d\n", getNonTermString(nt), i+1);
+        // fprintf(stderr, "%s Before:%lld ", getNonTermString(nt), lc.first);
         first(g, lc.heads[i]->next, &(lc.first));
+        // fprintf(stderr, "After: %lld\n", lc.first);
+        g[nt].first = lc.first;
     }
 
     // rhsChar curr = lc.heads[0]->next;
@@ -178,6 +251,7 @@ void computeFirst(Grammar g, nonTerminal nt) {
 void computeFollow(Grammar g, nonTerminal nt) {
     // the function assumes that the caller has first checked if the follow set
     // of nt has already been computed
+    // fprintf(stderr, "%s Before:%lld ", getNonTermString(nt), g[nt].follow);
     rhsChar rcn, nextrcn;
     long long int firstOfNext;
     for (int i=0; i<NO_OF_NONTERMINALS; i++) {
@@ -188,7 +262,8 @@ void computeFollow(Grammar g, nonTerminal nt) {
                     if (rcn->next !=NULL) {
                         nextrcn = rcn->next;
                         first(g, nextrcn, &firstOfNext);
-                        if ((firstOfNext>>eps) & 1 == 1) {
+                        // fprintf(stderr, "%lld\n", firstOfNext);
+                        if (((firstOfNext>>eps) & 1) == 1) {
                             // first set of subsequent string contains eps
                             firstOfNext = firstOfNext & EXCLUDE_EPS;
                             g[nt].follow = g[nt].follow | firstOfNext;
@@ -215,6 +290,7 @@ void computeFollow(Grammar g, nonTerminal nt) {
             }
         }
     }
+    // fprintf(stderr, "After: %lld\n", g[nt].follow);
 }
 
 
@@ -229,31 +305,34 @@ void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
 	int shiftFollow;
 	long long int first;
 	long long int follow;
+    // for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+    //     fprintf(stderr, "%lld: %lld\n", g[i].first, g[i].follow);
+    // }
 	for (int i=0; i<NO_OF_NONTERMINALS; i++) {
 		for (int j=0; j<g[i].numRules; j++) {
 			first = g[i].first;
 			follow = g[i].follow;
             //NO_OF_TERMINALS-1 in order to not consider eps while making parse table
 			for (shiftFirst = 0; shiftFirst<NO_OF_TERMINALS-1; shiftFirst++) {
-				if ((first>>shiftFirst) & 1 == 1) {
-					t[i][shiftFirst] = j;
-				}
+				// if (((first>>shiftFirst) & 1) == 1) {
+				// 	t[i][shiftFirst] = j;
+				// }
+                if(first & (1<<shiftFirst)) t[i][shiftFirst] = j;
 			}
             // now shiftFirst has acquired the value of eps            
 			if((first>>eps) & 1 == 1){
 				for (shiftFollow= 0; shiftFollow<NO_OF_TERMINALS-1; shiftFollow++)
 				{
-					if((follow>>shiftFollow) & 1 == 1){
+					if(((follow>>shiftFollow) & 1) == 1){
 						t[i][shiftFollow] = j;
 					}
 				}
 			}
-			if(((first>>eps) & 1 == 1) && ((follow>>dollar)  & 1 == 1)){
+			if((((first>>eps) & 1) == 1) && (((follow>>dollar)  & 1) == 1)){
 				t[i][dollar] = j;
 			}
 		}
 	}
-    fprintf(stderr, "Parse Table Created\n");
 }
 
 void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree root, int* error){
@@ -277,10 +356,10 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
 		//top of stack is a nonTerminal
 		if (k->tag==1) {
             if (token.tokenType == TK_EOF) {
-                printf("%d: end of file reached unexpectedly\n", token.lineNum);
+                printf("%lld: end of file reached unexpectedly\n", token.lineNum);
                 printf("exiting parser...\n");
                 break;
-            } else if(t[(k->id).nt][token.tokenType] > 0) {
+            } else if(t[(k->id).nt][token.tokenType] >= 0) {
 				//this parsetree node is now going to expand and
 				//bear children, hence naming it parent :)
 				parent = k->subtree;
@@ -319,7 +398,9 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
 			} else {
 				//enter recovery mode
 				*error = 1;
-                printf("%d: unexpected token: %s\n", token.lineNum, token.lexeme);
+                printf("%lld: Error entry: %s\n", token.lineNum, token.lexeme);
+                printf("Parse table entry is %d\n", t[k->id.nt][token.tokenType]);
+                // printf("%lld: unexpected token: %s\n", token.lineNum, token.lexeme);
                 nonTerminal ntOnTop = (k->id).nt;
                 long long int followSyn = g[ntOnTop].follow;
                 while(followSyn & (1<<token.tokenType) == 0) {
@@ -333,7 +414,7 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
                 else {
                     //enter recover mode
                     *error=1;
-                    printf("%d: parsing error: expecting end of program\n", token.lineNum);
+                    printf("%lld: parsing error: expecting end of program\n", token.lineNum);
                     while (token.tokenType != TK_EOF)
                         getNextToken(sourceFile, &token);
                 }
@@ -343,7 +424,7 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
             } else {
                 // enter recovery mode
                 *error = 1;
-                printf("%d: unexpected token: %s\n", token.lineNum, token.lexeme);
+                printf("%lld: unexpected token: %s\n", token.lineNum, token.lexeme);
                 while (k->tag != 1) {
                     if (k->id.t == dollar)
                         break;
@@ -356,31 +437,46 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
     fprintf(stderr, "Parse Tree Created Successfully\n");
 }
 
-void printParseTree2(parseTree root, nonTerminal parent) {
-
-    parsetree start = *root;          
-    parsetree child = start.children[0];
-    if (child.nt==-1) {
-        tokenInfo* terminal = child.terminal;
-        printf("%s %d %s parent:%s yes", terminal->lexeme, terminal->lineNum, getTermString(terminal->tokenType), getNonTermString(parent));
-        return;
-    } else {
-        printf("‐‐‐‐ Non-terminal: %s Parent: %s no", getNonTermString(child.nt), getNonTermString(child.nt));    
-    }    
-    printf("‐‐‐‐ Non-terminal: %s Parent: %s no", getNonTermString(start.nt), getNonTermString(parent));    
-    parsetree* children = start.children;
-    for (int i=1; i<start.numChild; i++) {
-        printParseTree2(&children[i], start.nt);
-    }
-}
 void printParseTree(parseTree root) {
-    parsetree start = *root;      
-    printParseTree2(&start.children[0], start.nt);
-    printf("‐‐‐‐ Non-terminal: %s Parent: ROOT no", getNonTermString(start.nt));
-    parsetree* children = start.children;
-    for (int i=1; i<start.numChild; i++) {
-        printParseTree2(&children[i], start.nt);
-    }
-}
 
+    printf("We are the Resistance!!!\n");
+
+	// parseTree current;
+	// int class;
+	// for(int i=0;i<root->numChild;i++)
+	// {
+	// 	current=&(root->children[i]);
+	// 	if(!current)
+	// 	printf("NULL\n");
+	// 	if(current->numChild==0 && current->terminal->tokenType==eps)
+	// 	continue;
+	// 	if(current->numChild>0)
+	// 	{
+	// 		printf("-------\t\t");
+	// 		printf("-------\t\t");
+	// 		printf("-------\t\t");
+	// 		printf("-------\t\t");
+	// 	}
+	// 	else{
+	// 		printf("%s\t\t",current->terminal->lexeme);
+	// 		printf("%lld\t\t",current->terminal->lineNum);
+	// 		printf("%s\t\t",tokenRepr(current->terminal->tokenType));
+	// 		if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
+	// 			printf("%s\t\t",current->terminal->lexeme);
+	// 		else printf("-------\t\t");	
+	// 	}
+	// 	printf("%s\t\t",idRepr(root->nonTerminal));
+	// 	if(current->numChild==0)
+	// 	{
+	// 		printf("YES\t\t");
+	// 		printf("-------\t\t");
+	// 	}
+	// 	else{
+	// 		printf("NO\t\t");
+	// 		printf("%s\t\t",idRepr(current->nonTerminal));
+	// 	}
+	// 	printf("\n");
+	// 	printParseTree(current);
+	// }
+}
 

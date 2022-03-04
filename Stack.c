@@ -87,9 +87,14 @@ Element newElement(Key k)
 
 Key newKey(symbol id, char* lexeme, unsigned int tag, parseTree pt){
 	Key k = malloc(sizeof(struct key));
-	(k)->id = id;
-	(k)->subtree = pt;
-	strcpy(k->lexeme, lexeme);
+	k->id = id;
+	k->subtree = pt;
+	k->tag = tag;
+	k->lexeme = NULL;
+	if(lexeme!=NULL) {
+		k->lexeme = malloc(MAX_LEXEME_SIZE*sizeof(char));
+		strcpy(k->lexeme, lexeme);
+	}
 	return k;
 }
 		

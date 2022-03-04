@@ -11,7 +11,7 @@
 #define PARSER
 
 #include "parserDef.h"
-#include "lexerDef.h"
+#include "lexer.h"
 #include "Stack.h"
 
 // int* calculateFirst(int production, Grammar g, FirstSet firstSet);
