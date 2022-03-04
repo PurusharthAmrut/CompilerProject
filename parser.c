@@ -120,69 +120,6 @@ void getGram(char *fname, Grammar g) {
         }
     }
 
-    // for(int i=0; i<NO_OF_NONTERMINALS; i++) {
-    //     int numRules;
-    //     fscanf(fp, "%d", &numRules);
-    //     // printf("%d\n", numRules);
-
-    //     g[i].heads = malloc(numRules*sizeof(rhsChar));
-    //     g[i].numRules = numRules;
-    //     g[i].first = 0;
-    //     g[i].follow = 0;
-	// 	g[i].isNullable = 0;
-
-    //     for(int j=0; j<numRules; j++) {
-    //         rhsChar curr = malloc(sizeof(struct rhsCharNode));
-    //         curr->next = NULL;
-
-    //         char *nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
-    //         fscanf(fp, "%s", nonTerm);
-    //         int numTokens;
-    //         fscanf(fp, "%d", &numTokens);
-    //         // printf("%s %d ", nonTerm, numTokens);
-
-    //         curr->tag = 1;
-    //         curr->s.nt = checkNonTerminal(nonTerm);
-    //         if(curr->s.nt==-1) {
-    //             fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
-	// 			exit(0);
-    //         }
-
-	// 		if(curr->s.nt==eps) g[i].isNullable = 1;
-
-    //         rhsChar prev = curr;
-
-    //         for(int k=0; k<numTokens; k++) {
-    //             rhsChar tmp = malloc(sizeof(struct rhsCharNode));
-    //             tmp->next = NULL;
-
-    //             char *token = malloc(MAX_TOKEN_LENGTH*sizeof(char));
-    //             fscanf(fp, "%s", token);
-    //             // printf("%s ", token);
-
-    //             int tokenIdx = checkTerminal(token);
-    //             if(tokenIdx!=-1) {
-    //                 tmp->tag = 0;
-    //                 tmp->s.t = tokenIdx;
-    //             }else {
-    //                 tokenIdx = checkNonTerminal(token);
-    //                 if(tokenIdx==-1) {
-    //                     fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", token);
-	// 					exit(0);
-    //                 }
-    //                 tmp->tag = 1;
-    //                 tmp->s.nt = tokenIdx;
-    //             }
-
-    //             prev->next = tmp;
-    //             prev = tmp;
-    //         }
-    //         g[i].heads[j] = curr;
-
-    //         // printf("\n");
-    //     }
-    // }
-
 	printf("Loaded Grammar!!!\n");
 
     fclose(fp);
@@ -419,46 +356,31 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
     fprintf(stderr, "Parse Tree Created Successfully\n");
 }
 
-void printParseTree(parseTree root) {
+void printParseTree2(parseTree root, nonTerminal parent) {
 
-    printf("We are the Resistance!!!\n");
-
-	// parseTree current;
-	// int class;
-	// for(int i=0;i<root->numChild;i++)
-	// {
-	// 	current=&(root->children[i]);
-	// 	if(!current)
-	// 	printf("NULL\n");
-	// 	if(current->numChild==0 && current->terminal->tokenType==eps)
-	// 	continue;
-	// 	if(current->numChild>0)
-	// 	{
-	// 		printf("-------\t\t");
-	// 		printf("-------\t\t");
-	// 		printf("-------\t\t");
-	// 		printf("-------\t\t");
-	// 	}
-	// 	else{
-	// 		printf("%s\t\t",current->terminal->lexeme);
-	// 		printf("%lld\t\t",current->terminal->lineNum);
-	// 		printf("%s\t\t",tokenRepr(current->terminal->tokenType));
-	// 		if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
-	// 			printf("%s\t\t",current->terminal->lexeme);
-	// 		else printf("-------\t\t");	
-	// 	}
-	// 	printf("%s\t\t",idRepr(root->nonTerminal));
-	// 	if(current->numChild==0)
-	// 	{
-	// 		printf("YES\t\t");
-	// 		printf("-------\t\t");
-	// 	}
-	// 	else{
-	// 		printf("NO\t\t");
-	// 		printf("%s\t\t",idRepr(current->nonTerminal));
-	// 	}
-	// 	printf("\n");
-	// 	printParseTree(current);
-	// }
+    parsetree start = *root;          
+    parsetree child = start.children[0];
+    if (child.nt==-1) {
+        tokenInfo* terminal = child.terminal;
+        printf("%s %d %s parent:%s yes", terminal->lexeme, terminal->lineNum, getTermString(terminal->tokenType), getNonTermString(parent));
+        return;
+    } else {
+        printf("‐‐‐‐ Non-terminal: %s Parent: %s no", getNonTermString(child.nt), getNonTermString(child.nt));    
+    }    
+    printf("‐‐‐‐ Non-terminal: %s Parent: %s no", getNonTermString(start.nt), getNonTermString(parent));    
+    parsetree* children = start.children;
+    for (int i=1; i<start.numChild; i++) {
+        printParseTree2(&children[i], start.nt);
+    }
 }
+void printParseTree(parseTree root) {
+    parsetree start = *root;      
+    printParseTree2(&start.children[0], start.nt);
+    printf("‐‐‐‐ Non-terminal: %s Parent: ROOT no", getNonTermString(start.nt));
+    parsetree* children = start.children;
+    for (int i=1; i<start.numChild; i++) {
+        printParseTree2(&children[i], start.nt);
+    }
+}
+
 
