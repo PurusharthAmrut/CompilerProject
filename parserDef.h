@@ -30,11 +30,10 @@ typedef struct rhsCharNode* rhsChar;
 typedef struct lhsChar{
 	rhsChar* heads;
 	int numRules;
-	long int first;
-	long int follow;
+	long long int first;
+	long long int follow;
 	unsigned int isNullable : 1;
-}lhsChar;
-
+} lhsChar;
 
 typedef lhsChar* Grammar;
 
@@ -52,6 +51,7 @@ typedef struct parsetree
 	int numChild;
 	tokenInfo* terminal;
 	int ruleNo;
+	// nt = -1 for leaf nodes
 	int nt;
 	struct parsetree* children;
 	struct tablePointer* tp;
