@@ -13,10 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parserDef.h"
-#include "lexer.h"
-#include "utils.h"
-#include "Stack.h"
 #include "parser.h"
 
 #define EXCLUDE_EPS -288230376151711745L
@@ -238,7 +234,7 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
 	begin.nt = program;
 	finish.t = dollar;
 	Key start = newKey(begin, NULL, 1, root);
-	Key end = newKey(finish, NULL, 1, NULL);
+	Key end = newKey(finish, NULL, 0, NULL);
 	push(parseStack, end);
 	push(parseStack, start);
 	Key k, child, temp;
@@ -248,8 +244,10 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
 		getNextToken(sourceFile, &token);
 		k = top1(parseStack);
 		//top of stack is a nonTerminal
-		if (k->tag==1) {		
-			if(t[(k->id).nt][token.tokenType] > 0) {
+		if (k->tag==1) {
+            if (token.tokenType == TK_EOF) {
+                printf("%d: end of file reached unexpectedly\n", token.lineNum);
+            } else if(t[(k->id).nt][token.tokenType] > 0) {
 				//this parsetree node is now going to expand and
 				//bear children, hence naming it parent :)
 				parent = k->subtree;
@@ -288,14 +286,38 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
 			} else {
 				//enter recovery mode
 				*error = 1;
+                printf("%d: unexpected token: %s\n", token.lineNum, token.lexeme);
+                nonTerminal ntOnTop = (k->id).nt;
+                long long int followSyn = g[ntOnTop].follow;
+                while(followSyn & (1<<token.tokenType) == 0) {
+                    getNextToken(sourceFile, &token);
+                }
 			}
 		} else {
-			if (k->id.t == token.tokenType)
+            if (k->id.t == dollar) {
+                if (token.tokenType==TK_EOF)
+                    printf("\n\nParsing completed. Compilation successful!\n");
+                else {
+                    //enter recover mode
+                    *error=1;
+                    printf("%d: parsing error: expecting end of program\n", token.lineNum);
+                    while (token.tokenType != TK_EOF)
+                        getNextToken(sourceFile, &token);
+                }
+            }
+			if (k->id.t == token.tokenType) {                
 				pop(parseStack);
-			else {
-				//enter recovery mode
-				*error = 1;
-			}				
+            } else {
+                // enter recovery mode
+                *error = 1;
+                printf("%d: unexpected token: %s\n", token.lineNum, token.lexeme);
+                while (k->tag != 1) {
+                    if (k->id.t == dollar)
+                        break;
+                    pop(parseStack);
+                    k = top1(parseStack);
+                }
+            }				
 		}
 	} while (token.tokenType != TK_EOF);
 
