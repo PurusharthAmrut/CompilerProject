@@ -33,7 +33,7 @@ stmts 5 typeDefinitions defineTypeStmts declarations otherStmts returnStmt
 typeDefinitions 2 typeDefinition typeDefinitions
 typeDefinitions 1 eps
 2
-typeDefinition 4 TK_RECORD TK_RECORDID fieldDefinitions TK_ENDRECORD
+typeDefinition 4 TK_RECORD TK_RUID fieldDefinitions TK_ENDRECORD
 typeDefinition 4 TK_UNION TK_RUID fieldDefinitions TK_ENDUNION
 1
 defineTypeStmt 6 TK_DEFINETYPE A TK_RUID TK_AS TK_RUID TK_SEM
