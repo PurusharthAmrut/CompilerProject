@@ -122,15 +122,15 @@ int main(int argc, char *argv[])
 		     		start_time = clock();		     			
 					int error=0;					
 					parseInputSourceCode(sourceFile,t,g,root,&error);
+					parseTree tree = malloc(sizeof(parsetree));
+					printParseTree(tree);
 					end_time = clock();
 					if(!m1)
 					{ 
 						total_CPU_time +=  (double) (end_time - start_time);
                 		total_CPU_time_in_seconds +=  total_CPU_time / CLOCKS_PER_SEC;
-						nodeCount(root,&ans);
 						ans++; 
-					}
-					printParseTree(sourceFile);
+					}					
 					break;		       
 		     default:
 		     		// invalid option

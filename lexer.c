@@ -178,8 +178,7 @@ void printToken(tokenInfo *t) {
     }
 }
 
-void printTokenizedCode(char *filepath) {
-    FILE *fp = fopen(filepath, "r");
+void printTokenizedCode(FILE *fp) {
     tokenInfo *token = (tokenInfo*)malloc(sizeof(tokenInfo));
     token->tokenType = 0;
     while(1) {

@@ -23,7 +23,7 @@ terminal getTokenType(char *key, LookUpTable *lookUpTable);
 void removeComments(char *testcaseFile, char *cleanFile);
 FILE *getStream(FILE *fp, char *c);
 void printToken(tokenInfo *t);
-void printTokenizedCode(char *filepath);
+void printTokenizedCode(FILE *fp);
 void getNextToken(FILE *fp, tokenInfo *t);
 
 #endif
