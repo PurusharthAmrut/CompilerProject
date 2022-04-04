@@ -72,7 +72,7 @@ void copy(parseTree dst,parseTree src)
 	dst->numChildAST = src->numChildAST;
 	dst->ruleNo = src->ruleNo;
 	dst->terminal = src->terminal;
-	dst->nonTerminal = src->nonTerminal;
+	dst->nt = src->nt;
 	dst->children = NULL;
 	dst->tp = NULL;
 }
@@ -106,7 +106,7 @@ void createASTUtils(parseTree curr, parseTree par)
 	{
 		for(int i = 0; i < curr->numChild ;i++)
 		{
-			if(curr->children[i].numChildAST==0 && curr->children[i].nonTerminal==-1)
+			if(curr->children[i].numChildAST==0 && curr->children[i].nt==-1)
 			{
 				if(useful(curr->children[i].terminal->tokenType))
 					copy(curr,&(curr->children[i]));
@@ -131,7 +131,7 @@ void buildAST(parseTree ast,parseTree root)
 		}
 		else
 		{
-			if(root->children[i].nonTerminal==-1 && useful(root->children[i].terminal->tokenType))
+			if(root->children[i].nt==-1 && useful(root->children[i].terminal->tokenType))
 			{
 				copy(&(ast->children[m]),&(root->children[i]));
 				m++;
@@ -175,7 +175,7 @@ parseTree createAST(parseTree root)
 // 				printf("%s\t\t",current->terminal->lexeme);
 // 			else printf("-------\t\t");	
 // 		}
-// 		printf("%s\t\t",idRepr(root->nonTerminal));
+// 		printf("%s\t\t",idRepr(root->nt));
 // 		if(current->numChildAST==0)
 // 		{
 // 			printf("YES\t\t");
@@ -183,7 +183,7 @@ parseTree createAST(parseTree root)
 // 		}
 // 		else{
 // 			printf("NO\t\t");
-// 			printf("%s\t\t",idRepr(current->nonTerminal));
+// 			printf("%s\t\t",idRepr(current->nt));
 // 		}
 // 		printf("\n");
 // 		printAST(current);
