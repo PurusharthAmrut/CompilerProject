@@ -49,6 +49,7 @@ typedef lhsChar* Grammar;
 typedef struct parsetree
 {	
 	int numChild;
+	int numChildAST;
 	tokenInfo* terminal;
 	int ruleNo;
 	// nt = -1 for leaf nodes
