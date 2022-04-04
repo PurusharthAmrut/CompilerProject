@@ -57,7 +57,6 @@ int useful(int tokenClass) {
         case TK_OP:
         case TK_CL:
         case TK_RETURN:
-        case TK_TYPE:
         case TK_ENDRECORD:
         case eps:
             return 0;
