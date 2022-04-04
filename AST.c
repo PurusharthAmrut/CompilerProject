@@ -149,43 +149,43 @@ parseTree createAST(parseTree root)
 	return ast;
 }
 
-void printAST(parseTree root)
-{
-	parseTree current;
-	int class;
-	for(int i=0;i<root->numChildAST;i++)
-	{
-		current=&(root->children[i]);
-		if(!current)
-		printf("NULL\n");
-		if(current->numChildAST==0 && current->terminal->tokenType==eps)
-		continue;
-		if(current->numChildAST>0)
-		{
-			printf("-------\t\t");
-			printf("-------\t\t");
-			printf("-------\t\t");
-			printf("-------\t\t");
-		}
-		else{
-			printf("%s\t\t",current->terminal->lexeme);
-			printf("%lld\t\t",current->terminal->lineNum);
-			printf("%s\t\t",tokenRepr(current->terminal->tokenType));
-			if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
-				printf("%s\t\t",current->terminal->lexeme);
-			else printf("-------\t\t");	
-		}
-		printf("%s\t\t",idRepr(root->nonTerminal));
-		if(current->numChildAST==0)
-		{
-			printf("YES\t\t");
-			printf("-------\t\t");
-		}
-		else{
-			printf("NO\t\t");
-			printf("%s\t\t",idRepr(current->nonTerminal));
-		}
-		printf("\n");
-		printAST(current);
-	}
-}
+// void printAST(parseTree root)
+// {
+// 	parseTree current;
+// 	int class;
+// 	for(int i=0;i<root->numChildAST;i++)
+// 	{
+// 		current=&(root->children[i]);
+// 		if(!current)
+// 		printf("NULL\n");
+// 		if(current->numChildAST==0 && current->terminal->tokenType==eps)
+// 		continue;
+// 		if(current->numChildAST>0)
+// 		{
+// 			printf("-------\t\t");
+// 			printf("-------\t\t");
+// 			printf("-------\t\t");
+// 			printf("-------\t\t");
+// 		}
+// 		else{
+// 			printf("%s\t\t",current->terminal->lexeme);
+// 			printf("%lld\t\t",current->terminal->lineNum);
+// 			printf("%s\t\t",tokenRepr(current->terminal->tokenType));
+// 			if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
+// 				printf("%s\t\t",current->terminal->lexeme);
+// 			else printf("-------\t\t");	
+// 		}
+// 		printf("%s\t\t",idRepr(root->nonTerminal));
+// 		if(current->numChildAST==0)
+// 		{
+// 			printf("YES\t\t");
+// 			printf("-------\t\t");
+// 		}
+// 		else{
+// 			printf("NO\t\t");
+// 			printf("%s\t\t",idRepr(current->nonTerminal));
+// 		}
+// 		printf("\n");
+// 		printAST(current);
+// 	}
+// }
