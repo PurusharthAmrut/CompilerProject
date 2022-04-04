@@ -9,6 +9,5 @@ tc_in.txt
 *.exe
 makefile
 getGram2.*
-compile.txt
 makefile
 parser.c
