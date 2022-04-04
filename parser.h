@@ -14,20 +14,13 @@
 #include "lexer.h"
 #include "Stack.h"
 
-// int* calculateFirst(int production, Grammar g, FirstSet firstSet);
-// int* add(int* ans, int* addit);
-// void buildFirstSet(Grammar g, FirstSet firstSet);
 void printGram(Grammar g);
 void getGram(char *fname, Grammar g);
 void first(Grammar g, rhsChar rcn, long long int* firstBitString);
 void computeFirst(Grammar g, nonTerminal nt);
 void computeFollow(Grammar g, nonTerminal nt);
-// void getFollowSets(Grammar g, FollowSet fw, FirstSet fr);
-// void findFollow(int NonTerminalNo, int productionNo, Grammar g, FollowSet fw, FirstSet fr,int* flag);
-// void createParseTable(FirstSet firstSet,FollowSet followSet,Grammar g,Table t);
+void printFirst(Grammar g);
 void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]);
-// void add2(int* ans,int* add,int* flag);
-// void parseInputSourceCode(FILE* sourceFile,Table t,Grammar g,parseTree root,int* error);
 void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree root, int* error);
 void printParseTree(parseTree root);
 
