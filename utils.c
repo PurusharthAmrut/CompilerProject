@@ -53,7 +53,3 @@ nonTerminal checkNonTerminal(char *tokenArr) {
 	// fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", tokenArr);
 	// exit(0);
 }
-
-void generateTermArr() {
-    
-}
