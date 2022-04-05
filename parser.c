@@ -132,14 +132,18 @@ void first(Grammar g, rhsChar rcn, long long int* firstBitString) {
 
     if (rcn->tag==0) {
         //symbol is a terminal
+        // printf("%s $$ \n", getTermString(rcn->s.t));
         *firstBitString = *firstBitString | (1LL<<(rcn->s.t));
     }else {
         //symbol is a non-terminal => further digging needed
         lhsChar lc = g[rcn->s.nt];
-        
+
         if (lc.first == 0) { //first set isn't initialized yet
             computeFirst(g, rcn->s.nt);
         }
+
+        // update the lc values
+        lc = g[rcn->s.nt];
         
         if (lc.isNullable) {
             *firstBitString = *firstBitString | (lc.first & EXCLUDE_EPS); //exclude eps
@@ -160,17 +164,23 @@ void first(Grammar g, rhsChar rcn, long long int* firstBitString) {
 void computeFirst(Grammar g, nonTerminal nt) {
     if(g[nt].first!=0) return;
     lhsChar lc = g[nt];
+    // printf("%s Starting:\n", getNonTermString(lc.heads[0]->s.nt));
     for(int i=0; i<lc.numRules; i++) {
-        // rhsChar tmp = lc.heads[i];
+        rhsChar tmp = lc.heads[i];
         // while(tmp!=NULL) {
         //     if(tmp->tag==0) printf("%s ", getTermString(tmp->s.t));
         //     else printf("%s ", getNonTermString(tmp->s.nt));
         //     tmp = tmp->next;
         // }
         // printf("\n");
+        
+        // if(lc.heads[i]->next->tag==0) printf("%s Going into:\n", getTermString(lc.heads[i]->next->s.t));
+        // else printf("%s Going into:\n", getNonTermString(lc.heads[i]->next->s.nt));
         first(g, lc.heads[i]->next, &(lc.first));
-        g[nt].first = lc.first;
+        // g[nt].first = lc.first;
     }
+    // printf("%s Ended:\n", getNonTermString(lc.heads[0]->s.nt));
+    g[nt].first = lc.first;
 }
 
 void printTerminalList(long long bitString) {
@@ -181,7 +191,7 @@ void printTerminalList(long long bitString) {
     printf("\n");
 }
 
-void printFirst (Grammar g) {
+void printFirst(Grammar g) {
     printf("\n===============First Sets=============================\n");
     for(int i=0; i<NO_OF_NONTERMINALS; i++) {
         long long firstBitString = g[i].first;

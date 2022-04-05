@@ -18,12 +18,13 @@ char *termArr[] = {"TK_ASSIGNOP", "TK_COMMENT", "TK_FIELDID", "TK_ID", "TK_NUM",
 "TK_GT", "TK_GE", "TK_NE", "TK_UNION", "TK_ENDUNION", "TK_DEFINETYPE", "TK_AS", "TK_EOF", "eps", "dollar", "TK_ERROR"};
 
 char *nonTermArr[] = {"program", "mainFunction", "otherFunctions", "function", "input_par", "output_par", "parameter_list", 
-"dataType", "primitiveDatatype", "constructedDatatype", "remaining_list", "stmts", "typeDefinitions", "typeDefinition", 
-"defineTypeStmts", "defineTypeStmt", "A", "fieldDefinitions", "fieldDefinition", "moreFields", "declarations", "declaration", 
-"global_or_not", "otherStmts", "stmt", "assignmentStmt", "singleOrRecId", "option_single_constructed", "oneExpansion", 
-"moreExpansions", "funCallStmt", "outputParameters", "inputParameters", "iterativeStmt", "conditionalStmt", "elsePart", 
-"ioStmt", "arithmeticExpression", "expPrime", "term", "termPrime", "factor", "highPrecedenceOperators", "lowPrecedenceOperators", 
-"booleanExpression", "var", "logicalOp", "relationalOp", "returnStmt", "optionalReturn", "idList", "more_ids"};
+"dataType", "primitiveDatatype", "constructedDatatype", "remaining_list", "stmts", "typeDefinitions", "actualOrRedefined", 
+"typeDefinition", "defineTypeStmt", "A", "fieldDefinitions", "fieldDefinition", "fieldType", "moreFields", "declarations", 
+"declaration", "global_or_not", "otherStmts", "stmt", "assignmentStmt", "singleOrRecId", "option_single_constructed", 
+"oneExpansion", "moreExpansions", "funCallStmt", "outputParameters", "inputParameters", "iterativeStmt", "conditionalStmt", 
+"elsePart", "ioStmt", "arithmeticExpression", "expPrime", "term", "termPrime", "factor", "highPrecedenceOperators", 
+"lowPrecedenceOperators", "booleanExpression", "var", "logicalOp", "relationalOp", "returnStmt", "optionalReturn", "idList", 
+"more_ids"};
 
 char* getTermString(terminal term) {
 	return termArr[term];
