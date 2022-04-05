@@ -210,7 +210,7 @@ void computeFollow(Grammar g, nonTerminal nt) {
     long long firstOfNext = 0;
     for (int i=0; i<NO_OF_NONTERMINALS; i++) {
         for (int j=0; j<g[i].numRules; j++) {
-            rcn = g[i].heads[j]->next; //TODO: rcn = g[i].heads[j]->next (probably)
+            rcn = g[i].heads[j]->next; 
             while (rcn!=NULL) {
                 if (rcn->tag==1 && rcn->s.nt==nt) {
                     if (rcn->next !=NULL) {
@@ -246,7 +246,7 @@ void computeFollow(Grammar g, nonTerminal nt) {
                         
                         // if(nextrcn->tag==0) printf("Using %s\n", getTermString(nextrcn->s.t));
                         // else printf("Using %s\n", getNonTermString(nextrcn->s.nt));
-                        // //TODO: make it efficient by directly return value for either terminal
+                        
                         // // or the calculated first value of nonterminal
                         // // first(g, nextrcn, &firstOfNext);
                         // long long nextrcnFirst = 0;
@@ -257,7 +257,7 @@ void computeFollow(Grammar g, nonTerminal nt) {
                         // }
                         // firstOfNext |= (nextrcnFirst & EXCLUDE_EPS);
                         // // fprintf(stderr, "%lld\n", firstOfNext);
-                        // if ((nextrcnFirst>>eps)%2) { // TODO: verify this boolean arithmetic
+                        // if ((nextrcnFirst>>eps)%2) { 
                         //     // first set of subsequent string contains eps
                         //     // g[nt].follow |= (firstOfNext & EXCLUDE_EPS);
                         //     g[nt].follow |= firstOfNext;

@@ -5,6 +5,8 @@ firstnfollow.c
 lexerTest.c
 parser.c
 
+*_test.c
+
 tc_in.txt
 
 output
