@@ -1,8 +1,19 @@
-gcc -c lexer.c
-gcc -c utils.c
-gcc -c parser.c
-gcc -c Stack.c
-gcc driver.c utils.o lexer.o stack.o parser.o -o a.out
+// format for using makefile (don't push your makefile on repo)
 
-Do not use this line (meant for Puru's personal use):
-gcc getGram2.c utils.o lexer.o stack.o parser.o -o a.out
+edit: driver utils.o lexer.o Stack.o parser.o
+	gcc driver.c
+
+utils.o: utils.c utils.h
+	gcc -c utils.c
+
+lexer.o: lexer.c lexer.h lexerDef.h
+	gcc -c lexer.c
+
+Stack.o: Stack.c Stack.h
+	gcc -c Stack.c
+
+parser.o: parser.c parser.h parserDef.h
+	gcc -c parser.c
+
+clean:
+	rm driver utils.o lexer.o Stack.o parser.o
