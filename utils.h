@@ -100,7 +100,7 @@ typedef enum {
 } terminal;
 
 typedef enum { 
-	program,
+    program,
     mainFunction,
     otherFunctions,
     function,
