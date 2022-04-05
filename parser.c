@@ -205,37 +205,74 @@ void computeFollow(Grammar g, nonTerminal nt) {
     // the function assumes that the caller has first checked if the follow set
     // of nt has already been computed
     // fprintf(stderr, "%s Before:%lld ", getNonTermString(nt), g[nt].follow);
+    // printf("%s Starting:\n", getNonTermString(nt));
     rhsChar rcn, nextrcn;
-    long long int firstOfNext;
+    long long firstOfNext = 0;
     for (int i=0; i<NO_OF_NONTERMINALS; i++) {
         for (int j=0; j<g[i].numRules; j++) {
-            rcn = g[i].heads[j];
+            rcn = g[i].heads[j]->next; //TODO: rcn = g[i].heads[j]->next (probably)
             while (rcn!=NULL) {
                 if (rcn->tag==1 && rcn->s.nt==nt) {
                     if (rcn->next !=NULL) {
+
                         nextrcn = rcn->next;
-                        first(g, nextrcn, &firstOfNext);
-                        // fprintf(stderr, "%lld\n", firstOfNext);
-                        if (((firstOfNext>>eps) & 1) == 1) {
-                            // first set of subsequent string contains eps
-                            firstOfNext = firstOfNext & EXCLUDE_EPS;
-                            g[nt].follow = g[nt].follow | firstOfNext;
-                            if (i!=nt) // if the nonTerminal on LHS is different than nt
-                            {
-                                if (g[i].follow == 0)
-                                    computeFollow(g, i);
-                                g[nt].follow = g[nt].follow | g[i].follow;                             
+
+                        bool hasEpsInFirst = 1;
+                        while(hasEpsInFirst && nextrcn!=NULL) {
+                            
+                            // if(nextrcn->tag==0) printf("Using %s\n", getTermString(nextrcn->s.t));
+                            // else printf("Using %s\n", getNonTermString(nextrcn->s.nt));
+
+                            long long nextrcnFirst = 0;
+                            if(nextrcn->tag==0) nextrcnFirst |= 1LL<<(nextrcn->s.t);
+                            else {
+                                // printf("%s: %lld\n", getNonTermString(nextrcn->s.nt), g[nextrcn->s.nt].first);
+                                nextrcnFirst |= g[nextrcn->s.nt].first;
                             }
-                        } else {
-                            g[nt].follow = g[nt].follow | firstOfNext;
+                            firstOfNext |= (nextrcnFirst & EXCLUDE_EPS);
+                            g[nt].follow |= firstOfNext;
+
+                            if((nextrcnFirst>>eps)%2==0) hasEpsInFirst = 0;                            
+                            nextrcn = nextrcn->next;
+
+                            if(nextrcn==NULL && hasEpsInFirst && i!=nt) {
+                                if(g[i].follow==0) computeFollow(g, i);
+                                g[nt].follow |= g[i].follow;  
+                            }
                         }
+
+
+                        // nextrcn = rcn->next;
+                        
+                        // if(nextrcn->tag==0) printf("Using %s\n", getTermString(nextrcn->s.t));
+                        // else printf("Using %s\n", getNonTermString(nextrcn->s.nt));
+                        // //TODO: make it efficient by directly return value for either terminal
+                        // // or the calculated first value of nonterminal
+                        // // first(g, nextrcn, &firstOfNext);
+                        // long long nextrcnFirst = 0;
+                        // if(nextrcn->tag==0) nextrcnFirst |= 1LL<<(nextrcn->s.t);
+                        // else {
+                        //     // printf("%s: %lld\n", getNonTermString(nextrcn->s.nt), g[nextrcn->s.nt].first);
+                        //     nextrcnFirst |= g[nextrcn->s.nt].first;
+                        // }
+                        // firstOfNext |= (nextrcnFirst & EXCLUDE_EPS);
+                        // // fprintf(stderr, "%lld\n", firstOfNext);
+                        // if ((nextrcnFirst>>eps)%2) { // TODO: verify this boolean arithmetic
+                        //     // first set of subsequent string contains eps
+                        //     // g[nt].follow |= (firstOfNext & EXCLUDE_EPS);
+                        //     g[nt].follow |= firstOfNext;
+                        //     if (i!=nt) {
+                        //         // if the nonTerminal on LHS is different than nt
+                        //         if (g[i].follow == 0) computeFollow(g, i);
+                        //         g[nt].follow |= g[i].follow;                             
+                        //     }
+                        // } else g[nt].follow |= firstOfNext;
                     } else {
                         //This is the last character in the RHS of the production
-                        if (i!=nt) // if the nonTerminal on LHS is different than nt
-                        {
-                            if (g[i].follow == 0)
-                                computeFollow(g, i);
-                            g[nt].follow = g[nt].follow | g[i].follow;                             
+                        if (i!=nt) {
+                            // if the nonTerminal on LHS is different than nt
+                            if (g[i].follow == 0) computeFollow(g, i);
+                            g[nt].follow |= g[i].follow;                             
                         }
                     }
                 }
@@ -243,6 +280,7 @@ void computeFollow(Grammar g, nonTerminal nt) {
             }
         }
     }
+    // printf("%s Ended:\n===========\n", getNonTermString(nt));
 }
 
 void printFollow(Grammar g) {

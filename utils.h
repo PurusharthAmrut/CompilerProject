@@ -23,6 +23,7 @@
 
 #define NONTERMINAL_OFFSET 12345
 #define NO_OF_TERMINALS 59 //excluding TK_ERROR and dollar
+// #define NO_OF_TERMINALS 61 //why not include them and make it 61 (won't not including them affect follow, since we need dollar)
 #define NO_OF_NONTERMINALS 53
 #define MAX_RULE_LEN 10
 #define NO_OF_PRODUCTIONS 90
