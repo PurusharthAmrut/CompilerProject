@@ -39,7 +39,7 @@ typeDefinition 4 TK_UNION TK_RUID fieldDefinitions TK_ENDUNION
 defineTypeStmt 6 TK_DEFINETYPE A TK_RUID TK_AS TK_RUID TK_SEM
 2
 defineTypeStmts 2 defineTypeStmt defineTypeStmts
-defineTypeStmt 1 eps
+defineTypeStmts 1 eps
 2
 A 1 TK_RECORD
 A 1 TK_UNION

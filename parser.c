@@ -22,107 +22,107 @@
 #define EXCLUDE_EPS 0b1111101111111111111111111111111111111111111111111111111111111111
 #define INCLUDE_EPS 0b0000010000000000000000000000000000000000000000000000000000000000
 
-// void printGram(Grammar g) {
-// 	for(int i=0; i<NO_OF_NONTERMINALS; i++) {
-// 		printf("%d %lld %lld %d\n", g[i].numRules, g[i].first, g[i].follow, g[i].isNullable);
-// 		for(int j=0; j<g[i].numRules; j++) {
-// 			rhsChar curr = g[i].heads[j];
-// 			while(curr!=NULL) {
-// 				if(curr->tag==0) printf("%s ", getTermString(curr->s.t));
-// 				else printf("%s ", getNonTermString(curr->s.nt));
-// 				curr = curr->next;
-// 			}
-// 			printf("\n");
-// 		}
-// 	}
-// }
+void printGram(Grammar g) {
+	for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+		printf("%d %lld %lld %d\n", g[i].numRules, g[i].first, g[i].follow, g[i].isNullable);
+		for(int j=0; j<g[i].numRules; j++) {
+			rhsChar curr = g[i].heads[j];
+			while(curr!=NULL) {
+				if(curr->tag==0) printf("%s ", getTermString(curr->s.t));
+				else printf("%s ", getNonTermString(curr->s.nt));
+				curr = curr->next;
+			}
+			printf("\n");
+		}
+	}
+}
 
-// void getGram(char *fname, Grammar g) {
-//     FILE *fp;
-//     fp = fopen(fname, "r");
-//     if(fp==NULL) {
-//         fprintf(stderr, "File %s file not found error\n", fname);
-//         exit(0);
-//     }
-//     int times = NO_OF_NONTERMINALS;
-//     while(times--) {
-//         int numRules;
-//         fscanf(fp, "%d", &numRules);
+void getGram(char *fname, Grammar g) {
+    FILE *fp;
+    fp = fopen(fname, "r");
+    if(fp==NULL) {
+        fprintf(stderr, "File %s file not found error\n", fname);
+        exit(0);
+    }
+    int times = NO_OF_NONTERMINALS;
+    while(times--) {
+        int numRules;
+        fscanf(fp, "%d", &numRules);
 
-//         char *nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
-//         fscanf(fp, "%s", nonTerm);
-//         int numTokens;
-//         fscanf(fp, "%d", &numTokens);
-//         // fprintf(stderr, "%d %s %d\n", numRules, nonTerm, numTokens);
-//         int i = checkNonTerminal(nonTerm);
+        char *nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
+        fscanf(fp, "%s", nonTerm);
+        int numTokens;
+        fscanf(fp, "%d", &numTokens);
+        // fprintf(stderr, "%d %s %d\n", numRules, nonTerm, numTokens);
+        int i = checkNonTerminal(nonTerm);
 
-//         if(i==-1) {
-//             fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
-//             exit(0);
-//         }
+        if(i==-1) {
+            fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
+            exit(0);
+        }
 
-//         g[i].heads = malloc(numRules*sizeof(rhsChar));
-//         g[i].numRules = numRules;
-//         g[i].first = 0;
-//         g[i].follow = 0;
-// 		g[i].isNullable = 0;
+        g[i].heads = malloc(numRules*sizeof(rhsChar));
+        g[i].numRules = numRules;
+        g[i].first = 0;
+        g[i].follow = 0;
+		g[i].isNullable = 0;
 
-//         for(int j=0; j<numRules; j++) {
-//             rhsChar curr = malloc(sizeof(struct rhsCharNode));
-//             curr->next = NULL;
+        for(int j=0; j<numRules; j++) {
+            rhsChar curr = malloc(sizeof(struct rhsCharNode));
+            curr->next = NULL;
 
-//             if(j) {
-//                 free(nonTerm);
-//                 nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
-//                 fscanf(fp, "%s", nonTerm);
-//                 fscanf(fp, "%d", &numTokens);
-//             }
+            if(j) {
+                free(nonTerm);
+                nonTerm = malloc(MAX_TOKEN_LENGTH*sizeof(char));
+                fscanf(fp, "%s", nonTerm);
+                fscanf(fp, "%d", &numTokens);
+            }
 
-//             if(checkNonTerminal(nonTerm)==eps) g[i].isNullable = 1;
+            if(checkNonTerminal(nonTerm)==eps) g[i].isNullable = 1;
 
-//             curr->tag = 1;
-//             curr->s.nt = checkNonTerminal(nonTerm);
-//             if(curr->s.nt==-1) {
-//                 fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
-// 				exit(0);
-//             }
+            curr->tag = 1;
+            curr->s.nt = checkNonTerminal(nonTerm);
+            if(curr->s.nt==-1) {
+                fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", nonTerm);
+				exit(0);
+            }
 
-//             rhsChar prev = curr;
+            rhsChar prev = curr;
 
-//             for(int k=0; k<numTokens; k++) {
-//                 rhsChar tmp = malloc(sizeof(struct rhsCharNode));
-//                 tmp->next = NULL;
+            for(int k=0; k<numTokens; k++) {
+                rhsChar tmp = malloc(sizeof(struct rhsCharNode));
+                tmp->next = NULL;
 
-//                 char *token = malloc(MAX_TOKEN_LENGTH*sizeof(char));
-//                 fscanf(fp, "%s", token);
-//                 // printf("%s ", token);
+                char *token = malloc(MAX_TOKEN_LENGTH*sizeof(char));
+                fscanf(fp, "%s", token);
+                // printf("%s ", token);
 
-//                 int tokenIdx = checkTerminal(token);
-//                 if(tokenIdx!=-1) {
-//                     tmp->tag = 0;
-//                     tmp->s.t = tokenIdx;
-//                     if(tokenIdx==eps) g[i].isNullable = 1;
-//                 }else {
-//                     tokenIdx = checkNonTerminal(token);
-//                     if(tokenIdx==-1) {
-//                         fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", token);
-// 						exit(0);
-//                     }
-//                     tmp->tag = 1;
-//                     tmp->s.nt = tokenIdx;
-//                 }
+                int tokenIdx = checkTerminal(token);
+                if(tokenIdx!=-1) {
+                    tmp->tag = 0;
+                    tmp->s.t = tokenIdx;
+                    if(tokenIdx==eps) g[i].isNullable = 1;
+                }else {
+                    tokenIdx = checkNonTerminal(token);
+                    if(tokenIdx==-1) {
+                        fprintf(stderr, "%s - Non Terminal does not exist in ENUM\n", token);
+						exit(0);
+                    }
+                    tmp->tag = 1;
+                    tmp->s.nt = tokenIdx;
+                }
 
-//                 prev->next = tmp;
-//                 prev = tmp;
-//             }
-//             g[i].heads[j] = curr;
-//         }
-//     }    
+                prev->next = tmp;
+                prev = tmp;
+            }
+            g[i].heads[j] = curr;
+        }
+    }    
 
-// 	printf("Loaded Grammar!!!\n");
+	printf("Loaded Grammar!!!\n");
 
-//     fclose(fp);
-// }
+    fclose(fp);
+}
 //------------------------------------------------------------
 //FIRST and FOLLOW
 
@@ -132,9 +132,8 @@ void first(Grammar g, rhsChar rcn, long long int* firstBitString) {
 
     if (rcn->tag==0) {
         //symbol is a terminal
-        *firstBitString = *firstBitString | 1<<(rcn->s.t);
-    } 
-    else {
+        *firstBitString = *firstBitString | (1LL<<(rcn->s.t));
+    }else {
         //symbol is a non-terminal => further digging needed
         lhsChar lc = g[rcn->s.nt];
         
@@ -144,11 +143,12 @@ void first(Grammar g, rhsChar rcn, long long int* firstBitString) {
         
         if (lc.isNullable) {
             *firstBitString = *firstBitString | (lc.first & EXCLUDE_EPS); //exclude eps
-            if (rcn->next != NULL)
+            if (rcn->next != NULL) {
                 first(g, rcn->next, firstBitString);
-            else
+            }else {
                 //This was the last symbol in the rule
                 *firstBitString = *firstBitString | INCLUDE_EPS;
+            }
         } else {
             //no need to compute first sets of further nonTerminals in the rule
             *firstBitString = *firstBitString | (lc.first);
@@ -158,13 +158,37 @@ void first(Grammar g, rhsChar rcn, long long int* firstBitString) {
 }
 
 void computeFirst(Grammar g, nonTerminal nt) {
-    if (g[nt].first !=0) return;
+    if(g[nt].first!=0) return;
     lhsChar lc = g[nt];
-    for (int i=0; i<lc.numRules; i++) {
-        first(g, lc.heads[i], &(lc.first));
+    for(int i=0; i<lc.numRules; i++) {
+        // rhsChar tmp = lc.heads[i];
+        // while(tmp!=NULL) {
+        //     if(tmp->tag==0) printf("%s ", getTermString(tmp->s.t));
+        //     else printf("%s ", getNonTermString(tmp->s.nt));
+        //     tmp = tmp->next;
+        // }
+        // printf("\n");
+        first(g, lc.heads[i]->next, &(lc.first));
         g[nt].first = lc.first;
     }
-    return;
+}
+
+void printTerminalList(long long bitString) {
+    for(int j=0; j<NO_OF_TERMINALS; j++) {
+        if(bitString%2) printf("%s ", getTermString(j));
+        bitString /= 2;
+    }
+    printf("\n");
+}
+
+void printFirst (Grammar g) {
+    printf("\n===============First Sets=============================\n");
+    for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+        long long firstBitString = g[i].first;
+        printf("%s:%lld:: ", getNonTermString(i), firstBitString);
+        printTerminalList(firstBitString);
+    }
+    printf("\n======================================================\n");
 }
 
 void computeFollow(Grammar g, nonTerminal nt) {
@@ -211,24 +235,15 @@ void computeFollow(Grammar g, nonTerminal nt) {
     }
 }
 
-void printFirst (Grammar g) {
-    long long firstBitString;
-    int i,j;
-    for (i=0; i<NO_OF_NONTERMINALS; i++) {
-        computeFirst(g, i);
-        firstBitString = g[i].first;
-        printf("%s: ", getNonTermString(i));
-        // printf("%lld ", g[i].first);
-        for (j=0; j<NO_OF_TERMINALS; j++) {
-            if (firstBitString%2==1) {
-                printf("%s ", getTermString(j));
-            }
-            firstBitString = firstBitString >> 1;
-        }
-        printf("\n");
+void printFollow(Grammar g) {
+    printf("\n===================Follow Sets========================\n");
+    for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+        long long followBitString = g[i].follow;
+        printf("%s:%lld:: ", getNonTermString(i), followBitString);
+        printTerminalList(followBitString);
     }
+    printf("\n======================================================\n");
 }
-
 
 void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
 	for(int i = 0; i < NO_OF_NONTERMINALS; i++)
@@ -269,6 +284,15 @@ void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
 			}
 		}
 	}
+}
+
+void printParseTable(int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
+    printf("\n===================Parse Table========================\n");
+    for(int i=0; i<NO_OF_NONTERMINALS; i++) {
+        for(int j=0; j<NO_OF_TERMINALS; j++) printf("%d ", t[i][j]);
+        printf("\n");
+    }
+    printf("\n======================================================\n");
 }
 
 void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree root, int* error){

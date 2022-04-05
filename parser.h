@@ -18,9 +18,12 @@ void printGram(Grammar g);
 void getGram(char *fname, Grammar g);
 void first(Grammar g, rhsChar rcn, long long int* firstBitString);
 void computeFirst(Grammar g, nonTerminal nt);
-void computeFollow(Grammar g, nonTerminal nt);
+void printTerminalList(long long bitString);
 void printFirst(Grammar g);
+void computeFollow(Grammar g, nonTerminal nt);
+void printFollow(Grammar g);
 void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]);
+void printParseTable(int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]);
 void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree root, int* error);
 void printParseTree(parseTree root);
 
