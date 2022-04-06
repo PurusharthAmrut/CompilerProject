@@ -77,68 +77,68 @@ void copy(parseTree dst,parseTree src)
 	// dst->tp = NULL;
 }
 
-void createASTUtils(parseTree curr, parseTree par)
-{
-	if(curr==NULL)
-	return ; 
-	if(curr -> numChildAST == 0)
-	{
-		if(!useful(curr->terminal->tokenType))
-		par->numChildAST--;
-		return;
-	}
-	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
-	{
-		if(useful(curr->children[0].terminal->tokenType))
-		{
-			copy(curr,&(curr->children[0]));
-			return;
-		}
-	}
+// void createASTUtils(parseTree curr, parseTree par)
+// {
+// 	if(curr==NULL)
+// 	return ; 
+// 	if(curr -> numChildAST == 0)
+// 	{
+// 		if(!useful(curr->terminal->tokenType))
+// 		par->numChildAST--;
+// 		return;
+// 	}
+// 	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
+// 	{
+// 		if(useful(curr->children[0].terminal->tokenType))
+// 		{
+// 			copy(curr,&(curr->children[0]));
+// 			return;
+// 		}
+// 	}
 	
-	int count = curr->numChild;
-	for(int i = 0; i < count; i++)
-	createASTUtils(&(curr->children[i]),curr);
+// 	int count = curr->numChild;
+// 	for(int i = 0; i < count; i++)
+// 	createASTUtils(&(curr->children[i]),curr);
 	
-	if(curr->numChildAST == 0)
-		par->numChildAST--;
-	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
-	{
-		for(int i = 0; i < curr->numChild ;i++)
-		{
-			if(curr->children[i].numChildAST==0 && curr->children[i].nt==-1)
-			{
-				if(useful(curr->children[i].terminal->tokenType))
-					copy(curr,&(curr->children[i]));
-			}
-		}
-	}
-}
+// 	if(curr->numChildAST == 0)
+// 		par->numChildAST--;
+// 	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
+// 	{
+// 		for(int i = 0; i < curr->numChild ;i++)
+// 		{
+// 			if(curr->children[i].numChildAST==0 && curr->children[i].nt==-1)
+// 			{
+// 				if(useful(curr->children[i].terminal->tokenType))
+// 					copy(curr,&(curr->children[i]));
+// 			}
+// 		}
+// 	}
+// }
 
-void buildAST(parseTree ast,parseTree root)
-{
-	if(!root)
-	return;
-	ast->children = malloc((root->numChildAST)*sizeof(parsetree));
-	int m=0;
-	for(int i = 0;i < root->numChild;i++) 
-	{
-		if(root->children[i].numChildAST!=0)
-		{
-			copy(&(ast->children[m]),&(root->children[i]));
-			buildAST(&(ast->children[m]),&(root->children[i]));
-			m++;
-		}
-		else
-		{
-			if(root->children[i].nt==-1 && useful(root->children[i].terminal->tokenType))
-			{
-				copy(&(ast->children[m]),&(root->children[i]));
-				m++;
-			}
-		}
-	}
-}
+// void buildAST(parseTree ast,parseTree root)
+// {
+// 	if(!root)
+// 	return;
+// 	ast->children = malloc((root->numChildAST)*sizeof(parsetree));
+// 	int m=0;
+// 	for(int i = 0;i < root->numChild;i++) 
+// 	{
+// 		if(root->children[i].numChildAST!=0)
+// 		{
+// 			copy(&(ast->children[m]),&(root->children[i]));
+// 			buildAST(&(ast->children[m]),&(root->children[i]));
+// 			m++;
+// 		}
+// 		else
+// 		{
+// 			if(root->children[i].nt==-1 && useful(root->children[i].terminal->tokenType))
+// 			{
+// 				copy(&(ast->children[m]),&(root->children[i]));
+// 				m++;
+// 			}
+// 		}
+// 	}
+// }
 
 parseTree createASTDummy(parseTree root){
 	if(!root){
@@ -190,43 +190,44 @@ parseTree createAST(parseTree root)
 	return createASTDummy(root);
 }
 
-// void printAST(parseTree root)
-// {
-// 	parseTree current;
-// 	int class;
-// 	for(int i=0;i<root->numChildAST;i++)
-// 	{
-// 		current=&(root->children[i]);
-// 		if(!current)
-// 		printf("NULL\n");
-// 		if(current->numChildAST==0 && current->terminal->tokenType==eps)
-// 		continue;
-// 		if(current->numChildAST>0)
-// 		{
-// 			printf("-------\t\t");
-// 			printf("-------\t\t");
-// 			printf("-------\t\t");
-// 			printf("-------\t\t");
-// 		}
-// 		else{
-// 			printf("%s\t\t",current->terminal->lexeme);
-// 			printf("%lld\t\t",current->terminal->lineNum);
-// 			printf("%s\t\t",tokenRepr(current->terminal->tokenType));
-// 			if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
-// 				printf("%s\t\t",current->terminal->lexeme);
-// 			else printf("-------\t\t");	
-// 		}
-// 		printf("%s\t\t",idRepr(root->nt));
-// 		if(current->numChildAST==0)
-// 		{
-// 			printf("YES\t\t");
-// 			printf("-------\t\t");
-// 		}
-// 		else{
-// 			printf("NO\t\t");
-// 			printf("%s\t\t",idRepr(current->nt));
-// 		}
-// 		printf("\n");
-// 		printAST(current);
-// 	}
-// }
+void printAST(parseTree root)
+{
+	printf("Avengers Assemble!!!\n");
+	// parseTree current;
+	// int class;
+	// for(int i=0;i<root->numChildAST;i++)
+	// {
+	// 	current=&(root->children[i]);
+	// 	if(!current)
+	// 	printf("NULL\n");
+	// 	if(current->numChildAST==0 && current->terminal->tokenType==eps)
+	// 	continue;
+	// 	if(current->numChildAST>0)
+	// 	{
+	// 		printf("-------\t\t");
+	// 		printf("-------\t\t");
+	// 		printf("-------\t\t");
+	// 		printf("-------\t\t");
+	// 	}
+	// 	else{
+	// 		printf("%s\t\t",current->terminal->lexeme);
+	// 		printf("%lld\t\t",current->terminal->lineNum);
+	// 		printf("%s\t\t",tokenRepr(current->terminal->tokenType));
+	// 		if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
+	// 			printf("%s\t\t",current->terminal->lexeme);
+	// 		else printf("-------\t\t");	
+	// 	}
+	// 	printf("%s\t\t",idRepr(root->nt));
+	// 	if(current->numChildAST==0)
+	// 	{
+	// 		printf("YES\t\t");
+	// 		printf("-------\t\t");
+	// 	}
+	// 	else{
+	// 		printf("NO\t\t");
+	// 		printf("%s\t\t",idRepr(current->nt));
+	// 	}
+	// 	printf("\n");
+	// 	printAST(current);
+	// }
+}
