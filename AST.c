@@ -73,8 +73,8 @@ void copy(parseTree dst,parseTree src)
 	dst->ruleNo = src->ruleNo;
 	dst->terminal = src->terminal;
 	dst->nt = src->nt;
-	dst->children = NULL;
-	dst->tp = NULL;
+	dst->children = src->children;
+	// dst->tp = NULL;
 }
 
 void createASTUtils(parseTree curr, parseTree par)
@@ -139,14 +139,55 @@ void buildAST(parseTree ast,parseTree root)
 		}
 	}
 }
+
+parseTree createASTDummy(parseTree root){
+	if(!root){
+		return NULL;
+	}
+	if(root->numChild > 1){
+		for(int i=0; i<root->numChild; i++){
+			//check if root is nt, if yes then call recursively, if no then check if it is useful, if useful then retain the node, otherwise free the node
+			if(root->children[i].nt != -1){
+				root->children[i] = *createASTDummy(&(root->children[i]));
+			} else{
+				if(useful(root->children[i].terminal->tokenType)){
+					continue;
+				} else{
+					root->numChild--;
+					free(&(root->children[i]));
+				}
+			}
+		}
+	} else if(root->numChild == 1 && root->children[0].nt!=1){
+		//change root to child of root and delete root
+		copy(root, &(root->children[0]));
+		free(root->children);
+		return createASTDummy(root->children);
+	} else if(root->numChild == 1 && root->children[0].nt==-1){
+		if(useful(root->children[0].terminal->tokenType)){
+			//change pointer to terminal
+			copy(root, &(root->children[0]));
+			free(root->children);
+			return root;
+		} else{
+			root->numChild--;
+			free(root->children);
+			return(root);
+		}
+	} else if(root->numChild == 0){
+		return root;
+	}
+	return root;
+}
 	
 parseTree createAST(parseTree root)
 {
-	createASTUtils(root,NULL);
-	parseTree ast = malloc(sizeof(parsetree));
-	copy(ast,root);
-	buildAST(ast,root);
-	return ast;
+	// createASTUtils(root,NULL);
+	// parseTree ast = malloc(sizeof(parsetree));
+	// copy(ast,root);
+	// buildAST(ast,root);
+	// return ast;
+	return createASTDummy(root);
 }
 
 // void printAST(parseTree root)
