@@ -28,25 +28,28 @@ constructedDatatype 1 TK_RUID
 remaining_list 2 TK_COMMA parameter_list
 remaining_list 1 eps
 1
-stmts 5 typeDefinitions defineTypeStmts declarations otherStmts returnStmt
+stmts 4 typeDefinitions declarations otherStmts returnStmt
 2
-typeDefinitions 2 typeDefinition typeDefinitions
+typeDefinitions 2 actualOrRedefined typeDefinitions
 typeDefinitions 1 eps
+2
+actualOrRedefined 1 typeDefinition
+actualOrRedefined 1 defineTypeStmt
 2
 typeDefinition 4 TK_RECORD TK_RUID fieldDefinitions TK_ENDRECORD
 typeDefinition 4 TK_UNION TK_RUID fieldDefinitions TK_ENDUNION
 1
 defineTypeStmt 6 TK_DEFINETYPE A TK_RUID TK_AS TK_RUID TK_SEM
 2
-defineTypeStmts 2 defineTypeStmt defineTypeStmts
-defineTypeStmt 1 eps
-2
 A 1 TK_RECORD
 A 1 TK_UNION
 1
 fieldDefinitions 3 fieldDefinition fieldDefinition moreFields
 1
-fieldDefinition 5 TK_TYPE primitiveDatatype TK_COLON TK_FIELDID TK_SEM
+fieldDefinition 5 TK_TYPE fieldType TK_COLON TK_FIELDID TK_SEM
+2
+fieldType 1 primitiveDatatype
+fieldType 1 TK_RUID
 2
 moreFields 2 fieldDefinition moreFields
 moreFields 1 eps
@@ -72,8 +75,8 @@ assignmentStmt 4 singleOrRecId TK_ASSIGNOP arithmeticExpression TK_SEM
 1
 singleOrRecId 2 TK_ID option_single_constructed
 2
-option_single_constructed 1 eps
 option_single_constructed 2 oneExpansion moreExpansions
+option_single_constructed 1 eps
 1 
 oneExpansion 2 TK_DOT TK_FIELDID
 2 
