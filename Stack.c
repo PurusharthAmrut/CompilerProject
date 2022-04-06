@@ -53,12 +53,14 @@ void delete_at_front(Stack s){
 		printf("empty stack\n");
 	}
 	else if(s->count == 1){
+        // TODO: free this space of curr
 		Element curr = s->head;
 		s->head = NULL;
 		s->tail = NULL;
 		s->count = 0;
 	}
 	else if(s->count > 1){
+        // TODO: free this space of curr
 		Element enext = s->head->next;
 		Element curr = s->head;
 		s->head = enext;
@@ -70,7 +72,7 @@ void delete_at_front(Stack s){
 Key top1(Stack s){
 	if(s->head != NULL){return s->head->k;}
 	else{
-		printf("Empty Stack\n");
+		// printf("Empty Stack\n");
 		return NULL;
 	}
 }
@@ -107,4 +109,10 @@ void pop(Stack s){
 	delete_at_front(s);
 }		
 			
-		
+void printKey(Key k) {
+    if(k->tag==0) printf("%s: ", getTermString(k->id.t));
+    else printf("%s: ", getNonTermString(k->id.nt));
+    if(k->lexeme!=NULL) printf("%s", k->lexeme);
+    else printf("NULL");
+    printf("\n");
+}	

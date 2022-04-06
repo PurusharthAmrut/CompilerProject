@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct element* Element;
+
 typedef struct key{
 	symbol id;
 	char *lexeme;
@@ -22,8 +22,9 @@ typedef struct key* Key;
 
 struct element{
 	Key k;
-	Element next;
+	struct element* next;
 };
+typedef struct element* Element;
 
 struct stack{
 	int count;
@@ -45,3 +46,4 @@ void pop(Stack s);
 Key top1(Stack s);
 Element newElement(Key k);
 Key newKey(symbol id, char* lexeme, unsigned int tag, parseTree pt);
+void printKey(Key k);
