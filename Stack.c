@@ -112,14 +112,9 @@ void pop(Stack s){
 void printKey(Key k) {
     if(k->tag==0) printf("%s: ", getTermString(k->id.t));
     else printf("%s: ", getNonTermString(k->id.nt));
-<<<<<<< HEAD
 
     if(k->lexeme!=NULL) printf("%s", k->lexeme);
     else printf("NULL");
     
-=======
-    if(k->lexeme!=NULL) printf("%s", k->lexeme);
-    else printf("NULL");
->>>>>>> aae6129aa9bd28530117562408a0db4a40f73b3e
     printf("\n");
 }	
