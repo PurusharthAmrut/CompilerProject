@@ -119,7 +119,7 @@ void getGram(char *fname, Grammar g) {
         }
     }    
 
-	printf("Loaded Grammar!!!\n");
+	printf("Loaded Grammar!!\n");
 
     fclose(fp);
 }
@@ -379,13 +379,14 @@ void printParseTable(int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
     printf("\n======================================================\n");
 }
 
-void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree root, int* error) {
+void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree *root, int* error) {
     Stack parseStack = newStack();
 
     symbol begin, finish;
 	begin.nt = program;
 	finish.t = dollar;
-	Key start = newKey(begin, NULL, 1, root);
+	// Key start = newKey(begin, NULL, 1, root);
+	Key start = newKey(begin, NULL, 1, NULL);
 	Key end = newKey(finish, NULL, 0, NULL);
 	push(parseStack, end);
 	push(parseStack, start);
@@ -404,17 +405,23 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
         // printf("####\n");
 
         if(token.tokenType==TK_COMMENT) continue;
+
+        if(k->tag==0 && k->id.t==eps) {
+            pop(parseStack);
+            continue;
+        }
 		
         if(k->tag==1) {
-            // TODO: k is a non terminal
+            // TODO: fix lexeme values for nodes
             if(token.tokenType==TK_EOF) {
                 printf("%lld: end of file reached unexpectedly\n", token.lineNum);
                 printf("exiting parser...\n");
                 break;
-            }else if(t[(k->id).nt][token.tokenType]!=-1) {
+            }else if(t[k->id.nt][token.tokenType]!=-1) {
                 retrieveNextToken = 0;
 
-                // printf("we can use production rule %d\n", t[(k->id).nt][token.tokenType]+1);
+                parsetree parent;
+                parent.nt = k->id.nt;
 
                 int prodIdx = t[k->id.nt][token.tokenType];
                 pop(parseStack);
@@ -424,64 +431,67 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
                 Stack tempStack = newStack();
 
                 while(rcn!=NULL) {
-                    // if(rcn->tag==0) printf("pushing %s into the temp stack\n", getTermString(rcn->s.t));
-                    // else printf("pushing %s into the temp stack\n", getNonTermString(rcn->s.t));
-
                     push(tempStack, newKey(rcn->s, token.lexeme, rcn->tag, NULL));
                     prodLen++;
                     rcn = rcn->next;
                 }
 
-                Key topElem = top1(tempStack);
+                parent.numChild = prodLen;
+                parent.children = (parseTree)malloc(prodLen*sizeof(parsetree));
 
-                if(topElem->tag==0 && topElem->id.t==eps) continue;
-                
-                while(topElem!=NULL) {
+                for(int idx=prodLen-1; idx>=0; idx--) {
+                    Key topElem = top1(tempStack);
+                    pop(tempStack);
+
                     // if(topElem->tag==0) printf("pushing %s into the parse stack\n", getTermString(topElem->id.t));
                     // else printf("pushing %s into the parse stack\n", getNonTermString(topElem->id.nt));
 
+                    // store the parent pointer in subtree, which will be used to reference it later
+                    // printf("Pointer before update: %p\n", (void*)topElem->subtree);
+                    topElem->subtree = &parent.children[idx];
+                    // printf("Pointer after update: %p\n", (void*)topElem->subtree);
+
+                    // printKey(topElem);
+
+                    if(topElem->tag==0) {
+                        parent.children[idx].terminal = (tokenInfo*)malloc(sizeof(tokenInfo));
+
+                        parent.children[idx].terminal->tokenType = topElem->id.t;
+                        if(topElem->lexeme!=NULL) strcpy(parent.children[idx].terminal->lexeme, topElem->lexeme);
+                        parent.children[idx].nt = -1;
+                        parent.children[idx].numChild = 0;
+                        parent.children[idx].children = NULL;
+                    }else {
+                        parent.children[idx].nt = topElem->id.nt;
+                        // default initialization
+                        parent.children[idx].numChild = 0;
+                        parent.children[idx].children = NULL;
+                    }
                     push(parseStack, topElem);
-                    pop(tempStack);
-                    topElem = top1(tempStack);
+                    // if(topElem->tag==0) printf("pushed %s into the parse stack\n", getTermString(topElem->id.t));
+                    // else printf("pushed %s into the parse stack\n", getNonTermString(topElem->id.nt));
                 }
 
-                // parent = k->subtree;
-				// parent->nt = (k->id).nt;
-				// productionIndex = t[(k->id).nt][token.tokenType];
-				// pop(parseStack);
-				// rcn = g[(k->id).nt].heads[productionIndex]->next;
-				// ruleLen = 0;
-				// while (rcn->next != NULL) {
-				// 	//currently, there is no parsetree corresponding
-				// 	//to this key object
-				// 	//pushing into temporary stack for order reversal
-				// 	push(tempStack, newKey(rcn->s, token.lexeme, rcn->tag, NULL));
-				// 	ruleLen++;
-				// 	rcn = rcn->next;
-				// }
-				// parent->children = (parsetree*)malloc(ruleLen*sizeof(parsetree));
-				// for (int i=ruleLen-1; i>=0; i--) {
-				// 	child = top1(tempStack);
-				// 	pop(tempStack);
-				// 	//storing the location of this node
-				// 	//(in the parsetree) in the key object
-				// 	child->subtree = &(parent->children)[i];
-				// 	//populating the parsetree data structure
-				// 	//using the key obtained from the stack
-				// 	if (child->tag == 0) {
-				// 		(parent->children)[i].terminal->tokenType = child->id.t;
-				// 		strcpy((parent->children)[i].terminal->lexeme, child->lexeme);
-				// 		(parent->children)[i].numChild = 0;
-				// 		(parent->children)[i].nt = -1;
-				// 		(parent->children)[i].children = NULL;
-				// 	} else
-				// 		(parent->children)[i].nt = child->id.nt;
-				// 	push(parseStack, child);
-				// }
+                // printParseTree(&parent);
 
+                if(parent.nt!=program) {
+                    if(parent.terminal!=NULL) {
+                        (*k->subtree).terminal = (tokenInfo*)malloc(sizeof(tokenInfo));
+                        (*k->subtree).terminal->tokenType = parent.terminal->tokenType;
+                        (*k->subtree).terminal->lineNum = parent.terminal->lineNum;
+                        if(parent.terminal->lexeme!=NULL) strcpy((*k->subtree).terminal->lexeme, parent.terminal->lexeme);
+                    }
+                    (*k->subtree).nt = parent.nt;
+                    (*k->subtree).numChild = parent.numChild;
+                    (*k->subtree).children = parent.children;
+                }else {
+                    if((*root)==NULL) *root = (parseTree)malloc(sizeof(parsetree));
+                    (*root)->nt = parent.nt;
+                    (*root)->numChild = parent.numChild;
+                    (*root)->children = parent.children;
+                }
 
-
-
+                // printParseTree(*root);
             }else {
                 // enter recovery mode
 				*error += 1;
@@ -507,7 +517,7 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
             if(k->id.t==dollar) {
                 if(token.tokenType==TK_EOF) {
                     // terminate the program
-                    printf("\n\nParsing completed. Compilation successful!\n");
+                    printf("Parsing completed. Compilation successful!!\n");
                 }else {
                     //enter recover mode (terminating program by reading every token till TK_EOF)
                     *error += 1;
@@ -648,7 +658,23 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
 
 void printParseTree(parseTree root) {
 
-    printf("We are the Resistance!!!\n");
+    if(root==NULL) return;
+
+    if(root->nt==-1) {
+        // terminal
+        printf("Terminal: %s, Lexeme: %s, LineNum: %lld\n", getTermString(root->terminal->tokenType), 
+        root->terminal->lexeme, root->terminal->lineNum);
+        return;
+    }
+
+    printf("Non-Terminal: %s, Children: %d\n", getNonTermString(root->nt), root->numChild);
+    for(int i=0; i<root->numChild; i++) {
+        printf("%s \t\t Child %d: ", getNonTermString(root->nt), i+1);
+        printParseTree(&root->children[i]);
+    }
+
+
+    // printf("We are the Resistance!!!\n");
 
 	// parseTree current;
 	// int class;

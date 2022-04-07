@@ -24,7 +24,7 @@ void computeFollow(Grammar g, nonTerminal nt);
 void printFollow(Grammar g);
 void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]);
 void printParseTable(int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]);
-void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree root, int* error);
+void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree *root, int* error);
 void printParseTree(parseTree root);
 
 

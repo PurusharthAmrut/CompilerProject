@@ -48,14 +48,14 @@ typedef lhsChar* Grammar;
 
 typedef struct parsetree
 {	
-	int numChild;
-	int numChildAST;
+	// int numChildAST;
 	tokenInfo* terminal;
-	int ruleNo;
+	// int ruleNo;
 	// nt = -1 for leaf nodes
 	int nt;
+	int numChild;
 	struct parsetree* children;
-	struct tablePointer* tp;
+	// struct tablePointer* tp;
 } parsetree;
 typedef parsetree* parseTree;
 
