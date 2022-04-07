@@ -1,0 +1,4 @@
+% Smallest working code
+_main
+	return;
+end

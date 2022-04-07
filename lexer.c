@@ -179,6 +179,7 @@ void printToken(tokenInfo *t) {
 }
 
 void printTokenizedCode(FILE *fp) {
+    printf("\n==================Tokenized Code======================\n");
     tokenInfo *token = (tokenInfo*)malloc(sizeof(tokenInfo));
     token->tokenType = 0;
     while(1) {
@@ -189,6 +190,7 @@ void printTokenizedCode(FILE *fp) {
     }
     free(token);
     fclose(fp);
+    printf("\n======================================================\n");
 }
 
 void getNextToken(FILE *fp, tokenInfo *t) {
