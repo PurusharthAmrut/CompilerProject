@@ -19,6 +19,7 @@
 #include "parser.h"
 #include "parserDef.h"
 #include "utils.h"
+#include "AST.h"
 
 
 int main(int argc, char *argv[]) 

@@ -10,23 +10,23 @@
 # include <stdlib.h>
 # include <stdio.h>
 
-void nodeCount(parseTree root,int* ans)
-{
-	if(!root)
-	return ;
-	*ans=*ans+root->numChild;
-	for(int i=0;i<root->numChild;i++)
-	nodeCount(&(root->children[i]),ans);
-}
+// void nodeCount(parseTree root,int* ans)
+// {
+// 	if(!root)
+// 	return ;
+// 	*ans=*ans+root->numChild;
+// 	for(int i=0;i<root->numChild;i++)
+// 	nodeCount(&(root->children[i]),ans);
+// }
 
-void nodeCountAST(parseTree root,int* ans)
-{
-	if(!root)
-	return ;
-	*ans=*ans+root->numChildAST;
-	for(int i=0;i<root->numChildAST;i++)
-	nodeCountAST(&(root->children[i]),ans);
-}
+// void nodeCountAST(parseTree root,int* ans)
+// {
+// 	if(!root)
+// 	return ;
+// 	*ans=*ans+root->numChildAST;
+// 	for(int i=0;i<root->numChildAST;i++)
+// 	nodeCountAST(&(root->children[i]),ans);
+// }
 
 int useful(int tokenClass) {
     switch(tokenClass) {
@@ -69,8 +69,8 @@ int useful(int tokenClass) {
 void copy(parseTree dst,parseTree src)
 {
 	dst->numChild = src->numChild;
-	dst->numChildAST = src->numChildAST;
-	dst->ruleNo = src->ruleNo;
+	// dst->numChildAST = src->numChildAST;
+	// dst->ruleNo = src->ruleNo;
 	dst->terminal = src->terminal;
 	dst->nt = src->nt;
 	dst->children = src->children;
@@ -193,6 +193,20 @@ parseTree createAST(parseTree root)
 void printAST(parseTree root)
 {
 	printf("Avengers Assemble!!!\n");
+	if(root==NULL) return;
+
+    if(root->nt==-1) {
+        // terminal
+        printf("Terminal: %s, Lexeme: %s, LineNum: %lld\n", getTermString(root->terminal->tokenType), 
+        root->terminal->lexeme, root->terminal->lineNum);
+        return;
+    }
+
+    printf("Non-Terminal: %s, Children: %d\n", getNonTermString(root->nt), root->numChild);
+    for(int i=0; i<root->numChild; i++) {
+        printf("%s \t\t Child %d: ", getNonTermString(root->nt), i+1);
+        printAST(&root->children[i]);
+    }
 	// parseTree current;
 	// int class;
 	// for(int i=0;i<root->numChildAST;i++)
