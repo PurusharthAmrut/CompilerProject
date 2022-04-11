@@ -239,33 +239,6 @@ void computeFollow(Grammar g, nonTerminal nt) {
                                 g[nt].follow |= g[i].follow;  
                             }
                         }
-
-
-                        // nextrcn = rcn->next;
-                        
-                        // if(nextrcn->tag==0) printf("Using %s\n", getTermString(nextrcn->s.t));
-                        // else printf("Using %s\n", getNonTermString(nextrcn->s.nt));
-                        
-                        // // or the calculated first value of nonterminal
-                        // // first(g, nextrcn, &firstOfNext);
-                        // long long nextrcnFirst = 0;
-                        // if(nextrcn->tag==0) nextrcnFirst |= 1LL<<(nextrcn->s.t);
-                        // else {
-                        //     // printf("%s: %lld\n", getNonTermString(nextrcn->s.nt), g[nextrcn->s.nt].first);
-                        //     nextrcnFirst |= g[nextrcn->s.nt].first;
-                        // }
-                        // firstOfNext |= (nextrcnFirst & EXCLUDE_EPS);
-                        // // fprintf(stderr, "%lld\n", firstOfNext);
-                        // if ((nextrcnFirst>>eps)%2) { 
-                        //     // first set of subsequent string contains eps
-                        //     // g[nt].follow |= (firstOfNext & EXCLUDE_EPS);
-                        //     g[nt].follow |= firstOfNext;
-                        //     if (i!=nt) {
-                        //         // if the nonTerminal on LHS is different than nt
-                        //         if (g[i].follow == 0) computeFollow(g, i);
-                        //         g[nt].follow |= g[i].follow;                             
-                        //     }
-                        // } else g[nt].follow |= firstOfNext;
                     } else {
                         //This is the last character in the RHS of the production
                         if (i!=nt) {
@@ -293,7 +266,7 @@ void printFollow(Grammar g) {
 }
 
 void createParseTable(Grammar g, int parseTable[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
-    // TODO: add error recovery in this
+    // TODO: add error recovery in this (why did i write this comment)
     for(int nt=0; nt<NO_OF_NONTERMINALS; nt++) {
         for(int t=0; t<NO_OF_TERMINALS; t++) parseTable[nt][t] = -1;
     }
@@ -317,55 +290,6 @@ void createParseTable(Grammar g, int parseTable[NO_OF_NONTERMINALS][NO_OF_TERMIN
     fprintf(stderr, "Parse Table Created!!\n");
 }
 
-// void createParseTable(Grammar g, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
-// 	for(int i = 0; i < NO_OF_NONTERMINALS; i++) {
-//         for(int j = 0; j < NO_OF_TERMINALS; j++) t[i][j] = -1;
-//     }
-
-// 	int shiftFirst;
-// 	int shiftFollow;
-// 	long long int first;
-// 	long long int follow;
-//     // for(int i=0; i<NO_OF_NONTERMINALS; i++) {
-//     //     fprintf(stderr, "%lld: %lld\n", g[i].first, g[i].follow);
-//     // }
-// 	for (int i=0; i<NO_OF_NONTERMINALS; i++) {
-// 		for (int j=0; j<g[i].numRules; j++) {
-// 			first = g[i].first;
-// 			follow = g[i].follow;
-//             //NO_OF_TERMINALS-1 in order to not consider eps while making parse table
-// 			for (shiftFirst = 0; shiftFirst<NO_OF_TERMINALS-1; shiftFirst++) {
-// 				// if (((first>>shiftFirst) & 1) == 1) {
-// 				// 	t[i][shiftFirst] = j;
-// 				// }
-//                 //TODO: shouldn't this be the first(B), where the rule is
-//                 // A -> B ..., A -> C ... and so on an we are currently
-//                 // processing A -> B ... [as first of g[i] includes first for
-//                 // productions of A]
-//                 if(first & (1<<shiftFirst)) t[i][shiftFirst] = j;
-// 			}
-//             // now shiftFirst has acquired the value of eps            
-// 			if((first>>eps) & 1 == 1){  //TODO: correct this boolean arithmetic
-// 				for (shiftFollow= 0; shiftFollow<NO_OF_TERMINALS-1; shiftFollow++)
-// 				{
-// 					if(((follow>>shiftFollow) & 1) == 1){ //TODO: correct this boolean arithmetic
-// 						t[i][shiftFollow] = j;
-// 					}
-// 				}
-// 			}
-//             //TODO: shouldn't this be the first(B), where the rule is
-//             // A -> B ..., A -> C ... and so on an we are currently
-//             // processing A -> B ... [as first of g[i] includes first for
-//             // productions of A]
-//             //TODO: correct this boolean arithmetic
-//             //TODO: dollar > 59, which is the number of no_of_terminals allowed (fix dimensions)
-// 			if((((first>>eps) & 1) == 1) && (((follow>>dollar)  & 1) == 1)){
-// 				t[i][dollar] = j;
-// 			}
-// 		}
-// 	}
-// }
-
 void printParseTable(int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS]) {
     printf("\n===================Parse Table========================\n");
     for(int i=0; i<NO_OF_NONTERMINALS; i++) {
@@ -385,7 +309,6 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
     symbol begin, finish;
 	begin.nt = program;
 	finish.t = dollar;
-	// Key start = newKey(begin, NULL, 1, root);
 	Key start = newKey(begin, NULL, 1, NULL);
 	Key end = newKey(finish, NULL, 0, NULL);
 	push(parseStack, end);
@@ -404,16 +327,15 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
         // printToken(&token);
         // printf("####\n");
 
+        if(token.lineNum>=20) break;
+
         if(token.tokenType==TK_COMMENT) continue;
 
         if(k->tag==0 && k->id.t==eps) {
             // correcting the terminal lexeme
             if(k->subtree->terminal==NULL) printf("Terminal Node terminal value is not initialized!\n");
             else {
-                // TODO: what should be eps's lexeme and linenum value
-                // strcpy(k->subtree->terminal->lexeme, token.lexeme);
-                strcpy(k->subtree->terminal->lexeme, "eps");
-                // k->subtree->terminal->lineNum = 0;
+                strcpy(k->subtree->terminal->lexeme, getTermString(k->id.t));
                 k->subtree->terminal->lineNum = token.lineNum;
             }
             pop(parseStack);
@@ -421,7 +343,6 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
         }
 		
         if(k->tag==1) {
-            // TODO: fix lexeme values for nodes
             if(token.tokenType==TK_EOF) {
                 printf("%lld: end of file reached unexpectedly\n", token.lineNum);
                 printf("exiting parser...\n");
@@ -508,18 +429,26 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
                 printf("Parse table entry is %d\n", t[k->id.nt][token.tokenType]);
                 // printf("%lld: unexpected token: %s\n", token.lineNum, token.lexeme);
                 //TODO: this code is incorrect, check both follow (push the checked token) and first of productions
-                // nonTerminal ntOnTop = k->id.nt;
-                // long long followOfNT = g[ntOnTop].follow;
-                // while(1) {
-                    
+
+                // // if error in lexeme, then pop the current non termminal
+                // if(token.tokenType==TK_ERROR) {
+                //     // getNextToken(sourceFile, &token);
+                //     pop(parseStack);
+                //     // continue;
                 // }
 
-
-                // nonTerminal ntOnTop = (k->id).nt;
-                // long long int followSyn = g[ntOnTop].follow;
-                // while(followSyn & (1LL<<token.tokenType) == 0) {
-                //     getNextToken(sourceFile, &token);
-                // }
+                nonTerminal ntOnTop = k->id.nt;
+                long long firstOfNT = g[ntOnTop].first;
+                long long followOfNT = g[ntOnTop].follow;
+                while(1) {
+                    terminal currToken = token.tokenType;
+                    // if(firstOfNT&(1LL<<currToken)) break;
+                    if(followOfNT&(1LL<<currToken)) {
+                        // pop(parseStack);
+                        break;
+                    }
+                    getNextToken(sourceFile, &token);
+                }
             }
         }else {
             // k is a terminal
@@ -551,149 +480,33 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
                 
                 pop(parseStack);
             }else {
-                // enter recovery mode (pop every non terminal, till you hit a non terminal)
+                // enter recovery mode (pop the current key as next key may be a non terminal 
+                // or a terminal which might or might not match the token given)
                 *error += 1;
                 printf("%lld: unexpected token: %s\n", token.lineNum, token.lexeme);
-                // TODO: dollar is at the bottom of the stack so maybe k!=NULL is not needed
-                while(k!=NULL && k->tag!=1 && k->id.t!=dollar) {
-                    pop(parseStack);
-                    k = top1(parseStack);
-                }
+                retrieveNextToken = 0;
+                pop(parseStack);
             }
         }
     }while(token.tokenType!=TK_EOF);
 }
 
-// void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERMINALS], Grammar g, parseTree root, int* error){
-// 	Stack parseStack=newStack();
-// 	Stack tempStack = newStack();
-// 	tokenInfo token;
-// 	parseTree leaf=NULL, current, parent;
-// 	symbol begin, finish;
-// 	begin.nt = program;
-// 	finish.t = dollar;
-// 	Key start = newKey(begin, NULL, 1, root);
-// 	Key end = newKey(finish, NULL, 0, NULL);
-// 	push(parseStack, end);
-// 	push(parseStack, start);
-// 	Key k, child, temp;
-// 	int productionIndex, ruleLen, i;
-// 	rhsChar rcn;
-// 	do {
-// 		getNextToken(sourceFile, &token);
-// 		k = top1(parseStack);
-// 		//top of stack is a nonTerminal
-//         printf("Key: ");
-//         printKey(k);
-//         printf("Token: ");
-//         printToken(&token);
-//         printf("####\n");
-//         if(token.tokenType==TK_COMMENT) continue;
-// 		if (k->tag==1) {
-//             if (token.tokenType == TK_EOF) {
-//                 printf("%lld: end of file reached unexpectedly\n", token.lineNum);
-//                 printf("exiting parser...\n");
-//                 break;
-//             // } else if(t[(k->id).nt][token.tokenType] >= 0) {
-//             } else if(t[(k->id).nt][token.tokenType] != -1) {
-// 				//this parsetree node is now going to expand and
-// 				//bear children, hence naming it parent :)
-//                 printf("we can use production rule %d\n", t[(k->id).nt][token.tokenType]+1);
-// 				parent = k->subtree;
-// 				parent->nt = (k->id).nt;
-// 				productionIndex = t[(k->id).nt][token.tokenType];
-// 				pop(parseStack);
-// 				rcn = g[(k->id).nt].heads[productionIndex]->next;
-// 				ruleLen = 0;
-// 				while (rcn->next != NULL) {
-// 					//currently, there is no parsetree corresponding
-// 					//to this key object
-// 					//pushing into temporary stack for order reversal
-// 					push(tempStack, newKey(rcn->s, token.lexeme, rcn->tag, NULL));
-// 					ruleLen++;
-// 					rcn = rcn->next;
-// 				}
-// 				parent->children = (parsetree*)malloc(ruleLen*sizeof(parsetree));
-// 				for (int i=ruleLen-1; i>=0; i--) {
-// 					child = top1(tempStack);
-// 					pop(tempStack);
-// 					//storing the location of this node
-// 					//(in the parsetree) in the key object
-// 					child->subtree = &(parent->children)[i];
-// 					//populating the parsetree data structure
-// 					//using the key obtained from the stack
-// 					if (child->tag == 0) {
-// 						(parent->children)[i].terminal->tokenType = child->id.t;
-// 						strcpy((parent->children)[i].terminal->lexeme, child->lexeme);
-// 						(parent->children)[i].numChild = 0;
-// 						(parent->children)[i].nt = -1;
-// 						(parent->children)[i].children = NULL;
-// 					} else
-// 						(parent->children)[i].nt = child->id.nt;
-// 					push(parseStack, child);
-// 				}
-// 			} else {
-// 				//enter recovery mode
-// 				// *error = 1;
-//                 // printf("%lld: Error entry: %s\n", token.lineNum, token.lexeme);
-//                 // printf("Parse table entry is %d\n", t[k->id.nt][token.tokenType]);
-//                 // // printf("%lld: unexpected token: %s\n", token.lineNum, token.lexeme);
-//                 // nonTerminal ntOnTop = (k->id).nt;
-//                 // long long int followSyn = g[ntOnTop].follow;
-//                 // while(followSyn & (1<<token.tokenType) == 0) {
-//                 //     getNextToken(sourceFile, &token);
-//                 // }
-//                 printf("Error 1\n");
-//                 exit(0);
-// 			}
-// 		} else {
-//             if (k->id.t == dollar) {
-//                 if (token.tokenType==TK_EOF)
-//                     printf("\n\nParsing completed. Compilation successful!\n");
-//                 else {
-//                     //enter recover mode
-//                     // *error=1;
-//                     // printf("%lld: parsing error: expecting end of program\n", token.lineNum);
-//                     // while (token.tokenType != TK_EOF) getNextToken(sourceFile, &token);
-//                     printf("Error 2\n");
-//                     exit(0);
-//                 }
-//             }else if (k->id.t == token.tokenType) {                
-// 				pop(parseStack);
-//             } else {
-//                 // enter recovery mode
-//                 // *error = 1;
-//                 // printf("%lld: unexpected token: %s\n", token.lineNum, token.lexeme);
-//                 // // TODO: add k->id.t != token.tokenType in while conditions
-//                 // while (k->tag != 1) {
-//                 //     if (k->id.t == dollar) break;
-//                 //     pop(parseStack);
-//                 //     k = top1(parseStack);
-//                 // }
-//                 printf("Error 3\n");
-//                 exit(0);
-//             }				
-// 		}
-// 	} while (token.tokenType != TK_EOF);
-//     fprintf(stderr, "Parse Tree Created Successfully\n");
-// }
-
-void printParseTree(parseTree root) {
+void printParseTree(parseTree root, nonTerminal parent) {
 
     if(root==NULL) return;
 
     if(root->nt==-1) {
         // terminal
-        printf("Terminal: %s, Lexeme: %s, LineNum: %lld\n", getTermString(root->terminal->tokenType), 
-        root->terminal->lexeme, root->terminal->lineNum);
+        printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueIfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
+        root->terminal->lexeme, root->terminal->lineNum, root->terminal->lexeme, 
+        ( (root->terminal->tokenType==TK_INT || root->terminal->tokenType==TK_REAL) ? root->terminal->lexeme : "----" ), 
+        getNonTermString(parent), getTermString(root->terminal->tokenType));
         return;
     }
 
-    printf("Non-Terminal: %s, Children: %d\n", getNonTermString(root->nt), root->numChild);
-    for(int i=0; i<root->numChild; i++) {
-        printf("%s \t\t Child %d: ", getNonTermString(root->nt), i+1);
-        printParseTree(&root->children[i]);
-    }
+    for(int i=0; i<root->numChild; i++) printParseTree(&root->children[i], root->nt);
+    printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueIfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
+    getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
 
 
     // printf("We are the Resistance!!!\n");
