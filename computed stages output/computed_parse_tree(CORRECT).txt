@@ -1,0 +1,23 @@
+Error: 0
+
+===============Parse Tree=============================
+Lexeme: eps, LineNo: 2, TokenName: eps, ValueIfNumber: ----, parentNodeSymbol: otherFunctions, isLeafNode: YES, NodeSymbol: eps
+Lexeme: ----, LineNo: ----, TokenName: otherFunctions, ValueIfNumber: ----, parentNodeSymbol: ROOT, isLeafNode: NO, NodeSymbol: otherFunctions
+Lexeme: _main, LineNo: 2, TokenName: _main, ValueIfNumber: ----, parentNodeSymbol: mainFunction, isLeafNode: YES, NodeSymbol: TK_MAIN
+Lexeme: eps, LineNo: 3, TokenName: eps, ValueIfNumber: ----, parentNodeSymbol: typeDefinitions, isLeafNode: YES, NodeSymbol: eps
+Lexeme: ----, LineNo: ----, TokenName: typeDefinitions, ValueIfNumber: ----, parentNodeSymbol: stmts, isLeafNode: NO, NodeSymbol: typeDefinitions
+Lexeme: eps, LineNo: 3, TokenName: eps, ValueIfNumber: ----, parentNodeSymbol: declarations, isLeafNode: YES, NodeSymbol: eps
+Lexeme: ----, LineNo: ----, TokenName: declarations, ValueIfNumber: ----, parentNodeSymbol: stmts, isLeafNode: NO, NodeSymbol: declarations
+Lexeme: eps, LineNo: 3, TokenName: eps, ValueIfNumber: ----, parentNodeSymbol: otherStmts, isLeafNode: YES, NodeSymbol: eps
+Lexeme: ----, LineNo: ----, TokenName: otherStmts, ValueIfNumber: ----, parentNodeSymbol: stmts, isLeafNode: NO, NodeSymbol: otherStmts
+Lexeme: return, LineNo: 3, TokenName: return, ValueIfNumber: ----, parentNodeSymbol: returnStmt, isLeafNode: YES, NodeSymbol: TK_RETURN
+Lexeme: eps, LineNo: 3, TokenName: eps, ValueIfNumber: ----, parentNodeSymbol: optionalReturn, isLeafNode: YES, NodeSymbol: eps
+Lexeme: ----, LineNo: ----, TokenName: optionalReturn, ValueIfNumber: ----, parentNodeSymbol: returnStmt, isLeafNode: NO, NodeSymbol: optionalReturn
+Lexeme: ;, LineNo: 3, TokenName: ;, ValueIfNumber: ----, parentNodeSymbol: returnStmt, isLeafNode: YES, NodeSymbol: TK_SEM
+Lexeme: ----, LineNo: ----, TokenName: returnStmt, ValueIfNumber: ----, parentNodeSymbol: stmts, isLeafNode: NO, NodeSymbol: returnStmt
+Lexeme: ----, LineNo: ----, TokenName: stmts, ValueIfNumber: ----, parentNodeSymbol: mainFunction, isLeafNode: NO, NodeSymbol: stmts
+Lexeme: end, LineNo: 4, TokenName: end, ValueIfNumber: ----, parentNodeSymbol: mainFunction, isLeafNode: YES, NodeSymbol: TK_END
+Lexeme: ----, LineNo: ----, TokenName: mainFunction, ValueIfNumber: ----, parentNodeSymbol: ROOT, isLeafNode: NO, NodeSymbol: mainFunction
+Lexeme: ----, LineNo: ----, TokenName: program, ValueIfNumber: ----, parentNodeSymbol: ROOT, isLeafNode: NO, NodeSymbol: program
+
+======================================================
