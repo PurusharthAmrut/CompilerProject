@@ -407,6 +407,15 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
         if(token.tokenType==TK_COMMENT) continue;
 
         if(k->tag==0 && k->id.t==eps) {
+            // correcting the terminal lexeme
+            if(k->subtree->terminal==NULL) printf("Terminal Node terminal value is not initialized!\n");
+            else {
+                // TODO: what should be eps's lexeme and linenum value
+                // strcpy(k->subtree->terminal->lexeme, token.lexeme);
+                strcpy(k->subtree->terminal->lexeme, "eps");
+                // k->subtree->terminal->lineNum = 0;
+                k->subtree->terminal->lineNum = token.lineNum;
+            }
             pop(parseStack);
             continue;
         }
@@ -527,6 +536,19 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
             }else if(k->id.t==token.tokenType) {
                 // since both terminals match, pop it from the stack
                 retrieveNextToken = 1;
+                
+                // this next line might not be needed
+                strcpy(k->lexeme, token.lexeme);
+
+                // correcting the terminal lexeme and linenum
+                if(k->subtree->terminal==NULL) printf("Terminal Node terminal value is not initialized!\n");
+                else {
+                    strcpy(k->subtree->terminal->lexeme, token.lexeme);
+                    k->subtree->terminal->lineNum = token.lineNum;
+                }
+                
+                // printKey(k);
+                
                 pop(parseStack);
             }else {
                 // enter recovery mode (pop every non terminal, till you hit a non terminal)
