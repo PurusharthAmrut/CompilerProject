@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 				}
 				start_time = clock();
 				ast = createASTDummy(root);
-				printAST(ast);
+				printAST(ast, program);
 				end_time = clock();
 				if(!m2)
 					{ 
