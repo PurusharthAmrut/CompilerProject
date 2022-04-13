@@ -22,6 +22,15 @@
 #define EXCLUDE_EPS 0b1111101111111111111111111111111111111111111111111111111111111111
 #define INCLUDE_EPS 0b0000010000000000000000000000000000000000000000000000000000000000
 
+void nodeCount(parseTree root,int* ans)
+{
+	if(!root)
+	return ;
+	*ans=*ans+root->numChild;
+	for(int i=0;i<root->numChild;i++)
+	nodeCount(&(root->children[i]),ans);
+}
+
 void printGram(Grammar g) {
 	for(int i=0; i<NO_OF_NONTERMINALS; i++) {
 		printf("%d %lld %lld %d\n", g[i].numRules, g[i].first, g[i].follow, g[i].isNullable);

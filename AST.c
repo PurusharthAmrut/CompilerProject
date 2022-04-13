@@ -12,23 +12,14 @@
 # include <stdlib.h>
 # include <stdio.h>
 
-// void nodeCount(parseTree root,int* ans)
-// {
-// 	if(!root)
-// 	return ;
-// 	*ans=*ans+root->numChild;
-// 	for(int i=0;i<root->numChild;i++)
-// 	nodeCount(&(root->children[i]),ans);
-// }
-
-// void nodeCountAST(parseTree root,int* ans)
-// {
-// 	if(!root)
-// 	return ;
-// 	*ans=*ans+root->numChildAST;
-// 	for(int i=0;i<root->numChildAST;i++)
-// 	nodeCountAST(&(root->children[i]),ans);
-// }
+void nodeCountAST(parseTree root,int* ans)
+{
+	if(!root)
+	return ;
+	*ans=*ans+root->numChildAST;
+	for(int i=0;i<root->numChildAST;i++)
+	nodeCountAST(&(root->children[i]),ans);
+}
 
 int useful(int tokenClass) {
     switch(tokenClass) {

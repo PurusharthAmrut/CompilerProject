@@ -14,6 +14,7 @@
 #include "lexer.h"
 #include "Stack.h"
 
+void nodeCount(parseTree root,int* ans);
 void printGram(Grammar g);
 void getGram(char *fname, Grammar g);
 void first(Grammar g, rhsChar rcn, long long int* firstBitString);
