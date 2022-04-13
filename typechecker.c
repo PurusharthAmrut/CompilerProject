@@ -23,6 +23,7 @@ typedef enum{
 integer,
 real,
 rec,
+union,
 boolean,
 error
 }types;
@@ -41,8 +42,8 @@ int TypeChecker(parsetree root, symbolTable s){
 		//printf("%s\n",idRepr(root.nonTerminal));
 	} 
 	int type1, type2;
-	type1 = 6;
-	type2 = 7;
+	type1 = 7;
+	type2 = 8;
 	if(root.terminal == NULL){
 		switch(root.nt){
 			
@@ -53,28 +54,11 @@ int TypeChecker(parsetree root, symbolTable s){
 				type2 = TypeChecker(root.children[1], s);
 				//printf("%d\t%d", type1,type2);
 				if(type1 == error || type2 == error) break;
-				// else if(type2 != type1){
-				// 	if(root.children[0].terminal == NULL){
-				// 		printf(" line %llu:Type of left variable %s.%s is not equal to type of right expression \n",root.children[0].children[0].terminal->lineNum,root.children[0].children[0].terminal->lexeme, root.children[0].children[1].terminal->lexeme);
-				// 		//return error;
-				// 		break;
-				// 	}
-				// 	else{
-				// 		printf("line %llu:Type of left variable %s is not equal to type of right expression \n",root.children[0].terminal->lineNum ,root.children[0].terminal->lexeme);
-				// 		//return error;
-				// 		break;
-				// 	}
-				// }
-				// else{
-				// 	return type1;
-				// }
 				else if(type1==integer && type2==integer){
 					return integer;
 				} else if(type1==integer && type2==real){
-					parsetree prev = root;
 					parsetree curr = root;
 					while(curr.terminal == NULL && curr.numChild != 0){
-						prev = curr;
 						curr = curr.children[0];
 					}
 					printf("line %llu:Type mismatch", curr.terminal->lineNum);
@@ -130,21 +114,6 @@ int TypeChecker(parsetree root, symbolTable s){
 			case term:
 				type1 = TypeChecker(root.children[0], s);
 				type2 = TypeChecker(root.children[1], s);
-				// if(type1 == error || type2 == error) break;//return error;
-				// else if(type2 != type1){
-				// 	parsetree last = root;
-				// 	parsetree curr = root;
-				// 	while(curr.numChild != 0){
-				// 		last = curr;
-				// 		curr = curr.children[0];
-				// 	}
-				// 	printf("line %llu:Type mismatch\n", curr.terminal->lineNum);
-				// 	//return error;
-				// 	break;
-				// }
-				// else{
-				// 	return type1;
-				// }
 				if(type1==error || type2==error){
 					break;
 				} else if(type1==integer && type2==integer){
@@ -205,13 +174,12 @@ int TypeChecker(parsetree root, symbolTable s){
 					type2 = TypeChecker(root.children[2], s);
 					if((root.children[1].terminal->tokenType == TK_AND) || (root.children[1].terminal->tokenType == TK_OR)){
 						if(type1 != boolean || type2 != boolean){
-							// parsetree last = root;
-							// parsetree curr = root;
-							// while(curr.terminal == NULL && curr.numChild != 0){
-							// 	last = curr;
-							// 	curr = curr.children[0];
-							// }
-							// printf("line %llu:Logical operators can only be applied to boolean types", curr.terminal->lineNum);
+							parsetree curr = root;
+							while(curr.terminal == NULL && curr.numChild != 0){
+			
+								curr = curr.children[0];
+							}
+							printf("line %llu:Logical operators can only be applied to boolean types", curr.terminal->lineNum);
 							break;
 						}	
 					}
@@ -242,17 +210,14 @@ int TypeChecker(parsetree root, symbolTable s){
 					return boolean;
 				}	
 			default:
-				// for(int i = 0; i < root.numChild; i++){
-				// 	//if(TypeChecker(root.children[i] , s) == error) break;
-				// 	TypeChecker(root.children[i] , s);
-				// }
-
+				for(int i = 0; i < root.numChild; i++){
+					TypeChecker(root.children[i] , s);
+				}
 				break;
 		}
 	}
 	else{
 		switch(root.terminal->tokenType){
-		
 			case TK_ID:
 				//printf("idahr\n");
 				if(tp == NULL) break;
@@ -280,7 +245,9 @@ int TypeChecker(parsetree root, symbolTable s){
 			case TK_RNUM:
 				return real;
 			case TK_RECORD:
-
+				return rec;
+			case TK_UNION:
+				return union;
 			default:
 				break;
 
