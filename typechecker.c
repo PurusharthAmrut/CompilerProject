@@ -22,7 +22,7 @@ boolean,
 error
 }status;
 
-struct tablePointer* tp;
+struct tableHeader* tp;
 int TypeChecker(parsetree root, symbolTable s){
 	//printf("idahr\n");
 	//if(root.numChild == 0)

@@ -15,32 +15,28 @@
 int GLOBAL_OFFSET ;
 
 //function to add at the end of linked list of record type
-record* insertAtEnd(record* ptr,record *temp)
-{
-	if(ptr==NULL)
-	{
-		ptr=temp;
-		return temp;
+record* insertAtEnd(record* ptr,record *newRec) {
+	if(ptr==NULL) {
+		ptr=newRec;
+		return newRec;
 	}
 	record *iter=ptr,*prev=ptr;
 	while(iter != NULL)
 	{
-		if(!strcmp(iter->rname,temp->rname))
+		if(!strcmp(iter->rname,newRec->rname))
 		{
-			printf("Line %d : %s field declared already in this record\n",temp->lineNo,temp->rname);
+			printf("Line %d : %s field declared already in this record\n",newRec->lineNo,temp->rname);
 			return ptr;
 		}
 		prev = iter;
 		iter = iter->next;
 	}
-	prev->next=temp;
+	prev->next=newRec;
 	return ptr;
 }
 
 // function to check whether variable already exists or not in localTable
-int checkExistence(TableLoc* presentList,char* newEntry)
-{
-	//TableLoc* temp = presentList;
+int lookup(TableLoc* presentList,char* newEntry) {
 	while(presentList)
 	{
 		if(strcmp(presentList->varname,newEntry)==0)
@@ -50,7 +46,7 @@ int checkExistence(TableLoc* presentList,char* newEntry)
 	return 0;		//variable entry does not exist already
 }
 
-//adding new entry with same hash value in linked list at same hash position for same function (scope)
+// adding new entry with same hash value in linked list at same hash position for same function (scope)
 void addEntryAtEnd(TableLoc** presentList,TableLoc* newEntry)
 {
 	TableLoc *temp = *presentList,*prev = *presentList;
@@ -86,7 +82,7 @@ symbolTable createSymbolTable(int size)
 	symbolTable st = malloc(sizeof(symboltable));
 	st->numFunc = 0;
 	st->functions = NULL;
-	st->fTable = malloc(size*sizeof(tablePointer*));
+	st->fTable = malloc(size*sizeof(tableHeader*));
 
 	for(int i=0;i<size;i++)
 	st->fTable[i] = NULL;
@@ -108,9 +104,9 @@ TableLoc* createEntry(char* type,char* varname,int size,int offset,record* ptr,p
 	return entry;
 }
 //creating a function entry for first layer hashing
-tablePointer* createTablePointer(char* fname,int size)
+tableHeader* createTablePointer(char* fname,int size)
 {
-	tablePointer* tp = malloc(sizeof(tablePointer));
+	tableHeader* tp = malloc(sizeof(tableHeader));
 	tp->localTable = malloc(size*sizeof(Table*));
 	for(int i=0;i < size; i++)
 	tp->localTable[i] = NULL;
@@ -148,12 +144,12 @@ void fillGlobalUtils2(TableLoc* table, parseTree ast) //ast=fieldDefs or moreFie
 	}
 }
 
-void fillGlobalUtils1(tablePointer* tp, parseTree ast)  //ast=typedef
+void fillGlobalUtils1(tableHeader* tp, parseTree ast)  //ast=typedef
 {
 	if(!tp || !ast)
 	return ;
 	TableLoc* table = tp->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
-	if(checkExistence(table,ast->children[1].terminal->lexeme))
+	if(lookup(table,ast->children[1].terminal->lexeme))
 	{
 		printf("line %lld : record %s being global, cannot be declared more than once.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
 		return ;
@@ -173,7 +169,7 @@ void fillGlobalUtils1(tablePointer* tp, parseTree ast)  //ast=typedef
 	GLOBAL_OFFSET += table->size;
 }
 
-void fillGlobalRecords(tablePointer* tp,parseTree ast) //ast=typeDefs
+void fillGlobalRecords(tableHeader* tp,parseTree ast) //ast=typeDefs
 {
 	if(!ast)
 	return;
@@ -183,7 +179,7 @@ void fillGlobalRecords(tablePointer* tp,parseTree ast) //ast=typeDefs
 }
 
 //------------------------------------------------------------------------------------
-void fillGlobalIds(tablePointer* tp,parseTree ast) //ast=declarations
+void fillGlobalIds(tableHeader* tp,parseTree ast) //ast=declarations
 {
 	if(!tp || !ast)
 	return ;
@@ -194,7 +190,7 @@ void fillGlobalIds(tablePointer* tp,parseTree ast) //ast=declarations
 		if(decl.children[0].nonTerminal == -1)  //INT or REAL
 		{
 			table = tp->localTable[hashVal(decl.children[1].terminal->lexeme,TABLE_SIZE)];
-			if(checkExistence(table,decl.children[1].terminal->lexeme))
+			if(lookup(table,decl.children[1].terminal->lexeme))
 			{
 				printf("line %lld : Variable %s being a global variable, cannot be declared more than once.\n",decl.children[1].terminal->lineNum,decl.children[1].terminal->lexeme);
 				return ;
@@ -217,7 +213,7 @@ void fillGlobalIds(tablePointer* tp,parseTree ast) //ast=declarations
 		else  // RECORD INSTANCE
 		{
 			table = tp->localTable[hashVal(decl.children[0].children[0].children[1].terminal->lexeme,TABLE_SIZE)];
-			if(!checkExistence(table,decl.children[0].children[0].children[1].terminal->lexeme))
+			if(!lookup(table,decl.children[0].children[0].children[1].terminal->lexeme))
 			{
 				printf("line %lld : constructed datatype %s is not defined.\n",decl.children[0].children[0].children[1].terminal->lineNum, decl.children[0].children[0].children[1].terminal->lexeme);
 				return;
@@ -251,7 +247,7 @@ char* extractDatatype(parseTree datatype)
 	return datatype->children[0].children[1].terminal->lexeme;
 }
 
-void addStmtVarUtils2(symbolTable st,tablePointer* tp,parseTree ast,int pos)  //ast = declaration
+void addStmtVarUtils2(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //ast = declaration
 {
 	if(!ast || !st || !tp)
 	{
@@ -260,13 +256,13 @@ void addStmtVarUtils2(symbolTable st,tablePointer* tp,parseTree ast,int pos)  //
 	if(ast->numChildAST == 3)
 	return ;
 	TableLoc* temp = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
-	if(checkExistence(temp,ast->children[1].terminal->lexeme))
+	if(lookup(temp,ast->children[1].terminal->lexeme))
 	{
 		printf("line %lld : %s record definition is already declared globally.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
 		return ;
 	}
 	TableLoc* table = tp->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
-	if(checkExistence(table,ast->children[1].terminal->lexeme))
+	if(lookup(table,ast->children[1].terminal->lexeme))
 	{
 		printf("line %lld : %s already declared in the function.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
 		return;
@@ -277,7 +273,7 @@ void addStmtVarUtils2(symbolTable st,tablePointer* tp,parseTree ast,int pos)  //
 	{
 		type = extractDatatype(&(ast->children[0]));
 		temp = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashVal(type,TABLE_SIZE)];
-		if(!checkExistence(temp,type))
+		if(!lookup(temp,type))
 		{
 			printf("line %lld : constructed datatype %s is not defined.\n",ast->children[0].children[0].children[1].terminal->lineNum,type);
 			return ;
@@ -304,14 +300,14 @@ void addStmtVarUtils2(symbolTable st,tablePointer* tp,parseTree ast,int pos)  //
 	tp->fSize += size;
 }
 
-void addStmtVarUtils1(symbolTable st,tablePointer* tp,parseTree ast,int pos) //ast = declarations
+void addStmtVarUtils1(symbolTable st,tableHeader* tp,parseTree ast,int pos) //ast = declarations
 {
 	addStmtVarUtils2(st,tp,&(ast->children[0]),pos);
 	if(ast->numChildAST == 2)
 	addStmtVarUtils1(st,tp,&(ast->children[1]),pos);
 }
 
-void addStmtVar(symbolTable st,tablePointer* tp,parseTree ast,int pos)  //ast = stmts
+void addStmtVar(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //ast = stmts
 {
 	if(!ast || !tp)
 	return ;
@@ -327,13 +323,13 @@ void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param) //a
 		int hashPos = hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE);
 		//considering if any collisions is there
 		int flag = 0;
-		if(checkExistence(st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashPos],ast->children[1].terminal->lexeme))
+		if(lookup(st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashPos],ast->children[1].terminal->lexeme))
 		{
 			printf("line %lld : variable %s being declared is already declared as a global variable.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
 			flag = 1;
 			//return;
 		}
-		else if(checkExistence(st->fTable[pos]->localTable[hashPos],ast->children[1].terminal->lexeme))
+		else if(lookup(st->fTable[pos]->localTable[hashPos],ast->children[1].terminal->lexeme))
 		{
 			printf("line %lld : variable %s being declared is already in this scope.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
 			flag = 1;
@@ -361,7 +357,7 @@ void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param) //a
 				int rhashValue = hashVal(c,TABLE_SIZE);
 				TableLoc* tl = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[rhashValue] ;
 				
-				if(!checkExistence(tl,c))
+				if(!lookup(tl,c))
 				{
 					printf("line %lld : constructed datatype %s is not defined.\n",ast->children[0].children[0].children[1].terminal->lineNum,c);
 					return;
@@ -480,7 +476,7 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 	    st->functions = insertAtEnd(st->functions,varPtr);
         
 		//printf("%s\n",key);
-		tablePointer* tp = createTablePointer(key,TABLE_SIZE);
+		tableHeader* tp = createTablePointer(key,TABLE_SIZE);
 		ast->tp = tp;
 		st->fTable[pos] = tp;   
 		int i;
@@ -546,7 +542,7 @@ void fillFuncVar(symbolTable st,parseTree ast)  // ast=program
 }
 
 //----------------------------------------------------------------------------------------------------------------
-void globalRecordsUpdate(parseTree ast,symbolTable st,tablePointer* tp)
+void globalRecordsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
 {
 	if(!ast || !st)
 	return ;
@@ -559,7 +555,7 @@ void globalRecordsUpdate(parseTree ast,symbolTable st,tablePointer* tp)
 	globalRecordsUpdate(&(ast->children[i]),st,tp);
 }
 
-void globalIdsUpdate(parseTree ast,symbolTable st,tablePointer* tp)
+void globalIdsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
 {
 	if(!ast || !st)
 	return ;
@@ -595,7 +591,7 @@ void printRecord(tablePointer* tp)
 symbolTable fillSymbolTable(parseTree ast)
 {
 	symbolTable st = createSymbolTable(TABLE_SIZE);
-	tablePointer* tp = createTablePointer("global",TABLE_SIZE);
+	tableHeader* tp = createTablePointer("global",TABLE_SIZE);
 	st->fTable[hashVal("global",TABLE_SIZE)] = tp;
 	
     record* varPtr = malloc(sizeof(record));	
@@ -614,7 +610,7 @@ symbolTable fillSymbolTable(parseTree ast)
 //printing only global variables and their offsets
 void printGlobalVariables(symbolTable st)
 {
-	tablePointer* tp = st->fTable[hashVal("global",TABLE_SIZE)];
+	tableHeader* tp = st->fTable[hashVal("global",TABLE_SIZE)];
 	if(!tp)
 		return;
 	char *lexeme,*type,*scope;
@@ -668,7 +664,7 @@ void printGlobalVariables(symbolTable st)
 }
 
 //print function variables in order of their offset
-void printFuncVariables(record* temp,tablePointer* tp)
+void printFuncVariables(record* temp,tableHeader* tp)
 {
 	
 	char *lexeme,*type,*scope;
@@ -694,7 +690,7 @@ void printFuncVariables(record* temp,tablePointer* tp)
 }
 
 //printing functions in order of which they are present in the test file
-void printTable(tablePointer* tp)
+void printTable(tableHeader* tp)
 {
 	if(!tp)
 		return;
@@ -778,7 +774,7 @@ void printFnameAndSizes(symbolTable st)
 	printf("\nfunctionName		size\n\n");
 	record *temp;
 	temp = st->functions;
-	tablePointer* tp;
+	tableHeader* tp;
 	while(temp != NULL)
 	{
 		char *c = temp->rname;
@@ -796,7 +792,7 @@ void printFnameAndSizes(symbolTable st)
 //function to print record definitions and their size along with their type
 void printRecDefAndSize(symbolTable st)
 {
-	tablePointer* tp = st->fTable[hashVal("global",TABLE_SIZE)];
+	tableHeader* tp = st->fTable[hashVal("global",TABLE_SIZE)];
 	if(!tp)
 		return;
 	char *lexeme;

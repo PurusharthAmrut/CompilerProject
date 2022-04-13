@@ -12,7 +12,7 @@
 
 #include "lexerDef.h"
 //#include "symbolTable.h"
-struct tablePointer;
+struct tableHeader;
 
 typedef union symbol {
 	terminal t;
