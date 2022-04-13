@@ -26,10 +26,6 @@
 #include "semanticAnalyser.h"
 
 
-// int TypeChecker(parsetree root, symbolTable s);
-// int checkFunctionSemantics(parseTree root, symbolTable s);
-
-
 int main(int argc, char *argv[]) 
 {
     FILE *sourceFile,*parsetreeOutfile, *dstFile;
@@ -136,7 +132,7 @@ int main(int argc, char *argv[])
 					int error=0;					
 					parseInputSourceCode(sourceFile,t,g,root,&error);
 					parseTree tree = malloc(sizeof(parsetree));
-					printParseTree(tree);
+					printParseTree(tree, 0);
 					
 					end_time = clock();
 					if(!m1)
@@ -178,7 +174,7 @@ int main(int argc, char *argv[])
 				printf("\n\nParse Tree number of nodes= %d\tAllocated Memory = %ld Bytes\n",count,count*sizeof(parsetree));
 		     		printf("\nAST number of nodes= %d\tAllocated Memory = %ld Bytes\n",countAST,countAST*sizeof(parsetree));	
 		     		float compressionPerc = (float)((count-countAST)/count)*100 ;
-				printf("Compression Percentage = %f\n\n\n",compression);
+				printf("Compression Percentage = %f\n\n\n",compressionPerc);
 				printf("\n\n------------------------------------------------------------------\n\n");
 		     		break;
 
@@ -258,10 +254,9 @@ int main(int argc, char *argv[])
 		     		printf("\n\n------------------------------------------------------------------\n\n");
 		     		break;
 		
-
-		     default:
+		     	default:
 		     		// invalid option
-		            fprintf(stderr, "\nstage2: error: invalid option\n");
+		            	fprintf(stderr, "\nstage2: error: invalid option\n");
         }
     }
 

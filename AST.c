@@ -11,6 +11,7 @@
 #include "utils.h"
 # include <stdlib.h>
 # include <stdio.h>
+#include "AST.h"
 
 void nodeCountAST(parseTree root,int* ans)
 {
