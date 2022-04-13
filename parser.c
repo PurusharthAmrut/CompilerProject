@@ -505,7 +505,7 @@ void printParseTree(parseTree root, nonTerminal parent) {
     }
 
     for(int i=0; i<root->numChild; i++) printParseTree(&root->children[i], root->nt);
-    printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueIfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
+    printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
     getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
 
 

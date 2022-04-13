@@ -192,58 +192,21 @@ parseTree createAST(parseTree root)
 	return createASTDummy(root);
 }
 
-void printAST(parseTree root)
+void printAST(parseTree root, nonTerminal parent)
 {
-	printf("Avengers Assemble!!!\n");
-	if(root==NULL) return;
+    if(root==NULL) return;
 
     if(root->nt==-1) {
         // terminal
-        printf("Terminal: %s, Lexeme: %s, LineNum: %lld\n", getTermString(root->terminal->tokenType), 
-        root->terminal->lexeme, root->terminal->lineNum);
+        printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueIfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
+        root->terminal->lexeme, root->terminal->lineNum, root->terminal->lexeme, 
+        ( (root->terminal->tokenType==TK_INT || root->terminal->tokenType==TK_REAL) ? root->terminal->lexeme : "----" ), 
+        getNonTermString(parent), getTermString(root->terminal->tokenType));
         return;
     }
 
-    printf("Non-Terminal: %s, Children: %d\n", getNonTermString(root->nt), root->numChild);
-    for(int i=0; i<root->numChild; i++) {
-        printf("%s \t\t Child %d: ", getNonTermString(root->nt), i+1);
-        printAST(&root->children[i]);
-    }
-	// parseTree current;
-	// int class;
-	// for(int i=0;i<root->numChildAST;i++)
-	// {
-	// 	current=&(root->children[i]);
-	// 	if(!current)
-	// 	printf("NULL\n");
-	// 	if(current->numChildAST==0 && current->terminal->tokenType==eps)
-	// 	continue;
-	// 	if(current->numChildAST>0)
-	// 	{
-	// 		printf("-------\t\t");
-	// 		printf("-------\t\t");
-	// 		printf("-------\t\t");
-	// 		printf("-------\t\t");
-	// 	}
-	// 	else{
-	// 		printf("%s\t\t",current->terminal->lexeme);
-	// 		printf("%lld\t\t",current->terminal->lineNum);
-	// 		printf("%s\t\t",tokenRepr(current->terminal->tokenType));
-	// 		if(current->terminal->tokenType==TK_NUM || current->terminal->tokenType==TK_RNUM)
-	// 			printf("%s\t\t",current->terminal->lexeme);
-	// 		else printf("-------\t\t");	
-	// 	}
-	// 	printf("%s\t\t",idRepr(root->nt));
-	// 	if(current->numChildAST==0)
-	// 	{
-	// 		printf("YES\t\t");
-	// 		printf("-------\t\t");
-	// 	}
-	// 	else{
-	// 		printf("NO\t\t");
-	// 		printf("%s\t\t",idRepr(current->nt));
-	// 	}
-	// 	printf("\n");
-	// 	printAST(current);
-	// }
+    for(int i=0; i<root->numChild; i++) printAST(&root->children[i], root->nt);
+    printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
+    getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+
 }
