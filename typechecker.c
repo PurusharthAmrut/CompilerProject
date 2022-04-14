@@ -7,28 +7,13 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-
-#include <stdio.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include "parserDef.h"
-#include "lexer.h"
-#include "symbolTable.h"
 #include "typechecker.h"
 
+// why is this line here?
 char *idRepr(int id);
 
-typedef enum{
-integer,
-real,
-rec,
-uniontype,
-boolean,
-error
-}types;
-
 struct tableHeader* tp;
+
 int TypeChecker(parsetree root, symbolTable s){
 	//printf("idahr\n");
 	//if(root.numChild == 0)

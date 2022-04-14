@@ -1,4 +1,6 @@
 % Smallest working code
 _main
+    type real: c3;
+    c3 <--- 3;
 	return;
 end

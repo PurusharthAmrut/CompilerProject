@@ -7,19 +7,16 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-# include "parserDef.h"
-#include "utils.h"
-# include <stdlib.h>
-# include <stdio.h>
 #include "AST.h"
 
-void nodeCountAST(parseTree root,int* ans)
-{
-	if(!root)
-	return ;
-	*ans=*ans+root->numChildAST;
-	for(int i=0;i<root->numChildAST;i++)
-	nodeCountAST(&(root->children[i]),ans);
+void nodeCountAST(parseTree root, int* ans) {
+	if(!root) return;
+
+	// *ans = *ans + root->numChildAST;
+	*ans = *ans + root->numChild;
+
+	// for(int i=0; i<root->numChildAST; i++) nodeCountAST(&(root->children[i]), ans);
+	for(int i=0; i<root->numChild; i++) nodeCountAST(&(root->children[i]), ans);
 }
 
 int useful(int tokenClass) {
@@ -70,7 +67,7 @@ void copy(parseTree dst, parseTree src)
     // not a correct copy function as we are moving the pointers to terminal
     // and children nodes, not exactly copying but moving the pointers
     src->terminal = NULL;
-    src->children = NULL;
+    src->children = (void*)NULL;
 
 	// dst->ruleNo = src->ruleNo;
 	// dst->numChildAST = src->numChildAST;
@@ -144,38 +141,72 @@ parseTree createASTDummy(parseTree root){
 	if(root==NULL) return NULL;
 	
 	if(root->numChild > 1){
-        // root is a non terminal, call the children recursively
-		for(int i=0; i<root->numChild; i++) { 
-			if(root->children[i].nt != -1) root->children[i] = *createASTDummy(&(root->children[i]));
-			// } else{
-			// 	if(useful(root->children[i].terminal->tokenType)){
-			// 		continue;
-			// 	} else{
-			// 		root->numChild--;
-			// 		free(&(root->children[i]));
-			// 	}
-			// }
-		}
+        // for(int i=0; i<root->numChild; i++) {
+        //     if(root->children[i].nt!=-1) root->children[i] = *createASTDummy(&root->children[i]);
+        // }
+
+        int newChildArrSize = 0;
+
+        for(int i=0; i<root->numChild; i++) {
+            if(root->children[i].nt!=-1) {
+                newChildArrSize++;
+                root->children[i] = *createASTDummy(&(root->children[i]));
+            }else if(useful(root->children[i].terminal->tokenType)) newChildArrSize++;
+        }
+
+        // fprintf(stderr, "%s-> before: %d | after: %d\n", getNonTermString(root->nt), root->numChild, newChildArrSize);
+
+        parseTree newChildArr = (parseTree)malloc(newChildArrSize*sizeof(parsetree));
+
+        int idx = 0;
+        for(int i=0; i<root->numChild; i++) {
+            if(root->children[i].nt!=-1 || useful(root->children[i].terminal->tokenType)) {
+                copyparsetree(&newChildArr[idx++], &root->children[i]);
+            }
+        }
+
+        free(root->children);
+
+        root->numChild = newChildArrSize;
+        
+        root->children = newChildArr;
+        newChildArr = NULL;
+
+        // root->children = (parseTree)malloc(root->numChild*sizeof(parsetree));
+        
+        // for(int i=0; i<root->numChild; i++) copyparsetree(&root->children[i], &newChildArr[i]);
+
+        // free(newChildArr);
+
+        return root;
 	} else if(root->numChild == 1 && root->children[0].nt!=-1){
         // root has only one child, which is a non terminal
 		//change root to child of root and delete root
         parseTree oldChild = &root->children[0];
+        // parseTree *oldChild = &root->children;
 		copy(root, &(root->children[0]));
         free(oldChild);
-		return createASTDummy(root->children);
+		// return createASTDummy(root->children);
+		return createASTDummy(root);
 	} else if(root->numChild == 1 && root->children[0].nt==-1){
         // root has only one child, which is a terminal
 		if(useful(root->children[0].terminal->tokenType)){
 			//change pointer to terminal
+            parseTree oldChild = &root->children[0];
+            // parseTree *oldChild = &root->children;
 			copy(root, &(root->children[0]));
-			free(root->children);
+			// free(root->children);
+            free(oldChild);
 			return root;
 		} else{
 			root->numChild--;
 			free(root->children);
 			return root;
 		}
-	} else if(root->numChild == 0) return root;
+	} else {
+        // either a useful terminal or a non terminal whose propagated child was a useless terminal
+        return root;
+    }
 	
 	return root;
 }
@@ -191,26 +222,43 @@ parseTree createAST(parseTree root)
 	return createASTDummy(root);
 }
 
-void printAST(parseTree root, nonTerminal parent)
+void printAST(parseTree ast, nonTerminal parent)
 {
     // if the format is same as printParseTree, then its a redundant function
-    if(root==NULL) return;
+    if(ast==NULL) return;
 
-    if(root->nt==-1) {
+    if(ast->nt==-1) {
         // terminal
         printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueOfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
-        root->terminal->lexeme, root->terminal->lineNum, root->terminal->lexeme, 
-        ( (root->terminal->tokenType==TK_INT || root->terminal->tokenType==TK_REAL) ? root->terminal->lexeme : "----" ), 
-        getNonTermString(parent), getTermString(root->terminal->tokenType));
+        ast->terminal->lexeme, ast->terminal->lineNum, ast->terminal->lexeme, 
+        ( (ast->terminal->tokenType==TK_INT || ast->terminal->tokenType==TK_REAL) ? ast->terminal->lexeme : "----" ), 
+        getNonTermString(parent), getTermString(ast->terminal->tokenType));
         return;
     }
 
-    for(int i=0; i<root->numChild; i++) {
-        printParseTree(&root->children[i], root->nt);
+    if(ast->numChild==0) {
+        printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
+        getNonTermString(ast->nt), ( (ast->nt==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(ast->nt));
+        return;
+    }
+    
+    for(int i=0; i<ast->numChild; i++) {
+        printAST(&ast->children[i], ast->nt);
         if(!i) {
             printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
-            getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+            getNonTermString(ast->nt), ( (ast->nt==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(ast->nt));
         }
     }
 
+}
+
+void printASTDetails(parseTree ast) {
+    if(ast==NULL) return;
+
+    if(ast->nt==-1) printf("%s ", getTermString(ast->terminal->tokenType));
+    else {
+        printf("%s -> ", getNonTermString(ast->nt));
+        for(int i=0; i<ast->numChild; i++) printASTDetails(&(ast->children[i]));
+        printf("\n");
+    }
 }

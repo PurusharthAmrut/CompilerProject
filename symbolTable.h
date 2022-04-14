@@ -7,12 +7,8 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include"symbolTableDef.h"
-
+// #include"symbolTableDef.h"
+#include "AST.h"
 
 record* insertAtEnd(record* ptr,record *temp);
 int hashVal(char* key, int size);

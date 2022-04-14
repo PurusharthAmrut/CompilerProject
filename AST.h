@@ -8,3 +8,4 @@ void copy(parseTree dst,parseTree src);
 parseTree createASTDummy(parseTree root);
 parseTree createAST(parseTree root);
 void printAST(parseTree root, nonTerminal parent);
+void printASTDetails(parseTree ast);

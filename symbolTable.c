@@ -7,9 +7,6 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-
-#include <string.h>
-#include <stdlib.h>
 #include "symbolTable.h"
 
 #define TABLE_SIZE 10000
@@ -26,7 +23,7 @@ record* insertAtEnd(record* ptr,record *newRec) {
 	{
 		if(!strcmp(iter->rname,newRec->rname))
 		{
-			printf("Line %d : %s field declared already in this record\n",newRec->lineNo,temp->rname);
+			printf("Line %d : %s field declared already in this record\n",newRec->lineNo,iter->rname);
 			return ptr;
 		}
 		prev = iter;
@@ -94,7 +91,7 @@ symbolTable createSymbolTable(int size)
 TableLoc* createEntry(char* type,char* varname,int size,int offset,record* ptr,paramInfo* param)
 {
 //	printf("entry\n");
-	TableLoc* entry = malloc(sizeof(Table));
+	TableLoc* entry = malloc(sizeof(TableLoc));
 	entry->type = type;
 	entry->varname = varname;
 	entry->size = size;
@@ -108,7 +105,7 @@ TableLoc* createEntry(char* type,char* varname,int size,int offset,record* ptr,p
 tableHeader* createTablePointer(char* fname,int size)
 {
 	tableHeader* tp = malloc(sizeof(tableHeader));
-	tp->localTable = malloc(size*sizeof(Table*));
+	tp->localTable = malloc(size*sizeof(TableLoc*));
 	for(int i=0;i < size; i++)
 	tp->localTable[i] = NULL;
 	tp->fname = fname;
@@ -128,7 +125,7 @@ void fillGlobalUtils2(TableLoc* table, parseTree ast) //ast=fieldDefs or moreFie
 {
 	if(!table || !ast)
 	return ;
-	if(ast->nonTerminal == fieldDefinition)
+	if(ast->nt == fieldDefinition)
 	{
 		record* ptr = malloc(sizeof(record));
 		ptr->rname = ast->children[1].terminal->lexeme;
@@ -188,7 +185,7 @@ void fillGlobalIds(tableHeader* tp,parseTree ast) //ast=declarations
 	if(decl.numChildAST == 3)
 	{
 		TableLoc* table;
-		if(decl.children[0].nonTerminal == -1)  //INT or REAL
+		if(decl.children[0].nt == -1)  //INT or REAL
 		{
 			table = tp->localTable[hashVal(decl.children[1].terminal->lexeme,TABLE_SIZE)];
 			if(lookup(table,decl.children[1].terminal->lexeme))
@@ -270,7 +267,7 @@ void addStmtVarUtils2(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //a
 	}
 	char* type;
 	int size;
-	if(ast->children[0].nonTerminal == dataType)
+	if(ast->children[0].nt == dataType)
 	{
 		type = extractDatatype(&(ast->children[0]));
 		temp = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashVal(type,TABLE_SIZE)];
@@ -313,7 +310,7 @@ void addStmtVar(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //ast = s
 	if(!ast || !tp)
 	return ;
 	for(int i = 0;i < ast->numChildAST; i++)
-	if(ast->children[i].nonTerminal == declarations)
+	if(ast->children[i].nt == declarations)
 	addStmtVarUtils1(st,tp,&(ast->children[i]),pos);
 }
 
@@ -352,7 +349,7 @@ void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param) //a
 			char str1[] = "int"; char str2[] = "real";
 			record *parListPtr = malloc(sizeof(record));
 			
-			if(ast->children[0].nonTerminal == dataType)
+			if(ast->children[0].nt == dataType)
 			{
 				char *c = extractDatatype(&(ast->children[0]));	
 				int rhashValue = hashVal(c,TABLE_SIZE);
@@ -462,7 +459,7 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
         int pos = hashVal(key,TABLE_SIZE);        
         if(st->fTable[pos] != NULL)
         {
-        		if(ast->nonTerminal == function)
+        		if(ast->nt == function)
                 	printf("line %lld : function %s already declared before.\n",ast->children[0].terminal->lineNum,key);
                 else
                 	("_main function declared twice");
@@ -481,11 +478,11 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 		ast->tp = tp;
 		st->fTable[pos] = tp;   
 		int i;
-		if(ast->nonTerminal == function)
+		if(ast->nt == function)
 		{
 			for(i=0; i < ast->numChildAST; i++)
 			{
-				if(ast->children[i].nonTerminal == input_par)
+				if(ast->children[i].nt == input_par)
 				{
 					paramInfo *param = malloc(sizeof(paramInfo));
 					param->isInputPar = true;
@@ -493,7 +490,7 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 					param->parIndex = 0;
 					addParameters(st, &(ast->children[i].children[0]), pos, param);
 				}
-				else if( ast->children[i].nonTerminal == output_par)
+				else if( ast->children[i].nt == output_par)
 				{
 					paramInfo *param = malloc(sizeof(paramInfo));
 					param->isInputPar = false;
@@ -504,7 +501,7 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 			}
 		}
 		
-		if(ast->children[ast->numChildAST-1].nonTerminal == stmts)
+		if(ast->children[ast->numChildAST-1].nt == stmts)
 		{
 			addStmtVar(st,tp, &(ast->children[ast->numChildAST-1]), pos);
 		}
@@ -531,7 +528,7 @@ void fillFuncVar(symbolTable st,parseTree ast)  // ast=program
 
 	for(int i=0;i < ast->numChildAST ;i++)
 	{
-		if(ast->children[i].nonTerminal == otherFunctions)
+		if(ast->children[i].nt == otherFunctions)
 		{
 			fillFuncIdsUtils1(st,&(ast->children[0]));
 		}
@@ -547,7 +544,7 @@ void globalRecordsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
 {
 	if(!ast || !st)
 	return ;
-	if(ast->nonTerminal == typeDefinitions)
+	if(ast->nt == typeDefinitions)
 	{
 		fillGlobalRecords(tp,ast);
 		return;
@@ -560,7 +557,7 @@ void globalIdsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
 {
 	if(!ast || !st)
 	return ;
-	if(ast->nonTerminal == declarations)
+	if(ast->nt == declarations)
 	{
 		fillGlobalIds(tp,ast);
 		return;
@@ -691,18 +688,14 @@ void printFuncVariables(record* temp,tableHeader* tp)
 }
 
 //printing functions in order of which they are present in the test file
-void printTable(tableHeader* tp)
-{
-	if(!tp)
-		return;
+void printTable(tableHeader* tp) {
+	if(!tp) return;
 	int flag=0;
-	if(strcmp(tp->fname,"global")==0)
-		flag=1;
+	if(strcmp(tp->fname,"global")==0) flag=1;
 
 	record *temp;
 
-	switch(flag)
-	{
+	switch(flag) {
 		case 0:	
 				printFuncVariables(tp->inParList,tp);
 				printFuncVariables(tp->outParList,tp);
@@ -754,19 +747,21 @@ void printTable(tableHeader* tp)
 
 
 //print complete symbol table
-void printSymbolTable(symbolTable st)
-{
-	if(!st)
-	return ;
+void printSymbolTable(symbolTable st) {
+	if(!st) return;
+
 	printf("\nlexeme		type		scope		offset\n\n");
 	record *temp;
 	temp = st->functions;
-	while(temp != NULL)
-	{
+	
+    printf("Symbol Table Entered\n");
+    if(temp==NULL) printf("Temp is NULL\n");
+    while(temp!=NULL) {
 		char *c = temp->rname;
 		printTable(st->fTable[hashVal(c,TABLE_SIZE)]);
 		temp = temp->next;
 	}
+    printf("Symbol Table Ended\n");
 }
 
 //print function name and its size

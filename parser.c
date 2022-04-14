@@ -22,13 +22,12 @@
 #define EXCLUDE_EPS 0b1111101111111111111111111111111111111111111111111111111111111111
 #define INCLUDE_EPS 0b0000010000000000000000000000000000000000000000000000000000000000
 
-void nodeCount(parseTree root,int* ans)
-{
-	if(!root)
-	return ;
-	*ans=*ans+root->numChild;
-	for(int i=0;i<root->numChild;i++)
-	nodeCount(&(root->children[i]),ans);
+void nodeCount(parseTree root, int* ans) {
+	if(!root) return;
+	
+    *ans = *ans + root->numChild;
+    
+	for(int i=0; i<root->numChild; i++) nodeCount(&(root->children[i]), ans);
 }
 
 void printGram(Grammar g) {
@@ -500,6 +499,21 @@ void parseInputSourceCode(FILE* sourceFile, int t[NO_OF_NONTERMINALS][NO_OF_TERM
     }while(token.tokenType!=TK_EOF);
 }
 
+void copyparsetree(parseTree dst, parseTree src) {
+    // copying static details and swaping pointers
+    (*dst).terminal = (*src).terminal;
+    (*dst).nt = (*src).nt;
+    (*dst).numChild = (*src).numChild;
+    (*dst).children = (*src).children;
+    
+    (*dst).numChildAST = (*src).numChildAST;
+    (*dst).tp = (*src).tp;
+
+    (*src).terminal = NULL;
+    (*src).children = (void*)NULL;
+    (*src).tp = NULL;
+}
+
 void printParseTree(parseTree root, nonTerminal parent) {
 
     if(root==NULL) return;
@@ -513,11 +527,17 @@ void printParseTree(parseTree root, nonTerminal parent) {
         return;
     }
 
+    if(root->numChild==0) {
+        printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
+        getNonTermString(root->nt), ( (root->nt==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+        return;
+    }
+
     for(int i=0; i<root->numChild; i++) {
         printParseTree(&root->children[i], root->nt);
         if(!i) {
             printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
-            getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+            getNonTermString(root->nt), ( (root->nt==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
         }
     }
 
@@ -563,3 +583,13 @@ void printParseTree(parseTree root, nonTerminal parent) {
 	// }
 }
 
+void printParserDetails(parseTree root) {
+    if(root==NULL) return;
+
+    if(root->nt==-1) printf("%s ", getTermString(root->terminal->tokenType));
+    else {
+        printf("%s -> ", getNonTermString(root->nt));
+        for(int i=0; i<root->numChild; i++) printParserDetails(&(root->children[i]));
+        printf("\n");
+    }
+}

@@ -7,12 +7,16 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-#include <stdio.h>
 #include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include "parserDef.h"
-#include "lexer.h"
-#include "symbolTable.h"
+#include "parser.h"
+
+typedef enum{
+    integer,
+    real,
+    rec,
+    uniontype,
+    boolean,
+    error
+} types;
 
 int TypeChecker(parsetree root, symbolTable s);
