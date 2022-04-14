@@ -23,7 +23,7 @@ typedef enum{
 integer,
 real,
 rec,
-union,
+union_token,
 boolean,
 error
 }types;
@@ -247,7 +247,7 @@ int TypeChecker(parsetree root, symbolTable s){
 			case TK_RECORD:
 				return rec;
 			case TK_UNION:
-				return union;
+				return union_token;
 			default:
 				break;
 
