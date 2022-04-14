@@ -18,11 +18,12 @@
 #include "symbolTable.h"
 #include "semanticAnalyser.h"
 char *idRepr(int id);
-// struct linklist{
-// 	parseTree this;
-// 	struct linklist* next;
-// };
-// typedef struct linklist* LinkedList;
+struct linklist{
+	parseTree this;
+	struct linklist* next;
+};
+typedef struct linklist* LinkedList;
+
 LinkedList add_1(LinkedList l, parseTree t){
 	if(l == NULL){
 		LinkedList l = malloc(sizeof(struct linklist));
@@ -113,7 +114,9 @@ LinkedList findTerminalsBoolean(parseTree root, LinkedList l){
 	}
 	return l;
 }
+
 int WhileSemantics(parseTree t){return 0;}
+
 int checkFuncCallStmts(parseTree stmt, parseTree* funList, symbolTable s, int* assigned, parseTree output_par, int i, int size){
 	int ids_size = 0;
 	parseTree* ids = findChildren(output_par, &ids_size);
@@ -126,7 +129,7 @@ int checkFuncCallStmts(parseTree stmt, parseTree* funList, symbolTable s, int* a
 			fname = malloc(sizeof(char) * 30);
 			if(stmt->numChildAST == 3) strcpy(fname, stmt->children[1].terminal->lexeme);
 			else strcpy(fname, stmt->children[0].terminal->lexeme);
-			tablePointer* callee = s->fTable[hashVal(fname, 10000)];
+			tableHeader* callee = s->fTable[hashVal(fname, 10000)];
 			//if(callee == NULL) return -1;
 			int index;
 			for(int l = 0; l < size; l++){
@@ -349,7 +352,7 @@ int checkFunctionSemantics(parseTree root, symbolTable s){
 		int flag2 = 0;
 		for(int i = 0; i < size; i++){
 			//printf("I am in the scope of %s\n", funList[i]->tp->fname);
-			tablePointer* fentry = funList[i]->tp;
+			tableHeader* fentry = funList[i]->tp;
 			if(funList[i]->children[funList[i]->numChildAST - 1].nonTerminal == stmts){
 				//printf("after1\n");
 				parseTree temp = &(funList[i]->children[funList[i]->numChildAST - 1]);
@@ -512,9 +515,3 @@ int checkFunctionSemantics(parseTree root, symbolTable s){
 		}
 	}
 }  
-
-
-
-			
-			
-			

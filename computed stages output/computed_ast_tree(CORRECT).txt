@@ -1,0 +1,11 @@
+=================AST Tree=============================
+Lexeme: ----, LineNo: ----, TokenName: program, ValueOfNumber: ----, parentNodeSymbol: ROOT, isLeafNode: NO, NodeSymbol: program
+Lexeme: _main, LineNo: 2, TokenName: _main, ValueOfNumber: ----, parentNodeSymbol: mainFunction, isLeafNode: YES, NodeSymbol: TK_MAIN
+Lexeme: ----, LineNo: ----, TokenName: mainFunction, ValueOfNumber: ----, parentNodeSymbol: ROOT, isLeafNode: NO, NodeSymbol: mainFunction
+Lexeme: ----, LineNo: ----, TokenName: stmts, ValueOfNumber: ----, parentNodeSymbol: mainFunction, isLeafNode: NO, NodeSymbol: stmts
+Lexeme: return, LineNo: 3, TokenName: return, ValueOfNumber: ----, parentNodeSymbol: returnStmt, isLeafNode: YES, NodeSymbol: TK_RETURN
+Lexeme: ----, LineNo: ----, TokenName: returnStmt, ValueOfNumber: ----, parentNodeSymbol: stmts, isLeafNode: NO, NodeSymbol: returnStmt
+Lexeme: ;, LineNo: 3, TokenName: ;, ValueOfNumber: ----, parentNodeSymbol: returnStmt, isLeafNode: YES, NodeSymbol: TK_SEM
+Lexeme: end, LineNo: 4, TokenName: end, ValueOfNumber: ----, parentNodeSymbol: mainFunction, isLeafNode: YES, NodeSymbol: TK_END
+
+======================================================

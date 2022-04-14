@@ -12,41 +12,40 @@
 #include <string.h>
 #include <stdlib.h>
 #include "AST.h"
-#include"parser.h"
+#include "parser.h"
 
-typedef struct paramInfo
-{
+typedef struct paramInfo {
 	bool isInputPar;
 	bool isOutputPar;
 	int parIndex;
-}paramInfo;
+} paramInfo;
 
-typedef struct record
-{
+typedef struct record {
 	char* rname;
 	char* type;
 	int lineNo;
 	struct record* next;
-}record;
+} record;
 
-typedef struct TableLoc
-{
+typedef struct TableLoc {
 	char* type;
 	char* varname;
 	int size;
 	int offset;
+	// If this entry is a record type
 	record* ptr;
+	// If this entry is a function parameter
 	paramInfo* param;
+
 	struct TableLoc *next;
-}TableLoc;
+} TableLoc;
 
-typedef struct hashtable
-{
+typedef struct hashtable {
+	// The hashtable is implemented as a linked list of TableLoc entries
 	TableLoc* entry;
-}hashtable;
+} hashtable;
 
-typedef struct tablePointer
-{
+typedef struct tableHeader {
 	TableLoc** localTable;
 	char* fname;
 	int numVar;
@@ -56,15 +55,12 @@ typedef struct tablePointer
 	record* inParList;
 	record* outParList;
 	record* variables;
-}tablePointer;
+} tableHeader;
 
-typedef struct symboltable
-{
-	tablePointer** fTable;
+typedef struct symboltable {
+	tableHeader** fTable;
 	int numFunc;
 	record* functions;
-}symboltable;
+} symboltable;
 
 typedef symboltable* symbolTable;
-
-
