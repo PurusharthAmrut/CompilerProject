@@ -32,9 +32,7 @@ typedef struct TableLoc {
 	char* varname;
 	int size;
 	int offset;
-	// If this entry is a record type
 	record* ptr;
-	// If this entry is a function parameter
 	paramInfo* param;
 
 	struct TableLoc *next;
@@ -58,7 +56,8 @@ typedef struct tableHeader {
 } tableHeader;
 
 typedef struct symboltable {
-	tableHeader** fTable;
+	tableHeader** fTable;	
+	// number of functions correspond to number of scopes
 	int numFunc;
 	record* functions;
 } symboltable;
