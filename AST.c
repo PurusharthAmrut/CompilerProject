@@ -35,7 +35,7 @@ int useful(int tokenClass) {
         case TK_OUTPUT:
         case TK_COMMA:
         case TK_COLON:
-	case TK_TYPE:
+	    case TK_TYPE:
         case TK_DOT:
         case TK_CALL:
         case TK_WITH:
@@ -44,10 +44,10 @@ int useful(int tokenClass) {
         case TK_WHILE:
         case TK_ENDWHILE:
         case TK_IF:
-	case TK_ELSE:
+	    case TK_ELSE:
         case TK_ENDIF:
-	case TK_READ:
-	case TK_WRITE:
+	    case TK_READ:
+	    case TK_WRITE:
         case TK_OP:
         case TK_CL:
         case TK_RETURN:
@@ -60,14 +60,20 @@ int useful(int tokenClass) {
     }
 }
 
-void copy(parseTree dst,parseTree src)
+void copy(parseTree dst, parseTree src)
 {
-	dst->numChild = src->numChild;
-	// dst->numChildAST = src->numChildAST;
-	// dst->ruleNo = src->ruleNo;
 	dst->terminal = src->terminal;
 	dst->nt = src->nt;
+	dst->numChild = src->numChild;
 	dst->children = src->children;
+
+    // not a correct copy function as we are moving the pointers to terminal
+    // and children nodes, not exactly copying but moving the pointers
+    src->terminal = NULL;
+    src->children = NULL;
+
+	// dst->ruleNo = src->ruleNo;
+	// dst->numChildAST = src->numChildAST;
 	// dst->tp = NULL;
 }
 
@@ -135,29 +141,30 @@ void copy(parseTree dst,parseTree src)
 // }
 
 parseTree createASTDummy(parseTree root){
-	if(!root){
-		return NULL;
-	}
+	if(root==NULL) return NULL;
+	
 	if(root->numChild > 1){
-		for(int i=0; i<root->numChild; i++){
-			//check if root is nt, if yes then call recursively, if no then check if it is useful, if useful then retain the node, otherwise free the node
-			if(root->children[i].nt != -1){
-				root->children[i] = *createASTDummy(&(root->children[i]));
-			} else{
-				if(useful(root->children[i].terminal->tokenType)){
-					continue;
-				} else{
-					root->numChild--;
-					free(&(root->children[i]));
-				}
-			}
+        // root is a non terminal, call the children recursively
+		for(int i=0; i<root->numChild; i++) { 
+			if(root->children[i].nt != -1) root->children[i] = *createASTDummy(&(root->children[i]));
+			// } else{
+			// 	if(useful(root->children[i].terminal->tokenType)){
+			// 		continue;
+			// 	} else{
+			// 		root->numChild--;
+			// 		free(&(root->children[i]));
+			// 	}
+			// }
 		}
-	} else if(root->numChild == 1 && root->children[0].nt!=1){
+	} else if(root->numChild == 1 && root->children[0].nt!=-1){
+        // root has only one child, which is a non terminal
 		//change root to child of root and delete root
+        parseTree oldChild = &root->children[0];
 		copy(root, &(root->children[0]));
-		free(root->children);
+        free(oldChild);
 		return createASTDummy(root->children);
 	} else if(root->numChild == 1 && root->children[0].nt==-1){
+        // root has only one child, which is a terminal
 		if(useful(root->children[0].terminal->tokenType)){
 			//change pointer to terminal
 			copy(root, &(root->children[0]));
@@ -166,19 +173,19 @@ parseTree createASTDummy(parseTree root){
 		} else{
 			root->numChild--;
 			free(root->children);
-			return(root);
+			return root;
 		}
-	} else if(root->numChild == 0){
-		return root;
-	}
+	} else if(root->numChild == 0) return root;
+	
 	return root;
 }
 	
 parseTree createAST(parseTree root)
 {
+    // isn't this just a redundant function
 	// createASTUtils(root,NULL);
 	// parseTree ast = malloc(sizeof(parsetree));
-	// copy(ast,root);
+	// copy(ast, root);
 	// buildAST(ast,root);
 	// return ast;
 	return createASTDummy(root);
@@ -186,19 +193,24 @@ parseTree createAST(parseTree root)
 
 void printAST(parseTree root, nonTerminal parent)
 {
+    // if the format is same as printParseTree, then its a redundant function
     if(root==NULL) return;
 
     if(root->nt==-1) {
         // terminal
-        printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueIfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
+        printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueOfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
         root->terminal->lexeme, root->terminal->lineNum, root->terminal->lexeme, 
         ( (root->terminal->tokenType==TK_INT || root->terminal->tokenType==TK_REAL) ? root->terminal->lexeme : "----" ), 
         getNonTermString(parent), getTermString(root->terminal->tokenType));
         return;
     }
 
-    for(int i=0; i<root->numChild; i++) printAST(&root->children[i], root->nt);
-    printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
-    getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+    for(int i=0; i<root->numChild; i++) {
+        printParseTree(&root->children[i], root->nt);
+        if(!i) {
+            printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
+            getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+        }
+    }
 
 }

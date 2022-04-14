@@ -506,16 +506,20 @@ void printParseTree(parseTree root, nonTerminal parent) {
 
     if(root->nt==-1) {
         // terminal
-        printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueIfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
+        printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueOfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
         root->terminal->lexeme, root->terminal->lineNum, root->terminal->lexeme, 
         ( (root->terminal->tokenType==TK_INT || root->terminal->tokenType==TK_REAL) ? root->terminal->lexeme : "----" ), 
         getNonTermString(parent), getTermString(root->terminal->tokenType));
         return;
     }
 
-    for(int i=0; i<root->numChild; i++) printParseTree(&root->children[i], root->nt);
-    printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
-    getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+    for(int i=0; i<root->numChild; i++) {
+        printParseTree(&root->children[i], root->nt);
+        if(!i) {
+            printf("Lexeme: ----, LineNo: ----, TokenName: %s, ValueOfNumber: ----, parentNodeSymbol: %s, isLeafNode: NO, NodeSymbol: %s\n",
+            getNonTermString(root->nt), ( (parent==program) ? "ROOT" : getNonTermString(parent) ), getNonTermString(root->nt));
+        }
+    }
 
 
     // printf("We are the Resistance!!!\n");

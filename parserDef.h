@@ -11,8 +11,7 @@
 #define PARSERDEF
 
 #include "lexerDef.h"
-//#include "symbolTable.h"
-struct tablePointer;
+#include "symbolTable.h"
 
 typedef union symbol {
 	terminal t;
@@ -48,14 +47,15 @@ typedef lhsChar* Grammar;
 
 typedef struct parsetree
 {	
-	// int numChildAST;
 	tokenInfo* terminal;
-	// int ruleNo;
 	// nt = -1 for leaf nodes
 	int nt;
 	int numChild;
 	struct parsetree* children;
-	// struct tablePointer* tp;
+
+	// int ruleNo;
+	int numChildAST;
+    tableHeader *tp;
 } parsetree;
 typedef parsetree* parseTree;
 
