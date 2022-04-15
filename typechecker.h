@@ -9,6 +9,8 @@
 
 #include <limits.h>
 #include "parser.h"
+#include "symbolTableDef.h"
+#include "symbolTable.h"
 
 typedef enum{
     integer,
@@ -20,3 +22,4 @@ typedef enum{
 } types;
 
 int TypeChecker(parsetree root, symbolTable s);
+struct tableHeader* tp;

@@ -523,7 +523,7 @@ void printParseTree(parseTree root, nonTerminal parent) {
         printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueOfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
         root->terminal->lexeme, root->terminal->lineNum, root->terminal->lexeme, 
         ( (root->terminal->tokenType==TK_INT || root->terminal->tokenType==TK_REAL) ? root->terminal->lexeme : "----" ), 
-        getNonTermString(parent), getTermString(root->terminal->tokenType));
+        getNonTermString(parent), getTermRepId(root->terminal->tokenType));
         return;
     }
 
