@@ -35,14 +35,8 @@ void globalIdsUpdate(parseTree ast,symbolTable st,tableHeader* tp);
 symbolTable fillSymbolTable(parseTree ast);
 void printTable(tableHeader* tp);
 void printFuncVariables(record* temp,tableHeader* tp);
+
 void printGlobalVariables(symbolTable st);
 void printFnameAndSizes(symbolTable st);
 void printRecDefAndSize(symbolTable st);
 //void printRecord(tablePointer* tp)
-
-
-
-
-
-
-
