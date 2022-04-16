@@ -1,837 +1,830 @@
 /* 
- * Group 05
- * Kush Mehta			2018B5A70956P
- * Purusharth Amrut		2018B5A70897P
- * Patel Darsh Rajesh		2018B4A70532P
- * Harsh Jhunjhunwala		2018B5A70691P
- * Jatin Aggarwal		2018B4A70884P
- */
+* Group 05
+* Kush Mehta			2018B5A70956P
+* Purusharth Amrut		2018B5A70897P
+* Patel Darsh Rajesh	2018B4A70532P
+* Harsh Jhunjhunwala	2018B5A70691P
+* Jatin Aggarwal		2018B4A70884P
+*/
 
 #include "symbolTable.h"
 
 #define TABLE_SIZE 10000
-int GLOBAL_OFFSET = 0;
+int OFFSET_GLOBAL = 0;
 
-//function to add at the end of linked list of record type
-record* insertAtEnd(record* ptr,record *newRec) {
-	if(ptr==NULL) {
-		ptr=newRec;
-		// return newRec;
-        return ptr;
-	}
-	record *iter=ptr,*prev=ptr;
-	while(iter != NULL)
-	{
-		if(strcmp(iter->rname,newRec->rname)==0)
-		{
-			printf("Line %d : %s field declared already in this record\n",newRec->lineNo,iter->rname);
-			return ptr;
-		}
-		prev = iter;
-		iter = iter->next;
-	}
-	prev->next=newRec;
-	return ptr;
+int hashFuncST(char *key, int size) {
+    // long long int sum = 0;
+    // for(int i=0; i<strlen(key); i++) {
+    //     sum *= 10;
+    //     sum += (long long int)(key[i]-'0');
+    //     if(sum<0) sum = 0;
+    // }
+    // int hashVal = sum%size;
+    // return hashVal;
+    const int p = 31, m = 1e9+7;
+    int hash = 0;
+    long p_pow = 1;
+    for(int i=0; i<strlen(key); i++) {
+        hash = (hash + (key[i] - '0' + 1) * p_pow) % m;
+        p_pow = (p_pow * p) % m;
+    }
+    // printf("Key: %s | Hash: %d\n", key, (hash%9973));
+    return hash%(9973);
 }
 
-// function to check whether variable already exists or not in localTable
-int lookup(TableLoc* presentList,char* newEntry) {
-	while(presentList)
-	{
-		if(strcmp(presentList->varname,newEntry)==0)
-			return 1;		//variable entry already exists
-		presentList = presentList->next;		
-	}
-	return 0;		//variable entry does not exist already
+record* insertBack(record *head, record *ptr) {
+    if(head==NULL) {
+        head = ptr;
+        return head;
+    }
+    record *curr = head, *prev = curr;
+    while(curr!=NULL) {
+        if(strcmp(curr->recname, ptr->recname)==0) {
+            printf("Line %d : %s field already declared in this record\n", ptr->lineNum, curr->recname);
+            return head;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    prev->next = ptr;
+
+    return head;
 }
 
-// adding new entry with same hash value in linked list at same hash position for same function (scope)
-void addEntryAtEnd(TableLoc** presentList,TableLoc* newEntry)
-{
-	TableLoc *temp = *presentList,*prev = *presentList;
-	if(temp == NULL)
-	{
-		*presentList = newEntry;
+int lookUpFunc(tablePtr *tabPtr, char *key) {
+    while(tabPtr!=NULL) {
+        if(strcmp(tabPtr->name, key)==0) return 1;
+        tabPtr = tabPtr->next;
+    }
+    return 0;
+}
+
+void addEntryBack(tablePtr **table, tablePtr *tabPtr) {
+    tablePtr *tmp = *table, *prev = *table;
+
+    if(tmp==NULL) {
+        *table = tabPtr;
+        return;
+    }
+
+    while(tmp!=NULL) {
+        prev = tmp;
+        tmp = tmp->next;
+    }
+    prev->next = tabPtr;
+}
+
+/*============================================================================================*/
+
+symbolTable createSymbolTable(int size) {
+    symbolTable st = (symbolTable)malloc(sizeof(symboltable));
+    st->numOfFunc = 0;
+    st->functions = NULL;
+    st->fTable = (tableHeader**)malloc(size*sizeof(tableHeader*));
+
+    for(int i=0; i<size; i++) st->fTable[i] = NULL;
+
+    return st;
+}
+
+tablePtr *createNewEntry(char *dataType, char *idName, int idSize, int offset, record *ptr, paramDetail *param) {
+    tablePtr *tabPtr = malloc(sizeof(tablePtr));
+
+    tabPtr->type = dataType;
+    tabPtr->name = idName;
+    tabPtr->size = idSize;
+    tabPtr->offset = offset;
+    tabPtr->ptr = ptr;
+    tabPtr->param = param;
+    tabPtr->next = NULL;
+
+    return tabPtr;
+}
+
+tableHeader* createTableHeader(char *funName, int size) {
+    tableHeader *th = malloc(sizeof(tableHeader));
+    th->localTable = (tablePtr**)malloc(size*sizeof(tablePtr*));
+
+    for(int i=0; i<size; i++) th->localTable[i] = NULL;
+
+    th->funName = funName;
+    th->numOfVar = 0;
+    th->funSize = 0;
+    th->numOfInPar = 0;
+    th->numOfOutPar = 0;
+    th->inParList = NULL;
+    th->outParList = NULL;
+    th->varList = NULL;
+
+    return th;
+}
+
+/*============================================================================================*/
+
+void populateGlobalRecordsHelperDefineType(tableHeader *th, parseTree ast) {
+    // ast==defineTypeStmt
+    // defineTypeStmt -> TK_DEFINETYPE A TK_RUID TK_AS TK_RUID
+
+    // TODO: defineTypeStmt is not completed for symbolTable
+    if(!th || !ast) return;
+
+    tablePtr *tabPtr = th->localTable[hashFuncST(ast->children[2].terminal->lexeme, TABLE_SIZE)];
+
+    if(!lookUpFunc(tabPtr, ast->children[2].terminal->lexeme)) {
+        printf("Line %lld : constructed datatype %s is not defined.\n", ast->children[2].terminal->lineNum, ast->children[2].terminal->lexeme);
 		return;
-	}
-	while(temp !=NULL)
-	{
-		prev = temp;
-		temp = temp->next;
-	}
-	prev->next = newEntry;
-	return;
+    }
+    
+    // tabPtr = createNewEntry("record", ast->children[2].terminal->lexeme, 0, OFFSET_GLOBAL, NULL, NULL);
+    // addEntryBack(&(th->localTable[hashFuncST(ast->children[2].terminal->lexeme, TABLE_SIZE)]), tabPtr);
+
+    // record *varPtr = malloc(sizeof(record));
+    // varPtr->recname = ast->children[2].terminal->lexeme;
+    // varPtr->type = NULL;
+    // varPtr->next = NULL;
+
+    // th->varList = insertBack(th->varList, varPtr);
+    // th->numOfVar++;
+
+    // OFFSET_GLOBAL += tabPtr->size;
 }
 
-//hash function
-int hashVal(char* key, int size)
-{
-	long long int sum = 0;
-	for(int i=0;i<strlen(key);i++){
-		sum = sum*10 + (long long int)(key[i] - '0');
-		if(sum<0) sum=0;
-	}
-	int hashvalue = sum % size;
-	return hashvalue;
-}
-//creating the symbol table
-symbolTable createSymbolTable(int size)
-{
-	symbolTable st = malloc(sizeof(symboltable));
-	st->numFunc = 0;
-	st->functions = NULL;
-	st->fTable = malloc(size*sizeof(tableHeader*));
+void populateGlobalRecordsHelperUtils2(tablePtr *tabPtr, parseTree ast) {
+    // ast==fieldDefinition/fieldDefinitions/moreFields
+    if(!tabPtr || !ast || !ast->numChild) return;
 
-	for(int i=0; i<size; i++) st->fTable[i] = NULL;
+    if(ast->nt==fieldDefinition) {
+        record *ptr = malloc(sizeof(record));
+        ptr->recname = ast->children[1].terminal->lexeme;
+        // TODO: check if TK_RUID is declared or not and add its size accordingly
+        ptr->type = ast->children[0].terminal->lexeme;
+        ptr->lineNum = ast->children[1].terminal->lineNum;
+        ptr->next = NULL;
 
-	return st;
-}
-//creating local table entry for each function
-TableLoc* createEntry(char* type,char* varname,int size,int offset,record* ptr,paramInfo* param)
-{
-//	printf("entry\n");
-	TableLoc* entry = malloc(sizeof(TableLoc));
-	entry->type = type;
-	entry->varname = varname;
-	entry->size = size;
-	entry->offset = offset;
-	entry->ptr = ptr;
-	entry->param = param;
-	entry->next = NULL;
-	return entry;
-}
-//creating a function entry for first layer hashing
-tableHeader* createTablePointer(char* fname,int size)
-{
-	tableHeader* tp = malloc(sizeof(tableHeader));
-	tp->localTable = malloc(size*sizeof(TableLoc*));
-	
-    for(int i=0;i < size; i++) tp->localTable[i] = NULL;
+        tabPtr->size += ((ptr->type=="int") ? 2 : 4);
+        tabPtr->ptr = insertBack(tabPtr->ptr, ptr);
+        return;
+    }
 
-	tp->fname = fname;
-	tp->numVar = 0;
-	tp->fSize = 0;
-	tp->numInpPar = 0;
-	tp->numOutPar = 0;
-	tp->inParList = NULL;
-	tp->outParList = NULL;
-	tp->variables = NULL;
-	return tp;
+    for(int i=0; i<ast->numChild; i++) populateGlobalRecordsHelperUtils2(tabPtr, &(ast->children[i]));
 }
 
-//---------------------------------------------------------------------------------------
-// for global record defn to be taken from typeDefinitions
-void fillGlobalUtils2(TableLoc* table, parseTree ast) //ast=fieldDefs or moreFields
-{
-	if(!table || !ast) return;
-	if(ast->nt == fieldDefinition)
-	{
-		record* ptr = malloc(sizeof(record));
-		ptr->rname = ast->children[1].terminal->lexeme;
-		ptr->type = ast->children[0].terminal->lexeme;
-		ptr->lineNo = ast->children[1].terminal->lineNum;
-		ptr->next = NULL;
-		table->size += (ptr->type=="int")? 2:4;
-		table->ptr = insertAtEnd(table->ptr,ptr);
+void populateGlobalRecordsHelperUtils(tableHeader *th, parseTree ast) {
+    //ast==typeDefinition
+    // typeDefinition -> TK_RECORD TK_RUID fieldDefinitions
+    if(!th || !ast) return;
+    
+    tablePtr *tabPtr = th->localTable[hashFuncST(ast->children[1].terminal->lexeme, TABLE_SIZE)];
+
+    if(lookUpFunc(tabPtr, ast->children[1].terminal->lexeme)) {
+        printf("Line %lld : record %s is global, cannot be declared more than once.\n",
+        ast->children[1].terminal->lineNum, ast->children[1].terminal->lexeme);
 		return;
-	}
-	// for(int i=0;i< ast->numChildAST;i++) fillGlobalUtils2(table,&(ast->children[i]));
-    for(int i=0;i< ast->numChild;i++) fillGlobalUtils2(table,&(ast->children[i]));
+    }
+
+    tabPtr = createNewEntry("record", ast->children[1].terminal->lexeme, 0, OFFSET_GLOBAL, NULL, NULL);
+    addEntryBack(&(th->localTable[hashFuncST(ast->children[1].terminal->lexeme, TABLE_SIZE)]), tabPtr);
+
+    record *varPtr = malloc(sizeof(record));
+    varPtr->recname = ast->children[1].terminal->lexeme;
+    varPtr->type = NULL;
+    varPtr->next = NULL;
+
+    th->varList = insertBack(th->varList, varPtr);
+    th->numOfVar++;
+
+    // populating fields of constructed datatypes
+    populateGlobalRecordsHelperUtils2(tabPtr, &(ast->children[2]));
+    OFFSET_GLOBAL += tabPtr->size;
 }
 
-void fillGlobalUtils1(tableHeader* tp, parseTree ast)  //ast=typedef
-{
-	if(!tp || !ast) return;
+/*============================================================================================*/
 
-    // if(ast->nt==-1) printf("Token: %s", getTermString(ast->terminal->tokenType));
-    // else printf("Token: %s ", getNonTermString(ast->nt));
-    // printf("Children: %d\n", ast->numChild);
-    // if(ast->children[1].terminal==NULL) printf("Lex: is NULL\n");
-    // else printf("Lex: $%s$\n", ast->children[1].terminal->lexeme);
-	TableLoc* table = tp->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
-    // // maybe lexeme for terminal tokens has some extra \n or something
-	// TableLoc* table = tp->localTable[hashVal(getTermString(ast->children[1].terminal->tokenType),TABLE_SIZE)];
-	if(lookup(table,ast->children[1].terminal->lexeme))
-	{
-		printf("line %lld : record %s being global, cannot be declared more than once.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
-		return ;
-	}
-	table = createEntry("record",ast->children[1].terminal->lexeme,0,GLOBAL_OFFSET,NULL,NULL);
-	addEntryAtEnd(&(tp->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)]),table);
+void populateGlobalRecordsHelper(tableHeader *th, parseTree ast) {
+    // ast==typedefinitions
+    // typeDefinitions -> [typeDefinition -> TK_RECORD TK_RUID fieldDefinitions] typeDefinitions
+    if(!ast || !ast->numChild) return;
 
-	record* varPtr = malloc(sizeof(record));	
-	varPtr->rname = ast->children[1].terminal->lexeme;
-	varPtr->type = NULL;
-	varPtr->next = NULL;
-	
-	tp->variables = insertAtEnd(tp->variables,varPtr);
-	
-	tp->numVar++;
-	fillGlobalUtils2(table,&(ast->children[2]));
-	GLOBAL_OFFSET += table->size;
+    if(strcmp(ast->children[0].children[0].terminal->lexeme, "TK_DEFINETYPE")==0) {
+        populateGlobalRecordsHelperDefineType(th, &(ast->children[0]));
+    }else {
+        populateGlobalRecordsHelperUtils(th, &(ast->children[0]));
+    }
+
+    populateGlobalRecordsHelper(th, &(ast->children[1]));
 }
 
-void fillGlobalRecords(tableHeader* tp,parseTree ast) //ast=typeDefs
-{
-	// if(!ast) return;
-	if(!ast || ast->numChild==0) return;
+void populateGlobalIDsHelper(tableHeader *th, parseTree ast) {
+    // ast==declarations
+    if(!th || !ast || !ast->numChild) return;
 
-	fillGlobalUtils1(tp,&(ast->children[0]));
-	// if(ast->numChildAST==2) fillGlobalRecords(tp,&(ast->children[1]));
-	if(ast->numChild==2) fillGlobalRecords(tp,&(ast->children[1]));
-}
+    // getting declaration from declarations
+    parsetree declar = ast->children[0];
 
-//------------------------------------------------------------------------------------
-void fillGlobalIds(tableHeader* tp,parseTree ast) //ast=declarations
-{
-	// if(!tp || !ast) return;
-	if(!tp || !ast || ast->numChild==0) return;
+    if(declar.numChild==3 && declar.children[2].numChild==1) {
+        // declaration -> dataType TK_ID global_or_not
+        // only global variable is processed
 
-	parsetree decl = ast->children[0];
-	// if(decl.numChildAST == 3) 
-	if(decl.numChild == 3) 
-	{
-		TableLoc* table;
-		if(decl.children[0].nt == -1)  //INT or REAL
-		{
-			table = tp->localTable[hashVal(decl.children[1].terminal->lexeme,TABLE_SIZE)];
-			if(lookup(table,decl.children[1].terminal->lexeme))
-			{
-				printf("line %lld : Variable %s being a global variable, cannot be declared more than once.\n",decl.children[1].terminal->lineNum,decl.children[1].terminal->lexeme);
-				return ;
-			}
-			char* type = (decl.children[0].terminal->tokenType == TK_INT)? "int":"real";
-			int size = (type == "int")? 2:4;
-			table = createEntry(type,decl.children[1].terminal->lexeme,size,GLOBAL_OFFSET,NULL,NULL);
-			addEntryAtEnd(&(tp->localTable[hashVal(decl.children[1].terminal->lexeme,TABLE_SIZE)]),table);
-			GLOBAL_OFFSET += size;
-
-			record* varPtr = malloc(sizeof(record));	
-			varPtr->rname = decl.children[1].terminal->lexeme;
-			varPtr->type = NULL;
-			varPtr->next = NULL;
-			
-			tp->variables = insertAtEnd(tp->variables,varPtr);
-			
-			tp->numVar++;
-		}
-		else  // RECORD INSTANCE
-		{
-			table = tp->localTable[hashVal(decl.children[0].children[0].children[1].terminal->lexeme,TABLE_SIZE)];
-			if(!lookup(table,decl.children[0].children[0].children[1].terminal->lexeme))
-			{
-				printf("line %lld : constructed datatype %s is not defined.\n",decl.children[0].children[0].children[1].terminal->lineNum, decl.children[0].children[0].children[1].terminal->lexeme);
+        tablePtr *tabPtr;
+        if(declar.children[0].nt==-1) {
+            // INT or REAL
+            tabPtr = th->localTable[hashFuncST(declar.children[1].terminal->lexeme, TABLE_SIZE)];
+            
+            if(lookUpFunc(tabPtr, declar.children[1].terminal->lexeme)) {
+                printf("Line %lld : Variable %s is a global variable, cannot be declared more than once.\n", 
+                declar.children[1].terminal->lineNum, declar.children[1].terminal->lexeme);
 				return;
-			}
-			char* type = decl.children[0].children[0].children[1].terminal->lexeme;
-			int size = table->size;
-			record* ptr = table->ptr;
+            }
 
-			TableLoc* temp = createEntry(type,decl.children[1].terminal->lexeme,size,GLOBAL_OFFSET,ptr,NULL);
-			addEntryAtEnd(&(tp->localTable[hashVal(decl.children[1].terminal->lexeme,TABLE_SIZE)]),temp);
-			GLOBAL_OFFSET += size;
-			
-			record* varPtr = malloc(sizeof(record));	
-			varPtr->rname = decl.children[1].terminal->lexeme;
-			varPtr->type = NULL;
-			varPtr->next = NULL;
-			
-			tp->variables = insertAtEnd(tp->variables,varPtr);
-			
-		}
-	}
-	// if(ast->numChildAST == 2) fillGlobalIds(tp,&(ast->children[1]));
-	if(ast->numChild == 2) fillGlobalIds(tp,&(ast->children[1]));
+            char *dataType = (declar.children[0].terminal->tokenType==TK_INT) ? "int" : "real";
+            int idSize = (dataType=="int") ? 2 : 4;
+
+            tabPtr = createNewEntry(dataType, declar.children[1].terminal->lexeme, idSize, OFFSET_GLOBAL, NULL, NULL);
+            addEntryBack(&(th->localTable[hashFuncST(declar.children[1].terminal->lexeme, TABLE_SIZE)]), tabPtr);
+            OFFSET_GLOBAL += idSize;
+
+            record *varPtr = malloc(sizeof(record));
+            varPtr->recname = declar.children[1].terminal->lexeme;
+            varPtr->type = NULL;
+            varPtr->next = NULL;
+
+            th->varList = insertBack(th->varList, varPtr);
+            th->numOfVar++;
+        }else {
+            // constructed datatype
+            // declaration -> [constructedDatatype -> TK_RECORD TK_RUID / TK_UNION TK_RUID / TK_RUID (this will give error)] 
+            // .. TK_ID global_or_not
+
+            tabPtr = th->localTable[hashFuncST(declar.children[0].children[1].terminal->lexeme, TABLE_SIZE)];
+
+            // checking if record/union datatype is defined before or not
+            if(!lookUpFunc(tabPtr, declar.children[0].children[1].terminal->lexeme)) {
+                printf("Line %lld : constructed datatype %s is not defined.\n",
+                declar.children[0].children[1].terminal->lineNum, declar.children[0].children[1].terminal->lexeme);
+				return;
+            }
+
+            char *dataType = declar.children[0].children[1].terminal->lexeme;
+            int idSize = tabPtr->size;
+            record *ptr = tabPtr->ptr;
+
+            tablePtr *tmp = createNewEntry(dataType, declar.children[1].terminal->lexeme, idSize, OFFSET_GLOBAL, ptr, NULL);
+            addEntryBack(&(th->localTable[hashFuncST(declar.children[1].terminal->lexeme, TABLE_SIZE)]), tmp);
+            OFFSET_GLOBAL += idSize;
+
+            record *varPtr = malloc(sizeof(record));
+            varPtr->recname = declar.children[1].terminal->lexeme;
+            varPtr->type = NULL;
+            varPtr->next = NULL;
+
+            th->varList = insertBack(th->varList, varPtr);
+        }
+    }
+    // recursively call for declarations_1
+    populateGlobalIDsHelper(th, &(ast->children[1]));
 }
 
-//---------------------------------------------------------------------------
-char* extractDatatype(parseTree datatype)
-{
-	if(!datatype)
-	return NULL;
-	return datatype->children[0].children[1].terminal->lexeme;
+/*============================================================================================*/
+
+void populateGlobalRecords(parseTree ast, symbolTable st, tableHeader *th) {
+    if(!ast || !st) return;
+
+    if(ast->nt==typeDefinitions) {
+        populateGlobalRecordsHelper(th, ast);
+        return;
+    }
+
+    for(int i=0; i<ast->numChild; i++) populateGlobalRecords(&(ast->children[i]), st, th);
 }
 
-void addStmtVarUtils2(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //ast = declaration
-{
-	if(!ast || !st || !tp)
-	{
+void populateGlobalIDs(parseTree ast, symbolTable st, tableHeader *th) {
+    if(!ast || !st) return;
+
+    if(ast->nt==declarations) {
+        populateGlobalIDsHelper(th, ast);
+        return;
+    }
+
+    for(int i=0; i<ast->numChild; i++) populateGlobalIDs(&(ast->children[i]), st, th);
+}
+
+/*============================================================================================*/
+
+char* getDataType(parseTree ast) {
+    //ast==constructedDatatype
+    // constructedDatatype -> TK_RECORD TK_RUID / TK_UNION TK_RUID / TK_RUID
+    if(!ast) return NULL;
+    return ast->children[1].terminal->lexeme;
+}
+
+void populateFuncParameters(symbolTable st, parseTree ast, int idx, paramDetail *param) {
+    //ast==parameter_list
+    // parameter_list -> dataType TK_ID [remaining_list -> parameter_list]
+    int hashIdx = hashFuncST(ast->children[1].terminal->lexeme, TABLE_SIZE);
+
+    // printf("orig: %s\n", ast->children[1].terminal->lexeme);
+    // printSymbolTable(st);
+
+    // checking for variable collisions with global or in scope variables
+    int flag = 0;
+    if(lookUpFunc(st->fTable[hashFuncST("global", TABLE_SIZE)]->localTable[hashIdx], ast->children[1].terminal->lexeme)) {
+        printf("Line %lld : variable %s declared here is already declared as a global variable.\n",
+        ast->children[1].terminal->lineNum, ast->children[1].terminal->lexeme);
+        flag = 1;
+    }else if(lookUpFunc(st->fTable[idx]->localTable[hashIdx], ast->children[1].terminal->lexeme)) {
+        // printf("here\n");
+        printf("Line %lld : variable %s declared here is already in this scope from the parent function.\n",
+        ast->children[1].terminal->lineNum, ast->children[1].terminal->lexeme);
+        flag = 1;
+    }
+
+    if(flag) return;
+    
+    if(!flag) {
+        if(param->isInpPar) param->parIdx = st->fTable[idx]->numOfInPar;
+        else if(param->isOutPar) param->parIdx = st->fTable[idx]->numOfOutPar;
+
+        st->fTable[idx]->numOfVar++;
+
+        tablePtr *tabPtr;
+        char strInt[] = "int", strReal[] = "real";
+        record *paramListPtr = malloc(sizeof(record));
+
+        if(ast->children[0].nt==constructedDatatype) {
+            char *dataType = getDataType(&(ast->children[0].children[0]));
+            int consHashVal = hashFuncST(dataType, TABLE_SIZE);
+
+            tabPtr = st->fTable[hashFuncST("global", TABLE_SIZE)]->localTable[consHashVal];
+
+            if(!lookUpFunc(tabPtr, dataType)) {
+                printf("Line %lld : constructed datatype %s is not defined.\n",
+                ast->children[0].children[0].terminal->lineNum, dataType);
+                return;
+            }
+
+            int consSize = tabPtr->size;
+            tabPtr = createNewEntry(dataType, ast->children[1].terminal->lexeme, consSize, st->fTable[idx]->funSize, tabPtr->ptr, param);
+            st->fTable[idx]->funSize += consSize;
+            
+            paramListPtr->recname = ast->children[1].terminal->lexeme;
+            paramListPtr->type = dataType;
+            paramListPtr->lineNum = ast->children[1].terminal->lineNum;
+
+            if(param->isInpPar) {
+                st->fTable[idx]->inParList = insertBack(st->fTable[idx]->inParList, paramListPtr);
+                st->fTable[idx]->numOfInPar++;
+            }else if(param->isOutPar) {
+                st->fTable[idx]->outParList = insertBack(st->fTable[idx]->outParList, paramListPtr);
+                st->fTable[idx]->numOfOutPar++;
+            }
+        }else if(strcmp(ast->children[0].terminal->lexeme, "int")==0) {
+            tabPtr = createNewEntry("int", ast->children[1].terminal->lexeme, 2, st->fTable[idx]->funSize, NULL, param);
+            st->fTable[idx]->funSize += 2;
+
+            paramListPtr->recname = ast->children[1].terminal->lexeme;
+            paramListPtr->type = strInt;
+            paramListPtr->lineNum = ast->children[1].terminal->lineNum;
+
+            if(param->isInpPar) {
+                st->fTable[idx]->inParList = insertBack(st->fTable[idx]->inParList, paramListPtr);
+                st->fTable[idx]->numOfInPar++;
+            }else if(param->isOutPar) {
+                st->fTable[idx]->outParList = insertBack(st->fTable[idx]->outParList, paramListPtr);
+                st->fTable[idx]->numOfOutPar++;
+            }
+        }else {
+            tabPtr = createNewEntry("real", ast->children[1].terminal->lexeme, 4, st->fTable[idx]->funSize, NULL, param);
+            st->fTable[idx]->funSize += 4;
+
+            paramListPtr->recname = ast->children[1].terminal->lexeme;
+            paramListPtr->type = strReal;
+            paramListPtr->lineNum = ast->children[1].terminal->lineNum;
+            
+            if(param->isInpPar) {
+                st->fTable[idx]->inParList = insertBack(st->fTable[idx]->inParList, paramListPtr);
+                st->fTable[idx]->numOfInPar++;
+            }else if(param->isOutPar) {
+                st->fTable[idx]->outParList = insertBack(st->fTable[idx]->outParList, paramListPtr);
+                st->fTable[idx]->numOfOutPar++;
+            }
+        }
+        addEntryBack(&(st->fTable[idx]->localTable[hashIdx]), tabPtr);
+    }
+
+    paramDetail *paramTmp;
+    if(param->isInpPar) {
+        paramTmp = malloc(sizeof(paramDetail));
+        paramTmp->isInpPar = true;
+        paramTmp->isOutPar = false;
+        paramTmp->parIdx = 0;
+    }else if(param->isOutPar) {
+        paramTmp = malloc(sizeof(paramDetail));
+        paramTmp->isInpPar = false;
+        paramTmp->isOutPar = true;
+        paramTmp->parIdx = 0;
+    }
+    if(ast->children[2].numChild) populateFuncParameters(st, &(ast->children[2].children[0]), idx, paramTmp);
+}
+
+void populateStmtVarUtils2(symbolTable st, tableHeader *th, parseTree ast, int idx) {
+    //ast=declaration
+    //declaration -> [TK_INT/TK_REAL/constructedDatatype] TK_ID global_or_not 
+    if(!st || !th || !ast) return;
+
+    // don't process global variables
+    if(ast->children[2].numChild==1) return;
+
+    tablePtr *tabPtr = st->fTable[hashFuncST("global", TABLE_SIZE)]->localTable[hashFuncST(ast->children[1].terminal->lexeme, TABLE_SIZE)];
+
+    if(lookUpFunc(tabPtr, ast->children[1].terminal->lexeme)) {
+        printf("Line %lld : %s record definition is already declared globally.\n",
+        ast->children[1].terminal->lineNum, ast->children[1].terminal->lexeme);
 		return;
-	}
-	// if(ast->numChildAST == 3) return;
-	if(ast->numChild == 3) return;
+    }
 
-	TableLoc* temp = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
-	if(lookup(temp,ast->children[1].terminal->lexeme))
-	{
-		printf("line %lld : %s record definition is already declared globally.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
-		return ;
-	}
-	TableLoc* table = tp->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
-	if(lookup(table,ast->children[1].terminal->lexeme))
-	{
-		printf("line %lld : %s already declared in the function.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
+    tabPtr = th->localTable[hashFuncST(ast->children[1].terminal->lexeme, TABLE_SIZE)];
+
+    if(lookUpFunc(tabPtr, ast->children[1].terminal->lexeme)) {
+        printf("Line %lld : %s already declared in this function.\n",
+        ast->children[1].terminal->lineNum, ast->children[1].terminal->lexeme);
 		return;
-	}
-	char* type;
-	int size;
-	if(ast->children[0].nt == dataType)
-	{
-		type = extractDatatype(&(ast->children[0]));
-		temp = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashVal(type,TABLE_SIZE)];
-		if(!lookup(temp,type))
-		{
-			printf("line %lld : constructed datatype %s is not defined.\n",ast->children[0].children[0].children[1].terminal->lineNum,type);
-			return ;
-		}
-		
-		size = temp->size;
-		table = createEntry(type,ast->children[1].terminal->lexeme,size,tp->fSize,temp->ptr,NULL);
-	}
-	else{
-		type = ast->children[0].terminal->lexeme ;
-		size = (ast->children[0].terminal->tokenType == TK_INT)? 2:4;
-		table = createEntry(type,ast->children[1].terminal->lexeme,size,tp->fSize,NULL,NULL);
-	}
-	addEntryAtEnd(&(tp->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)]),table) ;
-	
-	record* varPtr = malloc(sizeof(record));	
-	varPtr->rname = ast->children[1].terminal->lexeme;
-	varPtr->type = NULL;
-	varPtr->next = NULL;
-	
-	tp->variables = insertAtEnd(tp->variables,varPtr);
-	
-	tp->numVar++;
-	tp->fSize += size;
+    }
+
+    char *dataTypeStr;
+    int dataTypeSize;
+    tablePtr *tmpPtr;
+
+    if(ast->children[0].nt==constructedDatatype) {
+        dataTypeStr = getDataType(&(ast->children[0]));
+        tabPtr = st->fTable[hashFuncST("global", TABLE_SIZE)]->localTable[hashFuncST(dataTypeStr, TABLE_SIZE)];
+
+        if(!lookUpFunc(tabPtr, dataTypeStr)) {
+            printf("Line %lld : constructed dataTypeStr %s is not defined.\n",
+            ast->children[0].children[0].children[1].terminal->lineNum, dataTypeStr);
+			return;
+        }
+
+        dataTypeSize = tabPtr->size;
+        tmpPtr = createNewEntry(dataTypeStr, ast->children[1].terminal->lexeme, dataTypeSize, th->funSize, tabPtr->ptr, NULL);
+    }else {
+        dataTypeStr = ast->children[0].terminal->lexeme;
+        dataTypeSize = (ast->children[0].terminal->tokenType==TK_INT) ? 2 : 4;
+        tmpPtr = createNewEntry(dataTypeStr, ast->children[1].terminal->lexeme, dataTypeSize, th->funSize, NULL, NULL);
+    }
+    addEntryBack(&(th->localTable[hashFuncST(ast->children[1].terminal->lexeme, TABLE_SIZE)]), tmpPtr);
+
+    record *varPtr = malloc(sizeof(record));
+    varPtr->recname = ast->children[1].terminal->lexeme;
+    varPtr->type = NULL;
+    varPtr->next = NULL;
+
+    th->varList = insertBack(th->varList, varPtr);
+    th->numOfVar++;
+    th->funSize += dataTypeSize;
 }
 
-void addStmtVarUtils1(symbolTable st,tableHeader* tp,parseTree ast,int pos) //ast = declarations
-{
-	addStmtVarUtils2(st,tp,&(ast->children[0]),pos);
-	// if(ast->numChildAST == 2) addStmtVarUtils1(st,tp,&(ast->children[1]),pos);
-	if(ast->numChild == 2) addStmtVarUtils1(st,tp,&(ast->children[1]),pos);
+void populateStmtVarUtils(symbolTable st, tableHeader *th, parseTree ast, int idx) {
+    //ast==declarations
+    if(!th || !ast || !ast->numChild) return;
+
+    populateStmtVarUtils2(st, th, &(ast->children[0]), idx);
+
+    // recusively calling declarations_1
+    populateStmtVarUtils(st, th, &(ast->children[1]), idx);
 }
 
-void addStmtVar(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //ast = stmts
-{
-	if(!ast || !tp) return;
-	// for(int i = 0;i < ast->numChildAST; i++) {
-	for(int i = 0;i < ast->numChild; i++) {
-        if(ast->children[i].nt == declarations && ast->children[i].numChild!=0) addStmtVarUtils1(st,tp,&(ast->children[i]),pos);
+void populateStmtVar(symbolTable st, tableHeader *th, parseTree ast, int idx) {
+    //ast==stmts
+    if(!th || !ast) return;
+    
+    for(int i=0; i<ast->numChild; i++) {
+        if(ast->children[i].nt==declarations) populateStmtVarUtils(st, th, &(ast->children[i]), idx);
     }
 }
 
-//-----------------------------------------------------------------------------------------------------------------------------
-//adding input and output parameters of a function in localTable of function(scope)
-void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param) //ast = parameter_list
-{
-		int hashPos = hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE);
-		//considering if any collisions is there
-		int flag = 0;
-		if(lookup(st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashPos],ast->children[1].terminal->lexeme))
-		{
-			printf("line %lld : variable %s being declared is already declared as a global variable.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
-			flag = 1;
-			//return;
-		}
-		else if(lookup(st->fTable[pos]->localTable[hashPos],ast->children[1].terminal->lexeme))
-		{
-			printf("line %lld : variable %s being declared is already in this scope.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
-			flag = 1;
-			//return;
-		}
-		//if(flag==1)
-			//return;
-		
-		if(!flag)
-		{
-			if(param->isInputPar) param->parIndex = st->fTable[pos]->numInpPar;
-			else if(param->isOutputPar) param->parIndex = st->fTable[pos]->numOutPar;
-			
-			st->fTable[pos]->numVar++;
-			
-			TableLoc* t1;
-			char str1[] = "int"; char str2[] = "real";
-			record *parListPtr = malloc(sizeof(record));
-			
-			if(ast->children[0].nt == dataType)
-			{
-				char *c = extractDatatype(&(ast->children[0]));	
-				int rhashValue = hashVal(c,TABLE_SIZE);
-				TableLoc* tl = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[rhashValue] ;
-				
-				if(!lookup(tl,c))
-				{
-					printf("line %lld : constructed datatype %s is not defined.\n",ast->children[0].children[0].children[1].terminal->lineNum,c);
-					return;
-				}		
-				/*if(tl == NULL)     //to check whether datatype declared already or not
-				{
-					printf("line %lld : constructed datatype %s is not defined.\n",ast->children[0].children[0].children[1].terminal->lineNum,c);
-					return;
-				}*/
-				int rSize = tl->size;
-				t1 = createEntry(c, ast->children[1].terminal->lexeme, rSize, st->fTable[pos]->fSize, tl->ptr, param);
-				//st->fTable[hashVal("global",TABLE_SIZE)]->localTable[rhashValue] = t1;
-				st->fTable[pos]->fSize += rSize;
-				if(param->isInputPar)
-				{
-					parListPtr->rname = ast->children[1].terminal->lexeme;
-					parListPtr->type = c;
-					parListPtr->lineNo = ast->children[1].terminal->lineNum;
-					st->fTable[pos]->inParList = insertAtEnd(st->fTable[pos]->inParList,parListPtr);
-					st->fTable[pos]->numInpPar += 1;
-				}
-				else if(param->isOutputPar)
-				{
-					parListPtr->rname = ast->children[1].terminal->lexeme;
-					parListPtr->type = c;
-					parListPtr->lineNo = ast->children[1].terminal->lineNum;
-					st->fTable[pos]->outParList = insertAtEnd(st->fTable[pos]->outParList,parListPtr);
-					st->fTable[pos]->numOutPar += 1;
-				}				
-			}
-			else if(strcmp(ast->children[0].terminal->lexeme,"int") == 0)
-			{
-				t1 = createEntry("int", ast->children[1].terminal->lexeme, 2, st->fTable[pos]->fSize, NULL, param);
-				st->fTable[pos]->fSize += 2;
-				if(param->isInputPar)
-				{
-					parListPtr->rname = ast->children[1].terminal->lexeme;
-					parListPtr->type = str1;
-					parListPtr->lineNo = ast->children[1].terminal->lineNum;
-					st->fTable[pos]->inParList=insertAtEnd(st->fTable[pos]->inParList,parListPtr);
-					st->fTable[pos]->numInpPar += 1;
-				}
-				else if(param->isOutputPar)
-				{
-					parListPtr->rname = ast->children[1].terminal->lexeme;
-					parListPtr->type = str1;
-					parListPtr->lineNo = ast->children[1].terminal->lineNum;
-					st->fTable[pos]->outParList=insertAtEnd(st->fTable[pos]->outParList,parListPtr);
-					st->fTable[pos]->numOutPar += 1;
-				}
-			}
-			else
-			{
-				t1 = createEntry("real", ast->children[1].terminal->lexeme, 4, st->fTable[pos]->fSize, NULL, param);
-				st->fTable[pos]->fSize += 4;
-				if(param->isInputPar)
-				{
-					parListPtr->rname = ast->children[1].terminal->lexeme;
-					parListPtr->type = str2;
-					parListPtr->lineNo = ast->children[1].terminal->lineNum;
-					st->fTable[pos]->inParList=insertAtEnd(st->fTable[pos]->inParList,parListPtr);
-					st->fTable[pos]->numInpPar += 1;
-				}
-				else if(param->isOutputPar)
-				{
-					parListPtr->rname = ast->children[1].terminal->lexeme;
-					parListPtr->type = str2;
-					parListPtr->lineNo = ast->children[1].terminal->lineNum;
-					st->fTable[pos]->outParList=insertAtEnd(st->fTable[pos]->outParList,parListPtr);
-					st->fTable[pos]->numOutPar += 1;
-				}
-			}
-			//considering if any collisions are there
-			addEntryAtEnd(&(st->fTable[pos]->localTable[hashPos]),t1);
-		}		
-		// if(ast->numChildAST == 3)
-		if(ast->numChild == 3)
-		{
-			paramInfo *param1;
-			if(param->isInputPar)
-			{
-				param1 = malloc(sizeof(paramInfo));
-				param1->isInputPar = true;
-				param1->isOutputPar = false;
-				param1->parIndex = 0;
-			}
-			else if(param->isOutputPar)
-			{
-				param1 = malloc(sizeof(paramInfo));
-				param1->isInputPar = false;
-				param1->isOutputPar = true;
-				param1->parIndex = 0;
-			}
-			addParameters(st, &(ast->children[2].children[0]), pos, param1);
-		}
-		return;
-}
+void populateFuncUtils(symbolTable st, parseTree ast, char *funcName) {
+    //ast==function/_main
 
-//adding entries for new functions not declared already and _mainF
-void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function or mainF
-{
-        int pos = hashVal(key,TABLE_SIZE);        
-        if(st->fTable[pos] != NULL)
-        {
-        		if(ast->nt == function) printf("line %lld : function %s already declared before.\n",ast->children[0].terminal->lineNum,key);
-                else printf("_main function declared twice");
-                return;
-        }
-        
-        record* varPtr = malloc(sizeof(record));	
-		varPtr->rname = key;
-		varPtr->type = NULL;
-		varPtr->next = NULL;
-	
-	    st->functions = insertAtEnd(st->functions,varPtr);
-        
-		//printf("%s\n",key);
-		tableHeader* tp = createTablePointer(key,TABLE_SIZE);
-		ast->tp = tp;
-		st->fTable[pos] = tp;   
-		int i;
-		if(ast->nt == function)
-		{
-			// for(i=0; i < ast->numChildAST; i++) {
-			for(i=0; i < ast->numChild; i++) {
-				if(ast->children[i].nt == input_par)
-				{
-					paramInfo *param = malloc(sizeof(paramInfo));
-					param->isInputPar = true;
-					param->isOutputPar = false;
-					param->parIndex = 0;
-					addParameters(st, &(ast->children[i].children[0]), pos, param);
-				}
-				else if( ast->children[i].nt == output_par)
-				{
-					paramInfo *param = malloc(sizeof(paramInfo));
-					param->isInputPar = false;
-					param->isOutputPar = true;
-					param->parIndex = 0;
-					addParameters(st, &(ast->children[i].children[0]), pos, param);
-				}
-			}
-		}
-		
-		// if(ast->children[ast->numChildAST-1].nt == stmts)
-		if(ast->children[ast->numChild-1].nt == stmts)
-		{
-			// addStmtVar(st,tp, &(ast->children[ast->numChildAST-1]), pos);
-			addStmtVar(st,tp, &(ast->children[ast->numChild-1]), pos);
-		}
-		return;
-}
+    int idx = hashFuncST(funcName, TABLE_SIZE);
 
-//adding entries if otherFunctions are present
-void fillFuncIdsUtils1(symbolTable st,parseTree ast)  // ast = otherFunctions
-{
-        if(!st || !ast || ast->numChild==0) return;
-
-        fillFuncIdsUtils2(st,&(ast->children[0]),ast->children[0].children[0].terminal->lexeme);
-     
-        // if(ast->numChildAST == 2) fillFuncIdsUtils1(st,&(ast->children[1]));
-        if(ast->numChild == 2) fillFuncIdsUtils1(st,&(ast->children[1]));
+    if(st->fTable[idx]!=NULL) {
+        if(ast->nt==function) printf("Line %lld : function %s is already declared before.\n", ast->children[0].terminal->lineNum, funcName);
+        else printf("_main function declared twice");
         return;
-}
-//fill symbol table for different functions present
-void fillFuncVar(symbolTable st,parseTree ast)  // ast=program
-{
-	if(!st || !ast) return;
+    }
 
-	// for(int i=0;i < ast->numChildAST ;i++) {
-	for(int i=0;i < ast->numChild ;i++) {
-		if(ast->children[i].nt == otherFunctions) fillFuncIdsUtils1(st,&(ast->children[0]));
-		else fillFuncIdsUtils2(st, &(ast->children[i]), "_main");
-	}
-}
+    record *varPtr = malloc(sizeof(record));
+    varPtr->recname = funcName;
+    varPtr->type = NULL;
+    varPtr->next = NULL;
 
-//----------------------------------------------------------------------------------------------------------------
-void globalRecordsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
-{
-	if(!ast || !st) return;
-    // if(ast->nt==-1) printf("Token: %s | Childs: %d\n", getTermString(ast->terminal->tokenType), ast->numChild);
-    // else printf("Token: %s | Childs: %d\n", getNonTermString(ast->nt), ast->numChild);
-	if(ast->nt == typeDefinitions) {
-		fillGlobalRecords(tp,ast);
-		return;
-	}
-	// for(int i = 0;i < ast->numChildAST;i++) globalRecordsUpdate(&(ast->children[i]),st,tp);
-	for(int i = 0;i < ast->numChild;i++) globalRecordsUpdate(&(ast->children[i]),st,tp);
-}
+    st->functions = insertBack(st->functions, varPtr);
 
-void globalIdsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
-{
-	if(!ast || !st) return;
+    tableHeader *th = createTableHeader(funcName, TABLE_SIZE);
+    ast->th = th;
+    st->fTable[idx] = th;
 
-	if(ast->nt == declarations) {
-		fillGlobalIds(tp,ast);
-		return;
-	}
-	// for(int i = 0;i < ast->numChildAST;i++) globalIdsUpdate(&(ast->children[i]),st,tp);
-	for(int i = 0;i < ast->numChild;i++) globalIdsUpdate(&(ast->children[i]),st,tp);
-}
-/*
-void printRecord(tablePointer* tp)
-{
-	record* in = tp->inParList;
-	record* out = tp->outParList;
-	printf("\n\n\nINPUT LIST:\n");
-	while(in)
-	{
-		printf("%s %s\n",in->rname,in->type);
-		in = in->next;
-	}
-	in = out;
-	printf("\n\n\nOUTPUT LIST:\n");
-	while(in)
-	{
-		printf("%s %s\n",in->rname,in->type);
-		in = in->next;
-	}
-}*/
+    if(ast->nt==function) {
+        // function -> TK_FUNID input_par output_par stmts
+        
+        for(int i=0; i<ast->numChild; i++) {
+            if(ast->children[i].nt==input_par) {
+                // input_par -> parameter_list
 
-//filling symbol table
-symbolTable fillSymbolTable(parseTree ast)
-{
-	symbolTable st = createSymbolTable(TABLE_SIZE);
-	tableHeader* tp = createTablePointer("global",TABLE_SIZE);
-	st->fTable[hashVal("global",TABLE_SIZE)] = tp;
-	
-    record* varPtr = malloc(sizeof(record));	
-	varPtr->rname = "global";
-	varPtr->type = NULL;
-	varPtr->next = NULL;
-    st->functions = insertAtEnd(st->functions,varPtr);
-	
-	globalRecordsUpdate(ast,st,tp);
-	globalIdsUpdate(ast,st,tp);
-	fillFuncVar(st,ast);
-	
-	return st;		
+                paramDetail *param = malloc(sizeof(paramDetail));
+                param->isInpPar = true;
+                param->isOutPar = false;
+                param->parIdx = 0;
+                populateFuncParameters(st, &(ast->children[i].children[0]), idx, param);
+            }else if(ast->children[i].nt==output_par) {
+                // output_par -> parameter_list (or it can be eps)
+                if(!ast->children[i].numChild) continue;
+
+                paramDetail *param = malloc(sizeof(paramDetail));
+                param->isInpPar = false;
+                param->isOutPar = true;
+                param->parIdx = 0;
+                populateFuncParameters(st, &(ast->children[i].children[0]), idx, param);
+            }
+        }
+    }
+    
+    //mainFunction -> stmts
+    // stmts is always last in both rules
+    populateStmtVar(st, th, &(ast->children[ast->numChild-1]), idx);
 }
 
-//printing only global variables and their offsets
-void printGlobalVariables(symbolTable st)
-{
-	tableHeader* tp = st->fTable[hashVal("global",TABLE_SIZE)];
-	if(!tp)
-		return;
-	char *lexeme,*type,*scope;
-	int offset;
-	scope = tp->fname;
-	record *temp;
-	temp = tp->variables;
-	printf("\nlexeme		type		scope		offset\n\n");
-	while(temp != NULL)
-	{
-		char *c = temp->rname;
-		if(c[0] == '#')
-		{
-			temp = temp->next;
-			continue;
-		}
-		TableLoc* table;
-		table = tp->localTable[hashVal(c,TABLE_SIZE)];
-		if(!table)
-		{
-			temp = temp->next;
-			continue;
-		}
-		while(table)
-		{
-			lexeme = table->varname;
-			type = table->type;
-			offset = table->offset;
-			printf("%s		",lexeme);
-			if(table->ptr != NULL)
-			{
-				record *rPtr;
-				rPtr = table->ptr;
-				while(rPtr != NULL)
-				{
-					printf("%s",rPtr->type); //print int,int,real
-					if(rPtr->next != NULL)
-						printf(" x ");
-					rPtr=rPtr->next;
-				}							
-				printf("		%s		%d\n",scope,offset);
-			}
-			else
-			{
-				printf("%s		%s		%d\n",type,scope,offset);
-			}
-			table = table->next;
-		}
-		temp = temp->next;
-	}
+void populateFuncOther(symbolTable st, parseTree ast) {
+    //ast==otherFunctions
+    if(!st || !ast || !ast->numChild) return;
+
+    populateFuncUtils(st, &(ast->children[0]), ast->children[0].children[0].terminal->lexeme);
+
+    // recursively calling otherFunctions_1 
+    populateFuncOther(st, &(ast->children[1]));
 }
 
-//print function variables in order of their offset
-void printFuncVariables(record* temp,tableHeader* tp)
-{
-	
-	char *lexeme,*type,*scope;
-	int offset;
-	scope = tp->fname;
-	while(temp != NULL)
-	{
-		char *c = temp->rname;
-		TableLoc* table;
-		table = tp->localTable[hashVal(c,TABLE_SIZE)];
-		if(!table)
-			continue;
-		while(table)
-		{
-			lexeme = table->varname;
-			offset = table->offset;
-			type = table->type;
-			printf("%s		%s		%s		%d\n",lexeme,type,scope,offset);
-			table = table->next;
-		}
-		temp = temp->next;
-	}
+void populateFunc(symbolTable st, parseTree ast) {
+    // ast==program
+    if(!st || !ast) return;
+    
+    populateFuncOther(st, &(ast->children[0]));
+    populateFuncUtils(st, &(ast->children[1]), "_main");}
+
+/*============================================================================================*/
+
+symbolTable populateSymbolTable(parseTree ast) {
+    symbolTable st = createSymbolTable(TABLE_SIZE);
+    tableHeader *th = createTableHeader("global", TABLE_SIZE);
+    st->fTable[hashFuncST("global", TABLE_SIZE)] = th;
+
+    record *varPtr = malloc(sizeof(record));
+    varPtr->recname = "global";
+    varPtr->type = NULL;
+    varPtr->next = NULL;
+    
+    st->functions = insertBack(st->functions, varPtr);
+
+    populateGlobalRecords(ast, st, th);
+    populateGlobalIDs(ast, st, th);
+    populateFunc(st, ast);
+
+    return st;
 }
 
-//printing functions in order of which they are present in the test file
-void printTable(tableHeader* tp) {
-	if(!tp) return;
-	int flag=0;
-	if(strcmp(tp->fname,"global")==0) flag=1;
+/*============================================================================================*/
 
-	record *temp;
+void printFuncTableVariables(record *tmp, tableHeader *th) {
+    char *lex, *dataType, *scope;
+    int offset;
 
-	switch(flag) {
-		case 0:	
-				printFuncVariables(tp->inParList,tp);
-				printFuncVariables(tp->outParList,tp);
-				printFuncVariables(tp->variables,tp);
-				break;
-		case 1:
-                ;
-				char *lexeme,*type,*scope;
-				int offset;
-				scope = tp->fname;
-				temp = tp->variables;
-				while(temp != NULL)
-				{
-					char *c = temp->rname;
-					TableLoc* table;
-					table = tp->localTable[hashVal(c,TABLE_SIZE)];
-					if(!table) continue;
-					while(table)
-					{
-						lexeme = table->varname;
-						type = table->type;
-                        if(lexeme==NULL) printf("NULL		");
-						else printf("%s		",lexeme);
-						if(table->ptr != NULL)
-						{
-							record *rPtr;
-							rPtr = table->ptr;
-							while(rPtr != NULL)
-							{
-								printf("%s",rPtr->type); //print int,int,real
-								if(rPtr->next != NULL)
-									printf(" x ");
-								rPtr=rPtr->next;
-							}							
-							printf("		%s		-\n",scope);
-						}
-						else
-						{   
-                            if(type==NULL) printf("NULL		%s		-\n",scope);
-                            else printf("%s		%s		-\n",type,scope);
-						}
-						table = table->next;
-					}
-					temp = temp->next;
-				}
-				break;
-	}
-	printf("\n");
-}		
+    scope = th->funName;
 
+    while(tmp!=NULL) {
+        char *str = tmp->recname;
+        tablePtr *tabPtr;
+        tabPtr = th->localTable[hashFuncST(str, TABLE_SIZE)];
+        
+        if(tabPtr==NULL) {
+            tmp = tmp->next;
+            continue;
+        }
 
-//print complete symbol table
+        while(tabPtr!=NULL) {
+            lex = tabPtr->name;
+            dataType = tabPtr->type;
+            offset = tabPtr->offset;
+
+            printf("%s %20s %20s %20s %20d %20s %20d %20s\n", 
+            lex, scope, (str[0]=='#' ? str : "---"), dataType, tabPtr->size, "---", offset, "variableUsage");
+
+            tabPtr = tabPtr->next;
+        }
+        tmp = tmp->next;
+    }
+}
+
+void printFuncTable(tableHeader *th) {
+    if(!th) return;
+    int flag = 0;
+    // printf("----------------------------%s table----------------------------\n", th->funName);
+    if(strcmp(th->funName, "global")==0) flag = 1;
+
+    record *tmp;
+
+    switch(flag) {
+        case 0:
+            printFuncTableVariables(th->inParList, th);
+            printFuncTableVariables(th->outParList, th);
+            printFuncTableVariables(th->varList, th);
+            
+            break;
+        case 1:
+            ;
+            char *lex, *dataType, *scope;
+            int offset;
+
+            scope = th->funName;
+            tmp = th->varList;
+
+            while(tmp!=NULL) {
+                char *str = tmp->recname;
+
+                if(str[0]=='#') {
+                    tmp = tmp->next;
+                    continue;
+                }
+
+                tablePtr *tabPtr = th->localTable[hashFuncST(str, TABLE_SIZE)];
+
+                if(tabPtr==NULL) {
+                    tmp = tmp->next;
+                    continue;
+                }
+
+                while(tabPtr!=NULL) {
+                    lex = tabPtr->name;
+                    dataType = tabPtr->type;
+                    offset = tabPtr->offset;
+                    
+                    printf("%s %20s %20s ", lex, scope, (str[0]=='#' ? str : "---"));
+
+                    // datatype
+                    if(tabPtr->ptr!=NULL) {
+                        record *rPtr;
+                        rPtr = tabPtr->ptr;
+
+                        printf("%20s", "<");
+                        while(rPtr!=NULL) {
+                            printf("%s", rPtr->type);
+                            if(rPtr->next!=NULL) printf(", ");
+                            rPtr = rPtr->next;
+                        }
+                        printf("> ");
+                    }else printf("%20s ", dataType);
+                    printf("%20d %20s %20d %20s\n", tabPtr->size, "global", offset, "variableUsage");
+
+                    tabPtr = tabPtr->next;
+                }
+                tmp = tmp->next;
+            }
+
+            break;
+    }
+    printf("\n");
+}
+
 void printSymbolTable(symbolTable st) {
-	if(!st) return;
+    if(!st) return;
     printf("\n===================Symbol Table=======================\n");
-	printf("\nlexeme		type		scope		offset\n\n");
-	record *temp;
-	temp = st->functions;
-	
-    while(temp!=NULL) {
-		char *c = temp->rname;
-		printTable(st->fTable[hashVal(c,TABLE_SIZE)]);
-		temp = temp->next;
-	}
+    printf("\nlexeme \t\t scope \t\t typeName \t\t typeExpression \t\t width \t\t isGlobal \t\t offset \t\t variableUsage\n\n");
+
+    record *tmp = st->functions;
+    while(tmp!=NULL) {
+        char *funcName = tmp->recname;
+        printFuncTable(st->fTable[hashFuncST(funcName, TABLE_SIZE)]);
+        tmp = tmp->next;
+    }
     printf("\n======================================================\n");
 }
 
-//print function name and its size
-void printFnameAndSizes(symbolTable st)
-{
-	printf("\nfunctionName		size\n\n");
-	record *temp;
-	temp = st->functions;
-	tableHeader* tp;
-	while(temp != NULL)
-	{
-		char *c = temp->rname;
-		if(strcmp(c,"global")==0)
-		{
-			temp = temp->next;
-			continue;
-		}
-		tp = st->fTable[hashVal(c,TABLE_SIZE)];
-		printf("%s		%d\n",tp->fname,tp->fSize);
-		temp = temp->next;
-	}
+void printGlobalVariables(symbolTable st) {
+    printf("\n=================Global Variables=====================\n");
+    printf("\nlexeme		type				scope		offset\n\n");
+    tableHeader *th = st->fTable[hashFuncST("global", TABLE_SIZE)];
+    if(!th) return;
+
+    char *lex, *dataType, *scope;
+    int offset;
+    record *tmp = th->varList;
+
+    scope = th->funName;
+
+    while(tmp!=NULL) {
+        char *str = tmp->recname;
+        
+        if(str[0]=='#') {
+            tmp = tmp->next;
+            continue;
+        }
+
+        tablePtr *tabPtr;
+        tabPtr = th->localTable[hashFuncST(str, TABLE_SIZE)];
+
+        if(!tabPtr) {
+            tmp = tmp->next;
+            continue;
+        }
+
+        while(tabPtr!=NULL) {
+            lex = tabPtr->name;
+            dataType = tabPtr->type;
+            offset = tabPtr->offset;
+
+            printf("%s		", lex);
+            if(tabPtr!=NULL && dataType[0]=='#') {
+                record *rPtr;
+                rPtr = tabPtr->ptr;
+
+                while(rPtr!=NULL) {
+                    printf("%s", rPtr->type);
+                    if(rPtr->next!=NULL) printf(" x ");
+
+                    rPtr = rPtr->next;
+                }
+                printf("		");
+            }else printf("%s				", dataType);
+
+            printf("%s		%d\n", scope, offset);
+
+            tabPtr = tabPtr->next;
+        }
+        tmp = tmp->next;
+    }
+    printf("\n======================================================\n");
 }
 
-//function to print record definitions and their size along with their type
-void printRecDefAndSize(symbolTable st)
-{
-	tableHeader* tp = st->fTable[hashVal("global",TABLE_SIZE)];
-	if(!tp)
-		return;
-	char *lexeme;
-	int width;
-	record *temp;
-	temp = tp->variables;
-	int i=0;
-	printf("\nrecordName		typeExpression		width\n\n");
-	while(temp != NULL)
-	{
-		char *c = temp->rname;
-		if(c[0] != '#')
-		{
-			temp = temp->next;
-			continue;
-		}
-		TableLoc* table;
-		table = tp->localTable[hashVal(c,TABLE_SIZE)];
-		if(table == NULL)
-		{
-			temp = temp->next;
-			continue;
-		}
-		while(table != NULL)
-		{
-			lexeme = table->varname;
-			width = table->size;
-			
-			printf("%s		",lexeme);
-			if(table->ptr != NULL)
-			{
-				record *rPtr;
-				rPtr = table->ptr;
-				while(rPtr != NULL)
-				{
-					printf("%s",rPtr->type); //print int,int,real
-					if(rPtr->next != NULL)
-						printf(" x ");
+void printFuncNameAndSizes(symbolTable st) {
+    printf("\n=============Activation record sizes==================\n");
+    printf("\nfunctionName		size\n\n");
+    record *tmp = st->functions;
+    tableHeader *th;
+
+    while(tmp!=NULL) {
+        char *str = tmp->recname;
+        if(strcmp(str, "global")==0) {
+            tmp = tmp->next;
+            continue;
+        }
+        th = st->fTable[hashFuncST(str, TABLE_SIZE)];
+        printf("%s		%d\n", th->funName, th->funSize);
+		tmp = tmp->next;
+    }
+    printf("\n======================================================\n");
+}
+
+void printRecordsTypesAndSizes(symbolTable st) {
+    printf("\n==============Record types and sizes==================\n");
+    printf("\nrecordName		typeExpression		width\n\n");
+    tableHeader *th = st->fTable[hashFuncST("global", TABLE_SIZE)];
+    if(!th) return;
+
+    char *lex;
+    int width;
+    record *tmp = th->varList;
+
+    while(tmp!=NULL) {
+        char *str = tmp->recname;
+        if(str[0]!='#') {
+            tmp = tmp->next;
+            continue;
+        }
+        tablePtr *tabPtr = th->localTable[hashFuncST(str, TABLE_SIZE)];
+
+        if(tabPtr==NULL) {
+            tmp = tmp->next;
+            continue;
+        }
+
+        while(tabPtr!=NULL) {
+            lex = tabPtr->name;
+            width = tabPtr->size;
+
+            printf("%s		<", lex);
+            if(tabPtr!=NULL) {
+                record *rPtr;
+				rPtr = tabPtr->ptr;
+				while(rPtr!=NULL) {
+					printf("%s", rPtr->type);
+					if(rPtr->next!=NULL) printf(", ");
 					rPtr=rPtr->next;
-				}							
-				printf("		%d\n",width);
-			}
-			table = table->next;
-		}
-		temp = temp->next;
-	}
+				}			
+				printf(">		%d\n",width);
+            }
+            tabPtr = tabPtr->next;
+        }
+        tmp = tmp->next;
+    }    
+
+    printf("\n======================================================\n");
 }
-
-

@@ -1,42 +1,48 @@
 /* 
- * Group 05
- * Kush Mehta			2018B5A70956P
- * Purusharth Amrut		2018B5A70897P
- * Patel Darsh Rajesh		2018B4A70532P
- * Harsh Jhunjhunwala		2018B5A70691P
- * Jatin Aggarwal		2018B4A70884P
- */
+* Group 05
+* Kush Mehta			2018B5A70956P
+* Purusharth Amrut		2018B5A70897P
+* Patel Darsh Rajesh	2018B4A70532P
+* Harsh Jhunjhunwala	2018B5A70691P
+* Jatin Aggarwal		2018B4A70884P
+*/
 
-// #include"symbolTableDef.h"
 #include "AST.h"
 
-record* insertAtEnd(record* ptr,record *temp);
-int hashVal(char* key, int size);
+int hashFuncST(char *key, int size);
+
+record* insertBack(record *head, record *ptr);
+int lookUpFunc(tablePtr *tabPtr, char *key);
+void addEntryBack(tablePtr **table, tablePtr *tabPtr);
 symbolTable createSymbolTable(int size);
-TableLoc* createEntry(char* type,char* varname,int size,int offset,record* ptr,paramInfo* param);
-tableHeader* createTablePointer(char* fname,int size);
-void fillGlobalUtils2(TableLoc* table, parseTree ast);
-void fillGlobalUtils1(tableHeader* tp, parseTree ast);
-void fillGlobalRecords(tableHeader* tp, parseTree ast);
-void fillGlobalIds(tableHeader* tp,parseTree ast);
-char* extractDatatype(parseTree datatype);
-void addStmtVarUtils2(symbolTable st,tableHeader* tp,parseTree ast,int pos);
-void addStmtVarUtils1(symbolTable st,tableHeader* tp,parseTree ast,int pos) ;
-void addStmtVar(symbolTable st,tableHeader* tp,parseTree ast,int pos);
-void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param);
-void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key);
-void fillFuncIdsUtils1(symbolTable st,parseTree ast) ;
-void fillFuncVar(symbolTable st,parseTree ast) ;
+tablePtr *createNewEntry(char *dataType, char *idName, int idSize, int offset, record *ptr, paramDetail *param);
+tableHeader* createTableHeader(char *funName, int size);
+
+void populateGlobalRecordsHelperDefineType(tableHeader *th, parseTree ast);
+void populateGlobalRecordsHelperUtils2(tablePtr *tabPtr, parseTree ast);
+void populateGlobalRecordsHelperUtils(tableHeader *th, parseTree ast);
+
+void populateGlobalRecordsHelper(tableHeader *th, parseTree ast);
+void populateGlobalIDsHelper(tableHeader *th, parseTree ast);
+
+void populateGlobalRecords(parseTree ast, symbolTable st, tableHeader *th);
+void populateGlobalIDs(parseTree ast, symbolTable st, tableHeader *th);
+
+char* getDataType(parseTree ast);
+void populateFuncParameters(symbolTable st, parseTree ast, int idx, paramDetail *param);
+void populateStmtVarUtils2(symbolTable st, tableHeader *th, parseTree ast, int idx);
+void populateStmtVarUtils(symbolTable st, tableHeader *th, parseTree ast, int idx);
+void populateStmtVar(symbolTable st, tableHeader *th, parseTree ast, int idx);
+void populateFuncUtils(symbolTable st, parseTree ast, char *funcName);
+void populateFuncOther(symbolTable st, parseTree ast);
+void populateFunc(symbolTable st, parseTree ast);
+
+symbolTable populateSymbolTable(parseTree ast);
+
+void printFuncTableVariables(record *tmp, tableHeader *th);
+void printFuncTable(tableHeader *th);
 void printSymbolTable(symbolTable st);
-int lookup(TableLoc* presentList,char* newEntry);
-void addEntryAtEnd(TableLoc** presentList,TableLoc* newEntry);
-void globalRecordsUpdate(parseTree ast,symbolTable st,tableHeader* tp);
-void globalIdsUpdate(parseTree ast,symbolTable st,tableHeader* tp);
-symbolTable fillSymbolTable(parseTree ast);
-void printTable(tableHeader* tp);
-void printFuncVariables(record* temp,tableHeader* tp);
 
 void printGlobalVariables(symbolTable st);
-void printFnameAndSizes(symbolTable st);
-void printRecDefAndSize(symbolTable st);
-//void printRecord(tablePointer* tp)
+void printFuncNameAndSizes(symbolTable st);
+void printRecordsTypesAndSizes(symbolTable st);
