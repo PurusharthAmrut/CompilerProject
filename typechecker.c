@@ -11,43 +11,44 @@
 
 int TypeChecker(parsetree root, symbolTable s){
 
-	if(root.numChild != 0 && (root.nt == function || root.nt == mainFunction))
+	if(root.nt == function || root.nt == mainFunction)
 	{
 		tp = root.th;
 	} 
-	int type1, type2;
-	type1 = 7;
-	type2 = 8;
-	if(root.terminal == NULL){
+
+	int Atype = error + 1;
+	int Btype = Atype + 2;;
+
+	if(root.nt != -1){
 		switch(root.nt){
-			case assignmentStmt:
-			;
-				type1 = TypeChecker(root.children[0], s);
-				
-				type2 = TypeChecker(root.children[1], s);
-				if(type1 == error || type2 == error) break;
-				else if(type1==integer && type2==integer){
+			case assignmentStmt:			
+				Atype = TypeChecker(root.children[0], s);
+				Btype = TypeChecker(root.children[1], s);
+
+				if(Atype == error || Btype == error) return error;
+
+				else if(Atype==integer && Btype==integer){
 					return integer;
-				} else if(type1==integer && type2==real){
+				} else if(Atype==integer && Btype==real){
 					parsetree curr = root;
 					while(curr.terminal == NULL && curr.numChild != 0){
 						curr = curr.children[0];
 					}
-					printf("Type error in line %llu:Type mismatch", curr.terminal->lineNum);
+					printf("line %llu: type mismatch", curr.terminal->lineNum);
 					break;
-				} else if(type1==real && type2==integer){
+				} else if(Atype==real && Btype==integer){
 					return real;
-				} else if(type1==real && type2==real){
+				} else if(Atype==real && Btype==real){
 					return real;
 				}
 
-			case booleanExpression:
-			;
+			case booleanExpression:			
 				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[0], s);
-					type2 = TypeChecker(root.children[2], s);
+					Atype = TypeChecker(root.children[0], s);
+					Btype = TypeChecker(root.children[2], s);
+
 					if((root.children[1].terminal->tokenType == TK_AND) || (root.children[1].terminal->tokenType == TK_OR)){
-						if(type1 != boolean || type2 != boolean){
+						if(Atype != boolean || Btype != boolean){
 							parsetree curr = root;
 							while(curr.terminal == NULL && curr.numChild != 0){
 			
@@ -59,15 +60,15 @@ int TypeChecker(parsetree root, symbolTable s){
 						}	
 					}
 					else{
-						if((type1!= integer && type1!= real)||(type2!=integer&&type2!=real))
+						if((Atype!= integer && Atype!= real)||(Btype!=integer&&Btype!=real))
 						{
-							printf("Type error in line %llu: Relational operations are applied only on int and real but your expression contains other data types.\n", root.children[0].terminal->lineNum);
+							printf("line %llu: TYPE ERROR - relational operator requires int or real operands\n", root.children[0].terminal->lineNum);
 							return error;
 							break;
 						}
-						if(type1!=type2)
+						if(Atype!=Btype)
 						{
-							printf("Type Error in line %llu: Different types\n", root.children[0].terminal->lineNum);
+							printf("line %llu: TYPE ERROR - both operands should have same type\n", root.children[0].terminal->lineNum);
 							return error;
 							break;
 						}
@@ -76,102 +77,97 @@ int TypeChecker(parsetree root, symbolTable s){
 					break;
 				}
 				else if (root.numChild == 2){
-					type1 = TypeChecker(root.children[1], s);
-					if(type1 == error){
+					Atype = TypeChecker(root.children[1], s);
+					if(Atype == error){
 						return error;
 						break;
 					}
 						
-					else if(type1!= boolean)
+					else if(Atype!= boolean)
 					{
-						printf("Type error in line %llu: NOT operator can be applied only to boolean types but you expression contains non-boolean values.\n", root.children[0].terminal->lineNum);
+						printf("line %llu: TYPE ERROR - NOT operator requires boolean operands\n", root.children[0].terminal->lineNum);
 						return error;
 					}
 					return boolean;
 				}
 				break;
 
-			case arithmeticExpression:
-			;
-				type1 = TypeChecker(root.children[0], s);
-				type2 = TypeChecker(root.children[1], s);
-				if(type1==error || type2==error){
-					break;
-				} else if(type1==integer && type2==integer){
+			case arithmeticExpression:			
+				Atype = TypeChecker(root.children[0], s);
+				Btype = TypeChecker(root.children[1], s);
+				if(Atype==error || Btype==error){
+					return error;
+				} else if(Atype==integer && Btype==integer){
 					return integer;
-				} else if(type1==integer && type2==real){
+				} else if(Atype==integer && Btype==real){
 					return real;
-				} else if(type1==real && type2==integer){
+				} else if(Atype==real && Btype==integer){
 					return real;
-				} else if(type1==real && type2==real){
+				} else if(Atype==real && Btype==real){
 					return real;
 				}
 				break;
 
-			case term:
-			;
-				type1 = TypeChecker(root.children[0], s);
-				type2 = TypeChecker(root.children[1], s);
-				if(type1==error || type2==error){
+			case term:			
+				Atype = TypeChecker(root.children[0], s);
+				Btype = TypeChecker(root.children[1], s);
+				if(Atype==error || Btype==error){
 					break;
-				} else if(type1==integer && type2==integer){
+				} else if(Atype==integer && Btype==integer){
 					return integer;
-				} else if(type1==integer && type2==real){
+				} else if(Atype==integer && Btype==real){
 					return real;
-				} else if(type1==real && type2==integer){
+				} else if(Atype==real && Btype==integer){
 					return real;
-				} else if(type1==real && type2==real){
+				} else if(Atype==real && Btype==real){
 					return real;
 				}
 				break;
 
-			case termPrime:
-			;
+			case termPrime:			
 				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[1], s);
-					type2 = TypeChecker(root.children[2], s);
-					if(type1==error || type2==error){
+					Atype = TypeChecker(root.children[1], s);
+					Btype = TypeChecker(root.children[2], s);
+					if(Atype==error || Btype==error){
 						break;
-					} else if(type1==integer && type2==integer){
+					} else if(Atype==integer && Btype==integer){
 						return integer;
-					} else if(type1==integer && type2==real){
+					} else if(Atype==integer && Btype==real){
 						return real;
-					} else if(type1==real && type2==integer){
+					} else if(Atype==real && Btype==integer){
 						return real;
-					} else if(type1==real && type2==real){
+					} else if(Atype==real && Btype==real){
 						return real;
 					}
 				} else{
-					type1 = TypeChecker(root.children[1], s);
-					return type1;
+					Atype = TypeChecker(root.children[1], s);
+					return Atype;
 				}
 				break;
 
-			case expPrime:
-			;
+			case expPrime:			
 				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[1], s);
-					type2 = TypeChecker(root.children[2], s);
-					if(type1==error || type2==error){
+					Atype = TypeChecker(root.children[1], s);
+					Btype = TypeChecker(root.children[2], s);
+					if(Atype==error || Btype==error){
 						break;
-					} else if(type1==integer && type2==integer){
+					} else if(Atype==integer && Btype==integer){
 						return integer;
-					} else if(type1==integer && type2==real){
+					} else if(Atype==integer && Btype==real){
 						return real;
-					} else if(type1==real && type2==integer){
+					} else if(Atype==real && Btype==integer){
 						return real;
-					} else if(type1==real && type2==real){
+					} else if(Atype==real && Btype==real){
 						return real;
 					}	
 				}
 				else{
-					type1 = TypeChecker(root.children[1], s);
-					return type1;
+					Atype = TypeChecker(root.children[1], s);
+					return Atype;
 				}
 				break;	
 
-			case singleOrRecId:
-			;
+			case singleOrRecId:			
 				record* rectype;
 				if(s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme,9973)])
 					rectype  = s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
@@ -201,8 +197,7 @@ int TypeChecker(parsetree root, symbolTable s){
 	}
 	else{
 		switch(root.terminal->tokenType){
-			case TK_ID:
-			;
+			case TK_ID:			
 				if(tp == NULL) break;
 				
 				char* ch;
