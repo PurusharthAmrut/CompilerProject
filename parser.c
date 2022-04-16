@@ -506,7 +506,7 @@ void copyparsetree(parseTree dst, parseTree src) {
     (*dst).numChild = (*src).numChild;
     (*dst).children = (*src).children;
     
-    (*dst).numChildAST = (*src).numChildAST;
+    // (*dst).numChildAST = (*src).numChildAST;
     (*dst).th = (*src).th;
 
     (*src).terminal = NULL;

@@ -20,8 +20,8 @@ LinkedList addOneElem(LinkedList l, parseTree t) {
 }
 
 LinkedList findBooleanTerminals(parseTree root, LinkedList l) {
-    if(root->numChildAST==0) l = addOneElem(l, root);
-    else if(root->numChildAST==2) {
+    if(root->numChild==0) l = addOneElem(l, root);
+    else if(root->numChild==2) {
         l = findBooleanTerminals(&(root->children[0]), l);
         l = findBooleanTerminals(&(root->children[1]), l);
     }else {
@@ -46,8 +46,8 @@ parseTree* getChildren(parseTree root, int *size) {
         parseTree currNode = root;
         int cnt = 0;
 
-        while(currNode->numChildAST!=0) {
-            if(currNode->numChildAST==1) currNode = &(currNode->children[0]);
+        while(currNode->numChild!=0) {
+            if(currNode->numChild==1) currNode = &(currNode->children[0]);
             currNode = &(currNode->children[1]);
             cnt++;
         }
@@ -58,8 +58,8 @@ parseTree* getChildren(parseTree root, int *size) {
         currNode = root;
         cnt = 0;
 
-        while(currNode->numChildAST!=0) {
-            if(currNode->numChildAST==1) currNode = &(currNode->children[0]);
+        while(currNode->numChild!=0) {
+            if(currNode->numChild==1) currNode = &(currNode->children[0]);
             functionList[cnt++] = &(currNode->children[0]);
             currNode = &(currNode->children[1]);
         }
@@ -73,13 +73,13 @@ parseTree* getChildren(parseTree root, int *size) {
         parseTree currNode = root;
         int cnt = 0;
 
-        while(currNode->numChildAST!=1 && 
+        while(currNode->numChild!=1 && 
         currNode->children[0].nt!=currNode->children[1].nt) {
             currNode = &(currNode->children[1]);
             cnt++;
         }
 
-        if(currNode->numChildAST==1) cnt++;
+        if(currNode->numChild==1) cnt++;
         else cnt += 2;
 
         parseTree *functionList = (parseTree*)malloc(cnt*sizeof(parseTree));
@@ -87,13 +87,13 @@ parseTree* getChildren(parseTree root, int *size) {
         currNode = root;
         cnt = 0;
 
-        while(currNode->numChildAST!=1 && 
+        while(currNode->numChild!=1 && 
         currNode->children[0].nt!=currNode->children[1].nt) {
             functionList[cnt++] = &(currNode->children[0]);
             currNode = &(currNode->children[1]);
         }
 
-        if(currNode->numChildAST==1) functionList[cnt] = &(currNode->children[0]);
+        if(currNode->numChild==1) functionList[cnt] = &(currNode->children[0]);
         else {
             functionList[cnt++] = &(currNode->children[0]);
             functionList[cnt] = &(currNode->children[1]);
@@ -136,7 +136,7 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
             }
             break;
         case iterativeStmt:
-            if(stmt->numChildAST==3) {
+            if(stmt->numChild==3) {
                 int tmpSize = 0;
                 parseTree *tmpList = getChildren(&(stmt->children[2]), &tmpSize);
 
@@ -153,7 +153,7 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
             }
 
             if(whileStmtSemantics(stmt)==-1) {
-                if(stmt->children[0].numChildAST==3) {
+                if(stmt->children[0].numChild==3) {
                     printf("Line : %llu None of the variables participating in the iterations of the while loop gets updated.\n", stmt->children[0].children[1].terminal->lineNum);
 				}else{
 					printf("Line : %llu None of the variables participating in the iterations of the while loop gets updated.\n", stmt->children[0].children[0].terminal->lineNum);
@@ -161,7 +161,7 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
             }
             break;
         case conditionalStmt:
-            if(stmt->numChildAST==4) {
+            if(stmt->numChild==4) {
                 int tmp1Size, tmp2Size;
                 tmp1Size = tmp2Size = 0;
                 parseTree *tmpList1 = getChildren(&(stmt->children[2]), &tmp1Size);
@@ -179,7 +179,7 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
                     if(checkForFunctionCallStmts(tmpList2[k], functionList, s,
                     assignedVal, tmpOutputPar, i, size)==-1) error = -1;
                 }
-            }else if(stmt->numChildAST==3) {
+            }else if(stmt->numChild==3) {
                 int tmpSize = 0;
                 parseTree *tmpList = getChildren(&(stmt->children[2]), &tmpSize);
 
@@ -227,7 +227,7 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
             char *nameStr;
             nameStr = malloc(30*sizeof(char));
 
-            if(stmt->numChildAST==3) strcpy(nameStr, stmt->children[1].terminal->lexeme);
+            if(stmt->numChild==3) strcpy(nameStr, stmt->children[1].terminal->lexeme);
             else strcpy(nameStr, stmt->children[0].terminal->lexeme);
 
             tableHeader *callee = s->fTable[hashFuncLUT(nameStr, 10000)];
@@ -250,7 +250,7 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
 			}
 
 			parseTree outputParam = &(stmt->children[0]);
-			if(outputParam->numChildAST!=callee->numOfOutPar){
+			if(outputParam->numChild!=callee->numOfOutPar){
 				printf("Line : %llu Number of parameters required for function %s does not match number of returned parameters\n", stmt->children[1].terminal->lineNum, stmt->children[1].terminal->lexeme);
 				error = -1;
 			}
@@ -329,22 +329,22 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
 
 int checkSemanticsOfFunction(parseTree root, symbolTable s) {
     int error = 0;
-    if(root->numChildAST==2) {
+    if(root->numChild==2) {
         int size = 0;
         parseTree *functionList = getChildren(&(root->children[0]), &size);
 
         int flag = 0;
         for(int i=0; i<size; i++) {
             tableHeader *tmpEntry = functionList[i]->th;
-            if(functionList[i]->children[functionList[i]->numChildAST-1].nt==stmts) {
-                parseTree tmp = &(functionList[i]->children[functionList[i]->numChildAST-1]);
+            if(functionList[i]->children[functionList[i]->numChild-1].nt==stmts) {
+                parseTree tmp = &(functionList[i]->children[functionList[i]->numChild-1]);
 
-                if(tmp->children[tmp->numChildAST-1].nt==returnStmt || 
-                (tmp->children[tmp->numChildAST-1].terminal!=NULL && 
-                tmp->children[tmp->numChildAST-1].terminal->tokenType==TK_ID)) {
-                    parseTree returnStmtNode = &(tmp->children[tmp->numChildAST-1]);
+                if(tmp->children[tmp->numChild-1].nt==returnStmt || 
+                (tmp->children[tmp->numChild-1].terminal!=NULL && 
+                tmp->children[tmp->numChild-1].terminal->tokenType==TK_ID)) {
+                    parseTree returnStmtNode = &(tmp->children[tmp->numChild-1]);
 
-					if(returnStmtNode->numChildAST!=0 && returnStmtNode->numChildAST != tmpEntry->numOfOutPar){
+					if(returnStmtNode->numChild!=0 && returnStmtNode->numChild != tmpEntry->numOfOutPar){
 						printf("Error in function %s, number of parameters does not match the number output parameters in function definition\n", 
                         tmpEntry->funName);
 						error = -1; 
@@ -356,7 +356,7 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
 
 					int idSize = 0;
 					parseTree *idList;
-					if(tmp->children[tmp->numChildAST-1].nt==returnStmt){
+					if(tmp->children[tmp->numChild-1].nt==returnStmt){
 						idList = getChildren(&(returnStmtNode->children[0].children[0]), &idSize);
 					}else{
 						idList = malloc(sizeof(parseTree));
@@ -399,15 +399,15 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
 
                     if(flag) continue;
 
-                    if(functionList[i]->children[functionList[i]->numChildAST-2].nt==output_par) {
-						parseTree outputParam = &(functionList[i]->children[functionList[i]->numChildAST-2]);
+                    if(functionList[i]->children[functionList[i]->numChild-2].nt==output_par) {
+						parseTree outputParam = &(functionList[i]->children[functionList[i]->numChild-2]);
 						int idsSize = 0;
 						parseTree* idsList = getChildren(outputParam, &idsSize);
 						int *assignedVal = (int*)malloc(idsSize*sizeof(int));
 						memset(assignedVal, 0, idsSize);
 
-						if(tmp->numChildAST!=1 && tmp->children[tmp->numChildAST-2].nt==otherStmts){
-							parseTree otherStmts = &(tmp->children[tmp->numChildAST-2]);
+						if(tmp->numChild!=1 && tmp->children[tmp->numChild-2].nt==otherStmts){
+							parseTree otherStmts = &(tmp->children[tmp->numChild-2]);
 							int stmtSize = 0;
 							parseTree *stmtList = getChildren(otherStmts, &stmtSize);
 
@@ -424,14 +424,14 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
 						}
 					}
                 }else {
-                    if(functionList[i]->children[functionList[i]->numChildAST - 2].nt==output_par){
-						parseTree outputParam = &(functionList[i]->children[functionList[i]->numChildAST-2]);
+                    if(functionList[i]->children[functionList[i]->numChild - 2].nt==output_par){
+						parseTree outputParam = &(functionList[i]->children[functionList[i]->numChild-2]);
 						int idsSize = 0;
 						parseTree* idsList = getChildren(outputParam, &idsSize);
 						int *assignedVal = (int*)malloc(idsSize*sizeof(int));
 						memset(assignedVal, 0, idsSize);
-						if(tmp->numChildAST!=1 && tmp->children[tmp->numChildAST-2].nt==otherStmts) {
-							parseTree otherStmts = &(tmp->children[tmp->numChildAST-2]);
+						if(tmp->numChild!=1 && tmp->children[tmp->numChild-2].nt==otherStmts) {
+							parseTree otherStmts = &(tmp->children[tmp->numChild-2]);
 							int stmtSize = 0;
 							parseTree *stmtList = getChildren(otherStmts, &stmtSize);
 
@@ -458,9 +458,9 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
         functionList = getChildren(&(root->children[1]), &size);
         parseTree tmp = &(root->children[1].children[0]);
 
-        if(tmp->numChildAST!=1 && 
-        tmp->children[tmp->numChildAST-2].nt==otherStmts) {
-            parseTree otherStmts = &(tmp->children[tmp->numChildAST-2]);
+        if(tmp->numChild!=1 && 
+        tmp->children[tmp->numChild-2].nt==otherStmts) {
+            parseTree otherStmts = &(tmp->children[tmp->numChild-2]);
             int stmtSize = 0;
             parseTree *stmtList = getChildren(otherStmts, &stmtSize);
 
@@ -474,9 +474,9 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
         parseTree *functionList = getChildren(&(root->children[0]), &size);
         parseTree tmp = &(root->children[0].children[0]);
 
-        if(tmp->numChildAST!=1 && 
-        tmp->children[tmp->numChildAST-2].nt==otherStmts) {
-            parseTree tmpOtherStmts = &(tmp->children[tmp->numChildAST-2]);
+        if(tmp->numChild!=1 && 
+        tmp->children[tmp->numChild-2].nt==otherStmts) {
+            parseTree tmpOtherStmts = &(tmp->children[tmp->numChild-2]);
             int stmtSize = 0;
             parseTree *stmtList = getChildren(tmpOtherStmts, &stmtSize);
 

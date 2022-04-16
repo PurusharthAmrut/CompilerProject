@@ -12,10 +12,10 @@
 void nodeCountAST(parseTree root, int* ans) {
 	if(!root) return;
 
-	// *ans = *ans + root->numChildAST;
+	// *ans = *ans + root->numChild;
 	*ans = *ans + root->numChild;
 
-	// for(int i=0; i<root->numChildAST; i++) nodeCountAST(&(root->children[i]), ans);
+	// for(int i=0; i<root->numChild; i++) nodeCountAST(&(root->children[i]), ans);
 	for(int i=0; i<root->numChild; i++) nodeCountAST(&(root->children[i]), ans);
 }
 
@@ -70,7 +70,7 @@ void copy(parseTree dst, parseTree src)
     src->children = (void*)NULL;
 
 	// dst->ruleNo = src->ruleNo;
-	// dst->numChildAST = src->numChildAST;
+	// dst->numChild = src->numChild;
 	// dst->tp = NULL;
 }
 
@@ -78,13 +78,13 @@ void copy(parseTree dst, parseTree src)
 // {
 // 	if(curr==NULL)
 // 	return ; 
-// 	if(curr -> numChildAST == 0)
+// 	if(curr -> numChild == 0)
 // 	{
 // 		if(!useful(curr->terminal->tokenType))
-// 		par->numChildAST--;
+// 		par->numChild--;
 // 		return;
 // 	}
-// 	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
+// 	if(curr->numChild == 1 && curr->children[0].numChild == 0)
 // 	{
 // 		if(useful(curr->children[0].terminal->tokenType))
 // 		{
@@ -97,13 +97,13 @@ void copy(parseTree dst, parseTree src)
 // 	for(int i = 0; i < count; i++)
 // 	createASTUtils(&(curr->children[i]),curr);
 	
-// 	if(curr->numChildAST == 0)
-// 		par->numChildAST--;
-// 	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
+// 	if(curr->numChild == 0)
+// 		par->numChild--;
+// 	if(curr->numChild == 1 && curr->children[0].numChild == 0)
 // 	{
 // 		for(int i = 0; i < curr->numChild ;i++)
 // 		{
-// 			if(curr->children[i].numChildAST==0 && curr->children[i].nt==-1)
+// 			if(curr->children[i].numChild==0 && curr->children[i].nt==-1)
 // 			{
 // 				if(useful(curr->children[i].terminal->tokenType))
 // 					copy(curr,&(curr->children[i]));
@@ -116,11 +116,11 @@ void copy(parseTree dst, parseTree src)
 // {
 // 	if(!root)
 // 	return;
-// 	ast->children = malloc((root->numChildAST)*sizeof(parsetree));
+// 	ast->children = malloc((root->numChild)*sizeof(parsetree));
 // 	int m=0;
 // 	for(int i = 0;i < root->numChild;i++) 
 // 	{
-// 		if(root->children[i].numChildAST!=0)
+// 		if(root->children[i].numChild!=0)
 // 		{
 // 			copy(&(ast->children[m]),&(root->children[i]));
 // 			buildAST(&(ast->children[m]),&(root->children[i]));
