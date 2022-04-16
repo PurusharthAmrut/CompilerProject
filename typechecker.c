@@ -30,11 +30,11 @@ int TypeChecker(parsetree root, symbolTable sTable){
 				else if(Atype==integer && Btype==integer){
 					return integer;
 				} else if(Atype==integer && Btype==real){
-					parsetree curr = root;
-					while(curr.terminal == NULL && curr.numChild != 0){
-						curr = curr.children[0];
+					parsetree temp = root;
+					while(temp.terminal == NULL && temp.numChild != 0){
+						temp = temp.children[0];
 					}
-					printf("Type error in line %llu: type mismatch", curr.terminal->lineNum);
+					printf("Type error in line %llu: type mismatch", temp.terminal->lineNum);
 					break;
 				} else if(Atype==real && Btype==integer){
 					return real;
@@ -49,8 +49,8 @@ int TypeChecker(parsetree root, symbolTable sTable){
 
 					if((root.children[1].terminal->tokenType == TK_AND) || (root.children[1].terminal->tokenType == TK_OR)){
 						if(Atype != boolean || Btype != boolean){
-							parsetree curr = root;
-							while(curr.terminal == NULL && curr.numChild != 0){
+							parsetree temp = root;
+							while(temp.terminal == NULL && temp.numChild != 0){
 			
 								temp = temp.children[0];
 							}
@@ -59,7 +59,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 							break;
 						}	
 					} else if(root.children[1].terminal->tokenType == TK_OR){
-						if(type1 != boolean || type2 != boolean){
+						if(Atype != boolean || Btype != boolean){
 							parsetree temp = root;
 							while(temp.terminal == NULL && temp.numChild != 0){
 			
@@ -178,7 +178,8 @@ int TypeChecker(parsetree root, symbolTable sTable){
 				}
 				break;	
 
-			case singleOrRecId:			
+			case singleOrRecId:
+			;			
 				record* rectype;
 				tablePtr* globalEntry = sTable->fTable[hashFuncLUT("global", 9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)];
 				if(globalEntry != NULL)
