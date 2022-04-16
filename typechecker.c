@@ -172,24 +172,24 @@ int TypeChecker(parsetree root, symbolTable s){
 
 			case singleOrRecId:
 			;
-				record* rec;
+				record* rectype;
 				if(s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme,9973)])
-					rec  = s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
+					rectype  = s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
 				else if(tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)])
-					rec = tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
-				else break ;
+					rectype = tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
+				else break;
 
-				if(rec == NULL) break;
-				while(rec != NULL){
-					if(!strcmp(rec->recname , root.children[1].terminal->lexeme)) {
-						if(strcmp(rec->type,"int")==0)
+				if(rectype == NULL) break;
+				while(rectype != NULL){
+					if(!strcmp(rectype->recname , root.children[1].terminal->lexeme)) {
+						if(strcmp(rectype->type,"int")==0)
 							return integer;
-						else if(strcmp(rec->type,"real")==0)
+						else if(strcmp(rectype->type,"real")==0)
 							return real;
 						else 
 							return rec;
 					}
-					rec = rec->next;
+					rectype = rectype->next;
 				}
 
 			default:
