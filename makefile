@@ -1,5 +1,5 @@
-edit: driver_test.o utils.o lexer.o Stack.o parser.o AST.o symbolTable1.o typechecker.o semanticAnalyzer1.o
-	gcc -o driver_test driver_test.o utils.o lexer.o Stack.o parser.o AST.o symbolTable1.o typechecker.o semanticAnalyzer1.o
+edit: driver.o utils.o lexer.o Stack.o parser.o AST.o symbolTable1.o typechecker.o semanticAnalyzer1.o
+	gcc -o driver driver.o utils.o lexer.o Stack.o parser.o AST.o symbolTable1.o typechecker.o semanticAnalyzer1.o
 
 utils.o: utils.c utils.h
 	gcc -c utils.c
@@ -25,8 +25,8 @@ typechecker.o: typechecker.c typechecker.h
 semanticAnalyzer1.o: semanticAnalyzer1.c semanticAnalyzer1.h
 	gcc -c semanticAnalyzer1.c
 
-driver_test.o: driver_test.c 
-	gcc -c driver_test.c
+driver.o: driver.c 
+	gcc -c driver.c
 
 clean:
-	rm driver_test driver_test.o utils.o lexer.o Stack.o parser.o AST.o symbolTable1.o typechecker.o semanticAnalyzer1.o
+	rm driver driver.o utils.o lexer.o Stack.o parser.o AST.o symbolTable1.o typechecker.o semanticAnalyzer1.o
