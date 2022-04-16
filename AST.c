@@ -68,76 +68,10 @@ void copy(parseTree dst, parseTree src)
     // and children nodes, not exactly copying but moving the pointers
     src->terminal = NULL;
     src->children = (void*)NULL;
-
-	// dst->ruleNo = src->ruleNo;
-	// dst->numChildAST = src->numChildAST;
-	// dst->tp = NULL;
 }
 
-// void createASTUtils(parseTree curr, parseTree par)
-// {
-// 	if(curr==NULL)
-// 	return ; 
-// 	if(curr -> numChildAST == 0)
-// 	{
-// 		if(!useful(curr->terminal->tokenType))
-// 		par->numChildAST--;
-// 		return;
-// 	}
-// 	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
-// 	{
-// 		if(useful(curr->children[0].terminal->tokenType))
-// 		{
-// 			copy(curr,&(curr->children[0]));
-// 			return;
-// 		}
-// 	}
-	
-// 	int count = curr->numChild;
-// 	for(int i = 0; i < count; i++)
-// 	createASTUtils(&(curr->children[i]),curr);
-	
-// 	if(curr->numChildAST == 0)
-// 		par->numChildAST--;
-// 	if(curr->numChildAST == 1 && curr->children[0].numChildAST == 0)
-// 	{
-// 		for(int i = 0; i < curr->numChild ;i++)
-// 		{
-// 			if(curr->children[i].numChildAST==0 && curr->children[i].nt==-1)
-// 			{
-// 				if(useful(curr->children[i].terminal->tokenType))
-// 					copy(curr,&(curr->children[i]));
-// 			}
-// 		}
-// 	}
-// }
 
-// void buildAST(parseTree ast,parseTree root)
-// {
-// 	if(!root)
-// 	return;
-// 	ast->children = malloc((root->numChildAST)*sizeof(parsetree));
-// 	int m=0;
-// 	for(int i = 0;i < root->numChild;i++) 
-// 	{
-// 		if(root->children[i].numChildAST!=0)
-// 		{
-// 			copy(&(ast->children[m]),&(root->children[i]));
-// 			buildAST(&(ast->children[m]),&(root->children[i]));
-// 			m++;
-// 		}
-// 		else
-// 		{
-// 			if(root->children[i].nt==-1 && useful(root->children[i].terminal->tokenType))
-// 			{
-// 				copy(&(ast->children[m]),&(root->children[i]));
-// 				m++;
-// 			}
-// 		}
-// 	}
-// }
-
-parseTree createASTDummy(parseTree root){
+parseTree createAST(parseTree root){
 	if(root==NULL) return NULL;
 	
 	if(root->numChild > 1){
@@ -210,21 +144,10 @@ parseTree createASTDummy(parseTree root){
 	
 	return root;
 }
-	
-parseTree createAST(parseTree root)
-{
-    // isn't this just a redundant function
-	// createASTUtils(root,NULL);
-	// parseTree ast = malloc(sizeof(parsetree));
-	// copy(ast, root);
-	// buildAST(ast,root);
-	// return ast;
-	return createASTDummy(root);
-}
+
 
 void printAST(parseTree ast, nonTerminal parent)
 {
-    // if the format is same as printParseTree, then its a redundant function
     if(ast==NULL) return;
 
     if(ast->nt==-1) {
@@ -232,7 +155,7 @@ void printAST(parseTree ast, nonTerminal parent)
         printf("Lexeme: %s, LineNo: %lld, TokenName: %s, ValueOfNumber: %s, parentNodeSymbol: %s, isLeafNode: YES, NodeSymbol: %s\n",
         ast->terminal->lexeme, ast->terminal->lineNum, ast->terminal->lexeme, 
         ( (ast->terminal->tokenType==TK_INT || ast->terminal->tokenType==TK_REAL) ? ast->terminal->lexeme : "----" ), 
-        getNonTermString(parent), getTermString(ast->terminal->tokenType));
+        getNonTermString(parent), getTermRepId(ast->terminal->tokenType));
         return;
     }
 
@@ -255,7 +178,7 @@ void printAST(parseTree ast, nonTerminal parent)
 void printASTDetails(parseTree ast) {
     if(ast==NULL) return;
 
-    if(ast->nt==-1) printf("%s ", getTermString(ast->terminal->tokenType));
+    if(ast->nt==-1) printf("%s ", getTermRepId(ast->terminal->tokenType));
     else {
         printf("%s -> ", getNonTermString(ast->nt));
         for(int i=0; i<ast->numChild; i++) printASTDetails(&(ast->children[i]));

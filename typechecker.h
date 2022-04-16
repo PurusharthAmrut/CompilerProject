@@ -20,3 +20,4 @@ typedef enum{
 } types;
 
 int TypeChecker(parsetree root, symbolTable s);
+struct tableHeader* tp;
