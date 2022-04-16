@@ -9,7 +9,7 @@
 
 #include "typechecker.h"
 
-int TypeChecker(parsetree root, symbolTable s){
+int TypeChecker(parsetree root, symbolTable sTable){
 
 	if(root.numChild != 0 && (root.nt == function || root.nt == mainFunction))
 	{
@@ -22,18 +22,18 @@ int TypeChecker(parsetree root, symbolTable s){
 		switch(root.nt){
 			case assignmentStmt:
 			;
-				type1 = TypeChecker(root.children[0], s);
+				type1 = TypeChecker(root.children[0], sTable);
 				
-				type2 = TypeChecker(root.children[1], s);
+				type2 = TypeChecker(root.children[1], sTable);
 				if(type1 == error || type2 == error) break;
 				else if(type1==integer && type2==integer){
 					return integer;
 				} else if(type1==integer && type2==real){
-					parsetree curr = root;
-					while(curr.terminal == NULL && curr.numChild != 0){
-						curr = curr.children[0];
+					parsetree temp = root;
+					while(temp.terminal == NULL && temp.numChild != 0){
+						temp = temp.children[0];
 					}
-					printf("Type error in line %llu:Type mismatch", curr.terminal->lineNum);
+					printf("Type error in line %llu:Type mismatch", temp.terminal->lineNum);
 					break;
 				} else if(type1==real && type2==integer){
 					return real;
@@ -44,19 +44,30 @@ int TypeChecker(parsetree root, symbolTable s){
 			case booleanExpression:
 			;
 				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[0], s);
-					type2 = TypeChecker(root.children[2], s);
-					if((root.children[1].terminal->tokenType == TK_AND) || (root.children[1].terminal->tokenType == TK_OR)){
+					type1 = TypeChecker(root.children[0], sTable);
+					type2 = TypeChecker(root.children[2], sTable);
+					if(root.children[1].terminal->tokenType == TK_AND){
 						if(type1 != boolean || type2 != boolean){
-							parsetree curr = root;
-							while(curr.terminal == NULL && curr.numChild != 0){
+							parsetree temp = root;
+							while(temp.terminal == NULL && temp.numChild != 0){
 			
-								curr = curr.children[0];
+								temp = temp.children[0];
 							}
-							printf("Type error in line %llu: Logical operators are applied only to boolean types but your expression contins non-boolean types. \n", curr.terminal->lineNum);
+							printf("Type error in line %llu: Logical operators are applied only to boolean types but your expression contins non-boolean types. \n", temp.terminal->lineNum);
 							return error;
 							break;
 						}	
+					} else if(root.children[1].terminal->tokenType == TK_OR){
+						if(type1 != boolean || type2 != boolean){
+							parsetree temp = root;
+							while(temp.terminal == NULL && temp.numChild != 0){
+			
+								temp = temp.children[0];
+							}
+							printf("Type error in line %llu: Logical operators are applied only to boolean types but your expression contins non-boolean types. \n", temp.terminal->lineNum);
+							return error;
+							break;
+						}
 					}
 					else{
 						if((type1!= integer && type1!= real)||(type2!=integer&&type2!=real))
@@ -65,7 +76,7 @@ int TypeChecker(parsetree root, symbolTable s){
 							return error;
 							break;
 						}
-						if(type1!=type2)
+						else if(type1!=type2)
 						{
 							printf("Type Error in line %llu: Different types\n", root.children[0].terminal->lineNum);
 							return error;
@@ -76,7 +87,7 @@ int TypeChecker(parsetree root, symbolTable s){
 					break;
 				}
 				else if (root.numChild == 2){
-					type1 = TypeChecker(root.children[1], s);
+					type1 = TypeChecker(root.children[1], sTable);
 					if(type1 == error){
 						return error;
 						break;
@@ -93,8 +104,8 @@ int TypeChecker(parsetree root, symbolTable s){
 
 			case arithmeticExpression:
 			;
-				type1 = TypeChecker(root.children[0], s);
-				type2 = TypeChecker(root.children[1], s);
+				type1 = TypeChecker(root.children[0], sTable);
+				type2 = TypeChecker(root.children[1], sTable);
 				if(type1==error || type2==error){
 					break;
 				} else if(type1==integer && type2==integer){
@@ -110,8 +121,8 @@ int TypeChecker(parsetree root, symbolTable s){
 
 			case term:
 			;
-				type1 = TypeChecker(root.children[0], s);
-				type2 = TypeChecker(root.children[1], s);
+				type1 = TypeChecker(root.children[0], sTable);
+				type2 = TypeChecker(root.children[1], sTable);
 				if(type1==error || type2==error){
 					break;
 				} else if(type1==integer && type2==integer){
@@ -128,8 +139,8 @@ int TypeChecker(parsetree root, symbolTable s){
 			case termPrime:
 			;
 				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[1], s);
-					type2 = TypeChecker(root.children[2], s);
+					type1 = TypeChecker(root.children[1], sTable);
+					type2 = TypeChecker(root.children[2], sTable);
 					if(type1==error || type2==error){
 						break;
 					} else if(type1==integer && type2==integer){
@@ -142,7 +153,7 @@ int TypeChecker(parsetree root, symbolTable s){
 						return real;
 					}
 				} else{
-					type1 = TypeChecker(root.children[1], s);
+					type1 = TypeChecker(root.children[1], sTable);
 					return type1;
 				}
 				break;
@@ -150,8 +161,8 @@ int TypeChecker(parsetree root, symbolTable s){
 			case expPrime:
 			;
 				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[1], s);
-					type2 = TypeChecker(root.children[2], s);
+					type1 = TypeChecker(root.children[1], sTable);
+					type2 = TypeChecker(root.children[2], sTable);
 					if(type1==error || type2==error){
 						break;
 					} else if(type1==integer && type2==integer){
@@ -165,7 +176,7 @@ int TypeChecker(parsetree root, symbolTable s){
 					}	
 				}
 				else{
-					type1 = TypeChecker(root.children[1], s);
+					type1 = TypeChecker(root.children[1], sTable);
 					return type1;
 				}
 				break;	
@@ -173,8 +184,8 @@ int TypeChecker(parsetree root, symbolTable s){
 			case singleOrRecId:
 			;
 				record* rectype;
-				if(s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme,9973)])
-					rectype  = s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
+				if(sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme,9973)])
+					rectype  = sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
 				else if(tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)])
 					rectype = tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
 				else break;
@@ -194,7 +205,7 @@ int TypeChecker(parsetree root, symbolTable s){
 
 			default:
 				for(int i = 0; i < root.numChild; i++){
-					TypeChecker(root.children[i] , s);
+					TypeChecker(root.children[i] , sTable);
 				}
 				break;
 		}
@@ -206,8 +217,8 @@ int TypeChecker(parsetree root, symbolTable s){
 				if(tp == NULL) break;
 				
 				char* ch;
-				if(s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)])
-					ch = s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
+				if(sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)])
+					ch = sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
 				else if(tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)])
 					ch = tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
 				else
