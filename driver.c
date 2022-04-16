@@ -7,11 +7,6 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-/*
- * driver.c: contains the main function
- * provides an interface for testing the lexer and parser modules
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

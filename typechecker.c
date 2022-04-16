@@ -21,9 +21,7 @@ int TypeChecker(parsetree root, symbolTable s){
 	type2 = 8;
 	if(root.terminal == NULL){
 		switch(root.nt){
-			
 			case assignmentStmt:
-				
 				type1 = TypeChecker(root.children[0], s);
 				
 				type2 = TypeChecker(root.children[1], s);
@@ -36,104 +34,14 @@ int TypeChecker(parsetree root, symbolTable s){
 					while(curr.terminal == NULL && curr.numChild != 0){
 						curr = curr.children[0];
 					}
-					printf("TYpe error in line %llu:Type mismatch", curr.terminal->lineNum);
+					printf("Type error in line %llu:Type mismatch", curr.terminal->lineNum);
 					break;
 				} else if(type1==real && type2==integer){
 					return real;
 				} else if(type1==real && type2==real){
 					return real;
 				}
-			case singleOrRecId:
 
-				record* rtype;
-				if(s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme,10000)])
-				rtype = s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
-				else if(tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)])
-				rtype = tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
-				else break ;
-
-				if(rtype == NULL) break;
-				while(rtype != NULL){
-					if(!strcmp(rtype->rname , root.children[1].terminal->lexeme)) {
-						if(strcmp(rtype->type,"int")==0)
-							return integer;
-						else if(strcmp(rtype->type,"real")==0)
-							return real;
-						else 
-							return rec;
-					}
-					rtype = rtype->next;
-				}
-
-			case arithmeticExpression:
-				type1 = TypeChecker(root.children[0], s);
-				type2 = TypeChecker(root.children[1], s);
-				if(type1==error || type2==error){
-					break;
-				} else if(type1==integer && type2==integer){
-					return integer;
-				} else if(type1==integer && type2==real){
-					return real;
-				} else if(type1==real && type2==integer){
-					return real;
-				} else if(type1==real && type2==real){
-					return real;
-				}
-
-			case term:
-				type1 = TypeChecker(root.children[0], s);
-				type2 = TypeChecker(root.children[1], s);
-				if(type1==error || type2==error){
-					break;
-				} else if(type1==integer && type2==integer){
-					return integer;
-				} else if(type1==integer && type2==real){
-					return real;
-				} else if(type1==real && type2==integer){
-					return real;
-				} else if(type1==real && type2==real){
-					return real;
-				}
-
-			case termPrime:
-				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[1], s);
-					type2 = TypeChecker(root.children[2], s);
-					if(type1==error || type2==error){
-						break;
-					} else if(type1==integer && type2==integer){
-						return integer;
-					} else if(type1==integer && type2==real){
-						return real;
-					} else if(type1==real && type2==integer){
-						return real;
-					} else if(type1==real && type2==real){
-						return real;
-					}
-				} else{
-					type1 = TypeChecker(root.children[1], s);
-					return type1;
-				}
-			case expPrime:
-				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[1], s);
-					type2 = TypeChecker(root.children[2], s);
-					if(type1==error || type2==error){
-						break;
-					} else if(type1==integer && type2==integer){
-						return integer;
-					} else if(type1==integer && type2==real){
-						return real;
-					} else if(type1==real && type2==integer){
-						return real;
-					} else if(type1==real && type2==real){
-						return real;
-					}	
-				}
-				else{
-					type1 = TypeChecker(root.children[1], s);
-					return type1;
-				}	
 			case booleanExpression:
 				if(root.numChild == 3){
 					type1 = TypeChecker(root.children[0], s);
@@ -165,6 +73,7 @@ int TypeChecker(parsetree root, symbolTable s){
 						}
 						return boolean;	
 					}
+					break;
 				}
 				else if (root.numChild == 2){
 					type1 = TypeChecker(root.children[1], s);
@@ -176,7 +85,105 @@ int TypeChecker(parsetree root, symbolTable s){
 						return error;
 					}
 					return boolean;
-				}	
+				}
+
+			case arithmeticExpression:
+				type1 = TypeChecker(root.children[0], s);
+				type2 = TypeChecker(root.children[1], s);
+				if(type1==error || type2==error){
+					break;
+				} else if(type1==integer && type2==integer){
+					return integer;
+				} else if(type1==integer && type2==real){
+					return real;
+				} else if(type1==real && type2==integer){
+					return real;
+				} else if(type1==real && type2==real){
+					return real;
+				}
+				break;
+
+			case term:
+				type1 = TypeChecker(root.children[0], s);
+				type2 = TypeChecker(root.children[1], s);
+				if(type1==error || type2==error){
+					break;
+				} else if(type1==integer && type2==integer){
+					return integer;
+				} else if(type1==integer && type2==real){
+					return real;
+				} else if(type1==real && type2==integer){
+					return real;
+				} else if(type1==real && type2==real){
+					return real;
+				}
+				break;
+
+			case termPrime:
+				if(root.numChild == 3){
+					type1 = TypeChecker(root.children[1], s);
+					type2 = TypeChecker(root.children[2], s);
+					if(type1==error || type2==error){
+						break;
+					} else if(type1==integer && type2==integer){
+						return integer;
+					} else if(type1==integer && type2==real){
+						return real;
+					} else if(type1==real && type2==integer){
+						return real;
+					} else if(type1==real && type2==real){
+						return real;
+					}
+				} else{
+					type1 = TypeChecker(root.children[1], s);
+					return type1;
+				}
+				break;
+
+			case expPrime:
+				if(root.numChild == 3){
+					type1 = TypeChecker(root.children[1], s);
+					type2 = TypeChecker(root.children[2], s);
+					if(type1==error || type2==error){
+						break;
+					} else if(type1==integer && type2==integer){
+						return integer;
+					} else if(type1==integer && type2==real){
+						return real;
+					} else if(type1==real && type2==integer){
+						return real;
+					} else if(type1==real && type2==real){
+						return real;
+					}	
+				}
+				else{
+					type1 = TypeChecker(root.children[1], s);
+					return type1;
+				}
+				break;	
+
+			case singleOrRecId:
+
+				record* rtype;
+				if(s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme,10000)])
+				rtype = s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
+				else if(tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)])
+				rtype = tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
+				else break ;
+
+				if(rtype == NULL) break;
+				while(rtype != NULL){
+					if(!strcmp(rtype->rname , root.children[1].terminal->lexeme)) {
+						if(strcmp(rtype->type,"int")==0)
+							return integer;
+						else if(strcmp(rtype->type,"real")==0)
+							return real;
+						else 
+							return rec;
+					}
+					rtype = rtype->next;
+				}
+
 			default:
 				for(int i = 0; i < root.numChild; i++){
 					TypeChecker(root.children[i] , s);
@@ -206,14 +213,19 @@ int TypeChecker(parsetree root, symbolTable s){
 					return real;
 				else 
 					return rec;
+				break;
 			case TK_NUM:
 				return integer;
+				break;
 			case TK_RNUM:
 				return real;
+				break;
 			case TK_RECORD:
 				return rec;
+				break;
 			case TK_UNION:
 				return uniontype;
+				break;
 			default:
 				break;
 
