@@ -9,22 +9,11 @@
 
 #include "typechecker.h"
 
-// why is this line here?
-char *idRepr(int id);
-
-struct tableHeader* tp;
-
 int TypeChecker(parsetree root, symbolTable s){
-	//printf("idahr\n");
-	//if(root.numChild == 0)
-	//printf("%s\n",root.terminal->lexeme);
-	//else printf("%s\n",idRepr(root.nonTerminal));
+
 	if(root.numChild != 0 && (root.nt == function || root.nt == mainFunction))
 	{
-		//printf("%s\n",idRepr(root.nonTerminal)) ;
-		tp = root.tp;
-		//if(!tp)
-		//printf("%s\n",idRepr(root.nonTerminal));
+		tp = root.th;
 	} 
 	int type1, type2;
 	type1 = 7;
@@ -32,14 +21,10 @@ int TypeChecker(parsetree root, symbolTable s){
 	if(root.terminal == NULL){
 		switch(root.nt){
 			case assignmentStmt:
-<<<<<<< HEAD
-=======
-				//printf("idahr333\n");
->>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
+			;
 				type1 = TypeChecker(root.children[0], s);
 				
 				type2 = TypeChecker(root.children[1], s);
-				//printf("%d\t%d", type1,type2);
 				if(type1 == error || type2 == error) break;
 				else if(type1==integer && type2==integer){
 					return integer;
@@ -48,20 +33,16 @@ int TypeChecker(parsetree root, symbolTable s){
 					while(curr.terminal == NULL && curr.numChild != 0){
 						curr = curr.children[0];
 					}
-<<<<<<< HEAD
 					printf("Type error in line %llu:Type mismatch", curr.terminal->lineNum);
-=======
-					printf("line %llu:Type mismatch", curr.terminal->lineNum);
->>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
 					break;
 				} else if(type1==real && type2==integer){
 					return real;
 				} else if(type1==real && type2==real){
 					return real;
 				}
-<<<<<<< HEAD
 
 			case booleanExpression:
+			;
 				if(root.numChild == 3){
 					type1 = TypeChecker(root.children[0], s);
 					type2 = TypeChecker(root.children[2], s);
@@ -76,31 +57,6 @@ int TypeChecker(parsetree root, symbolTable s){
 							return error;
 							break;
 						}	
-=======
-			case singleOrRecId:
-				//if(root.terminal != NULL) return root.stEntry->type;
-					//if(root.children[0].stEntry == NULL) return error;
-					
-						// we have to access the record typedefinitions here. Fill in the required detais
-				//record* rtype = tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
-				record* rtype;
-				if(s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme,10000)])
-				rtype = s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
-				else if(tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)])
-				rtype = tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
-				else break ;
-
-				if(rtype == NULL) break;
-				while(rtype != NULL){
-					if(!strcmp(rtype->rname , root.children[1].terminal->lexeme)) {
-						if(strcmp(rtype->type,"int")==0)
-							return integer;
-						else if(strcmp(rtype->type,"real")==0)
-							return real;
-						else 
-							return rec;
-						//return rtype->type;
->>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
 					}
 					else{
 						if((type1!= integer && type1!= real)||(type2!=integer&&type2!=real))
@@ -121,8 +77,11 @@ int TypeChecker(parsetree root, symbolTable s){
 				}
 				else if (root.numChild == 2){
 					type1 = TypeChecker(root.children[1], s);
-					if(type1 == error)
-						break;//return error;
+					if(type1 == error){
+						return error;
+						break;
+					}
+						
 					else if(type1!= boolean)
 					{
 						printf("Type error in line %llu: NOT operator can be applied only to boolean types but you expression contains non-boolean values.\n", root.children[0].terminal->lineNum);
@@ -130,9 +89,10 @@ int TypeChecker(parsetree root, symbolTable s){
 					}
 					return boolean;
 				}
+				break;
 
 			case arithmeticExpression:
-				//printf("idhar444\n");
+			;
 				type1 = TypeChecker(root.children[0], s);
 				type2 = TypeChecker(root.children[1], s);
 				if(type1==error || type2==error){
@@ -149,6 +109,7 @@ int TypeChecker(parsetree root, symbolTable s){
 				break;
 
 			case term:
+			;
 				type1 = TypeChecker(root.children[0], s);
 				type2 = TypeChecker(root.children[1], s);
 				if(type1==error || type2==error){
@@ -165,6 +126,7 @@ int TypeChecker(parsetree root, symbolTable s){
 				break;
 
 			case termPrime:
+			;
 				if(root.numChild == 3){
 					type1 = TypeChecker(root.children[1], s);
 					type2 = TypeChecker(root.children[2], s);
@@ -181,13 +143,12 @@ int TypeChecker(parsetree root, symbolTable s){
 					}
 				} else{
 					type1 = TypeChecker(root.children[1], s);
-					//printf("%d\n", type1);
 					return type1;
 				}
 				break;
 
 			case expPrime:
-				//printf("idhar555\n");
+			;
 				if(root.numChild == 3){
 					type1 = TypeChecker(root.children[1], s);
 					type2 = TypeChecker(root.children[2], s);
@@ -205,73 +166,30 @@ int TypeChecker(parsetree root, symbolTable s){
 				}
 				else{
 					type1 = TypeChecker(root.children[1], s);
-					//printf("%d\n", type1);
 					return type1;
-<<<<<<< HEAD
 				}
 				break;	
 
 			case singleOrRecId:
-
-				record* rtype;
-				if(s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme,10000)])
-				rtype = s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
-				else if(tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)])
-				rtype = tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
+			;
+				record* rec;
+				if(s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme,9973)])
+					rec  = s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
+				else if(tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)])
+					rec = tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
 				else break ;
 
-				if(rtype == NULL) break;
-				while(rtype != NULL){
-					if(!strcmp(rtype->rname , root.children[1].terminal->lexeme)) {
-						if(strcmp(rtype->type,"int")==0)
+				if(rec == NULL) break;
+				while(rec != NULL){
+					if(!strcmp(rec->recname , root.children[1].terminal->lexeme)) {
+						if(strcmp(rec->type,"int")==0)
 							return integer;
-						else if(strcmp(rtype->type,"real")==0)
+						else if(strcmp(rec->type,"real")==0)
 							return real;
 						else 
 							return rec;
-=======
-				}	
-			case booleanExpression:
-				if(root.numChild == 3){
-					type1 = TypeChecker(root.children[0], s);
-					type2 = TypeChecker(root.children[2], s);
-					if((root.children[1].terminal->tokenType == TK_AND) || (root.children[1].terminal->tokenType == TK_OR)){
-						if(type1 != boolean || type2 != boolean){
-							parsetree curr = root;
-							while(curr.terminal == NULL && curr.numChild != 0){
-			
-								curr = curr.children[0];
-							}
-							printf("line %llu:Logical operators can only be applied to boolean types", curr.terminal->lineNum);
-							break;
-						}	
 					}
-					else{
-						if((type1!= integer && type1!= real)||(type2!=integer&&type2!=real))
-						{
-							printf("line %llu: Invalid expression. Relational operations possible only on int and real\n", root.children[0].terminal->lineNum);
-							//return error;
-							break;
-						}
-						if(type1!=type2)
-						{
-							printf("line %llu:types of expressions should be same while comparing\n", root.children[0].terminal->lineNum);
-							//return error;
-							break;
-						}
-						return boolean;	
-					}
-				}
-				else if (root.numChild == 2){
-					type1 = TypeChecker(root.children[1], s);
-					if(type1 == error)
-						break;//return error;
-					else if(type1!= boolean)
-					{
-						printf("line %llu: NOT operator can only be applied to boolean types\n", root.children[0].terminal->lineNum);
->>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
-					}
-					rtype = rtype->next;
+					rec = rec->next;
 				}
 
 			default:
@@ -284,24 +202,23 @@ int TypeChecker(parsetree root, symbolTable s){
 	else{
 		switch(root.terminal->tokenType){
 			case TK_ID:
-				//printf("idahr\n");
+			;
 				if(tp == NULL) break;
-				//printf("idahr777\n");
 				
-				char* temp;
-				if(s->fTable[hashVal("global",10000)]->localTable[hashVal(root.terminal->lexeme, 10000)])
-				temp = s->fTable[hashVal("global",10000)]->localTable[hashVal(root.terminal->lexeme, 10000)]->type;
-				else if(tp->localTable[hashVal(root.terminal->lexeme, 10000)])
-				temp = tp->localTable[hashVal(root.terminal->lexeme, 10000)]->type;
+				char* ch;
+				if(s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)])
+					ch = s->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
+				else if(tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)])
+					ch = tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
 				else
 				 {
-				 	printf("Line %llu: variable %s not declared\n",root.terminal->lineNum,root.terminal->lexeme);	
+				 	printf("Line %llu: variable %s is not declared\n",root.terminal->lineNum,root.terminal->lexeme);	
 				 	break ;
 				 }
 				
-				if(strcmp(temp,"int")==0)
+				if(strcmp(ch,"int")==0)
 					return integer;
-				else if(strcmp(temp,"real")==0)
+				else if(strcmp(ch,"real")==0)
 					return real;
 				else 
 					return rec;

@@ -36,7 +36,7 @@ void printGram(Grammar g) {
 		for(int j=0; j<g[i].numRules; j++) {
 			rhsChar curr = g[i].heads[j];
 			while(curr!=NULL) {
-				if(curr->tag==0) printf("%s ", getTermString(curr->s.t));
+				if(curr->tag==0) printf("%s ", getTermRepId(curr->s.t));
 				else printf("%s ", getNonTermString(curr->s.nt));
 				curr = curr->next;
 			}
