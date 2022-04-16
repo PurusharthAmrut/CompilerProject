@@ -26,22 +26,12 @@ char *nonTermArr[] = {"program", "mainFunction", "otherFunctions", "function", "
 "lowPrecedenceOperators", "booleanExpression", "var", "logicalOp", "relationalOp", "returnStmt", "optionalReturn", "idList", 
 "more_ids"};
 
-char* termRepId[] = {"'<---'","TK_COMMENT","TK_FIELDID","TK_ID","TK_NUM","TK_RNUM","TK_FUNID","TK_RUID","'with'",
-"TK_PARAMETER","end","while","'int'","'real'","'type'","'_main'","'global'","'parameter'","'list'","'['","']'","'input'","'output'",
-";" , ":" , "." , ",", "endwhile", "(" ,")" , "if" , "then" , "endif" , "read" , "write" , 
-"return" , "+" , "-" , "*" , "/" , "call" , "record" , "'endrecord'" , "'else'" , "'&&&'" , "'@@@'" , "'~'" , "'<'", 
-"'<='" , "'=='" , "'>'" , "'>='" , "'!='" , "union", "endunion", "TK_DEFINETYPE", "as","TK_EOF" , "eps", "dollar", "error"};
-
 char* getTermString(terminal term) {
 	return termArr[term];
 }
 
 char* getNonTermString(nonTerminal nonTerm) {
 	return nonTermArr[nonTerm];
-}
-
-char* getTermRepId(terminal term){
-	return termRepId[term];
 }
 
 terminal checkTerminal(char *tokenArr) {

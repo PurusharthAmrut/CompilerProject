@@ -9,7 +9,7 @@
 
 #include <limits.h>
 #include "parser.h"
-#include "symbolTable.h"
+#include "symbolTable1.h"
 
 struct linkedList {
     parseTree this;
