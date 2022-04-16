@@ -22,8 +22,8 @@ int TypeChecker(parsetree root, symbolTable sTable){
 	if(root.nt != -1){
 		switch(root.nt){
 			case assignmentStmt:			
-				Atype = TypeChecker(root.children[0], s);
-				Btype = TypeChecker(root.children[1], s);
+				Atype = TypeChecker(root.children[0], sTable);
+				Btype = TypeChecker(root.children[1], sTable);
 
 				if(Atype == error || Btype == error) return error;
 
@@ -34,7 +34,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 					while(curr.terminal == NULL && curr.numChild != 0){
 						curr = curr.children[0];
 					}
-					printf("line %llu: type mismatch", curr.terminal->lineNum);
+					printf("Type error in line %llu: type mismatch", curr.terminal->lineNum);
 					break;
 				} else if(Atype==real && Btype==integer){
 					return real;
@@ -44,8 +44,8 @@ int TypeChecker(parsetree root, symbolTable sTable){
 
 			case booleanExpression:			
 				if(root.numChild == 3){
-					Atype = TypeChecker(root.children[0], s);
-					Btype = TypeChecker(root.children[2], s);
+					Atype = TypeChecker(root.children[0], sTable);
+					Btype = TypeChecker(root.children[2], sTable);
 
 					if((root.children[1].terminal->tokenType == TK_AND) || (root.children[1].terminal->tokenType == TK_OR)){
 						if(Atype != boolean || Btype != boolean){
@@ -88,7 +88,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 					break;
 				}
 				else if (root.numChild == 2){
-					Atype = TypeChecker(root.children[1], s);
+					Atype = TypeChecker(root.children[1], sTable);
 					if(Atype == error){
 						return error;
 						break;
@@ -104,8 +104,8 @@ int TypeChecker(parsetree root, symbolTable sTable){
 				break;
 
 			case arithmeticExpression:			
-				Atype = TypeChecker(root.children[0], s);
-				Btype = TypeChecker(root.children[1], s);
+				Atype = TypeChecker(root.children[0], sTable);
+				Btype = TypeChecker(root.children[1], sTable);
 				if(Atype==error || Btype==error){
 					return error;
 				} else if(Atype==integer && Btype==integer){
@@ -120,8 +120,8 @@ int TypeChecker(parsetree root, symbolTable sTable){
 				break;
 
 			case term:			
-				Atype = TypeChecker(root.children[0], s);
-				Btype = TypeChecker(root.children[1], s);
+				Atype = TypeChecker(root.children[0], sTable);
+				Btype = TypeChecker(root.children[1], sTable);
 				if(Atype==error || Btype==error){
 					break;
 				} else if(Atype==integer && Btype==integer){
@@ -137,8 +137,8 @@ int TypeChecker(parsetree root, symbolTable sTable){
 
 			case termPrime:			
 				if(root.numChild == 3){
-					Atype = TypeChecker(root.children[1], s);
-					Btype = TypeChecker(root.children[2], s);
+					Atype = TypeChecker(root.children[1], sTable);
+					Btype = TypeChecker(root.children[2], sTable);
 					if(Atype==error || Btype==error){
 						break;
 					} else if(Atype==integer && Btype==integer){
@@ -151,15 +151,15 @@ int TypeChecker(parsetree root, symbolTable sTable){
 						return real;
 					}
 				} else{
-					Atype = TypeChecker(root.children[1], s);
+					Atype = TypeChecker(root.children[1], sTable);
 					return Atype;
 				}
 				break;
 
 			case expPrime:			
 				if(root.numChild == 3){
-					Atype = TypeChecker(root.children[1], s);
-					Btype = TypeChecker(root.children[2], s);
+					Atype = TypeChecker(root.children[1], sTable);
+					Btype = TypeChecker(root.children[2], sTable);
 					if(Atype==error || Btype==error){
 						break;
 					} else if(Atype==integer && Btype==integer){
@@ -173,7 +173,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 					}	
 				}
 				else{
-					Atype = TypeChecker(root.children[1], s);
+					Atype = TypeChecker(root.children[1], sTable);
 					return Atype;
 				}
 				break;	
@@ -227,7 +227,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 					if (localEntry != NULL)
 						ch = tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
 					else {
-						printf("ine %llu: variable %s has not been declared\n",root.terminal->lineNum,root.terminal->lexeme);	
+						printf("line %llu: variable %s has not been declared\n",root.terminal->lineNum,root.terminal->lexeme);	
 						return error;
 					}
 				}
