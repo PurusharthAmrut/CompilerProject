@@ -34,7 +34,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 					while(curr.terminal == NULL && curr.numChild != 0){
 						curr = curr.children[0];
 					}
-					printf("line %llu: type mismatch", curr.terminal->lineNum);
+					printf("Type error in line %llu: type mismatch", curr.terminal->lineNum);
 					break;
 				} else if(Atype==real && Btype==integer){
 					return real;
@@ -218,7 +218,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 					ch = tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
 				else
 				 {
-				 	printf("Line %llu: variable %s is not declared\n",root.terminal->lineNum,root.terminal->lexeme);	
+				 	printf("Error in line %llu: variable %s is not declared\n",root.terminal->lineNum,root.terminal->lexeme);	
 				 	break ;
 				 }
 				
