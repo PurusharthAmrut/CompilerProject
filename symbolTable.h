@@ -7,12 +7,8 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include"symbolTableDef.h"
-
+// #include"symbolTableDef.h"
+#include "AST.h"
 
 record* insertAtEnd(record* ptr,record *temp);
 int hashVal(char* key, int size);
@@ -39,14 +35,8 @@ void globalIdsUpdate(parseTree ast,symbolTable st,tableHeader* tp);
 symbolTable fillSymbolTable(parseTree ast);
 void printTable(tableHeader* tp);
 void printFuncVariables(record* temp,tableHeader* tp);
+
 void printGlobalVariables(symbolTable st);
 void printFnameAndSizes(symbolTable st);
 void printRecDefAndSize(symbolTable st);
 //void printRecord(tablePointer* tp)
-
-
-
-
-
-
-

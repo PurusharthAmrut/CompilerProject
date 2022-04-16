@@ -11,8 +11,46 @@
 #define PARSERDEF
 
 #include "lexerDef.h"
-//#include "symbolTable.h"
-struct tableHeader;
+
+/*========symbol table def=======================================================*/
+typedef struct paramDetail {
+    bool isInpPar, isOutPar;
+    int parIdx;
+} paramDetail;
+
+typedef struct record {
+    char *type, *recname;
+    int lineNum;
+    struct record *next;
+} record;
+
+typedef struct tablePtr {
+    char *type, *name;
+    int size, offset;
+    record *ptr;
+    paramDetail *param;
+    struct tablePtr *next;
+} tablePtr;
+
+typedef struct hashTable {
+    tablePtr *tptr;
+} hashTable;
+
+typedef struct tableHeader {
+    tablePtr **localTable;
+    char *funName;
+    int numOfVar, funSize, numOfInPar, numOfOutPar;
+    record *inParList, *outParList, *varList;
+} tableHeader;
+
+typedef struct symboltable {
+    tableHeader **fTable;
+    int numOfFunc;
+    record *functions;
+} symboltable;
+
+typedef symboltable* symbolTable;
+/*==============================================================================*/
 
 typedef union symbol {
 	terminal t;
@@ -48,14 +86,15 @@ typedef lhsChar* Grammar;
 
 typedef struct parsetree
 {	
-	// int numChildAST;
 	tokenInfo* terminal;
-	// int ruleNo;
 	// nt = -1 for leaf nodes
 	int nt;
 	int numChild;
 	struct parsetree* children;
-	// struct tablePointer* tp;
+
+	// int ruleNo;
+	int numChildAST;
+    tableHeader *th;
 } parsetree;
 typedef parsetree* parseTree;
 

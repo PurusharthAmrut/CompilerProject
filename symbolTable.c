@@ -7,26 +7,24 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-
-#include <string.h>
-#include <stdlib.h>
 #include "symbolTable.h"
 
 #define TABLE_SIZE 10000
-int GLOBAL_OFFSET ;
+int GLOBAL_OFFSET = 0;
 
 //function to add at the end of linked list of record type
 record* insertAtEnd(record* ptr,record *newRec) {
 	if(ptr==NULL) {
 		ptr=newRec;
-		return newRec;
+		// return newRec;
+        return ptr;
 	}
 	record *iter=ptr,*prev=ptr;
 	while(iter != NULL)
 	{
-		if(!strcmp(iter->rname,newRec->rname))
+		if(strcmp(iter->rname,newRec->rname)==0)
 		{
-			printf("Line %d : %s field declared already in this record\n",newRec->lineNo,temp->rname);
+			printf("Line %d : %s field declared already in this record\n",newRec->lineNo,iter->rname);
 			return ptr;
 		}
 		prev = iter;
@@ -71,8 +69,7 @@ int hashVal(char* key, int size)
 	long long int sum = 0;
 	for(int i=0;i<strlen(key);i++){
 		sum = sum*10 + (long long int)(key[i] - '0');
-		if(sum<0)
-			sum=0;
+		if(sum<0) sum=0;
 	}
 	int hashvalue = sum % size;
 	return hashvalue;
@@ -85,8 +82,7 @@ symbolTable createSymbolTable(int size)
 	st->functions = NULL;
 	st->fTable = malloc(size*sizeof(tableHeader*));
 
-	for(int i=0;i<size;i++)
-	st->fTable[i] = NULL;
+	for(int i=0; i<size; i++) st->fTable[i] = NULL;
 
 	return st;
 }
@@ -94,7 +90,7 @@ symbolTable createSymbolTable(int size)
 TableLoc* createEntry(char* type,char* varname,int size,int offset,record* ptr,paramInfo* param)
 {
 //	printf("entry\n");
-	TableLoc* entry = malloc(sizeof(Table));
+	TableLoc* entry = malloc(sizeof(TableLoc));
 	entry->type = type;
 	entry->varname = varname;
 	entry->size = size;
@@ -108,9 +104,10 @@ TableLoc* createEntry(char* type,char* varname,int size,int offset,record* ptr,p
 tableHeader* createTablePointer(char* fname,int size)
 {
 	tableHeader* tp = malloc(sizeof(tableHeader));
-	tp->localTable = malloc(size*sizeof(Table*));
-	for(int i=0;i < size; i++)
-	tp->localTable[i] = NULL;
+	tp->localTable = malloc(size*sizeof(TableLoc*));
+	
+    for(int i=0;i < size; i++) tp->localTable[i] = NULL;
+
 	tp->fname = fname;
 	tp->numVar = 0;
 	tp->fSize = 0;
@@ -126,9 +123,8 @@ tableHeader* createTablePointer(char* fname,int size)
 // for global record defn to be taken from typeDefinitions
 void fillGlobalUtils2(TableLoc* table, parseTree ast) //ast=fieldDefs or moreFields
 {
-	if(!table || !ast)
-	return ;
-	if(ast->nonTerminal == fieldDefinition)
+	if(!table || !ast) return;
+	if(ast->nt == fieldDefinition)
 	{
 		record* ptr = malloc(sizeof(record));
 		ptr->rname = ast->children[1].terminal->lexeme;
@@ -139,17 +135,22 @@ void fillGlobalUtils2(TableLoc* table, parseTree ast) //ast=fieldDefs or moreFie
 		table->ptr = insertAtEnd(table->ptr,ptr);
 		return;
 	}
-	for(int i=0;i< ast->numChildAST;i++)
-	{
-	fillGlobalUtils2(table,&(ast->children[i]));
-	}
+	// for(int i=0;i< ast->numChildAST;i++) fillGlobalUtils2(table,&(ast->children[i]));
+    for(int i=0;i< ast->numChild;i++) fillGlobalUtils2(table,&(ast->children[i]));
 }
 
 void fillGlobalUtils1(tableHeader* tp, parseTree ast)  //ast=typedef
 {
-	if(!tp || !ast)
-	return ;
+	if(!tp || !ast) return;
+
+    // if(ast->nt==-1) printf("Token: %s", getTermString(ast->terminal->tokenType));
+    // else printf("Token: %s ", getNonTermString(ast->nt));
+    // printf("Children: %d\n", ast->numChild);
+    // if(ast->children[1].terminal==NULL) printf("Lex: is NULL\n");
+    // else printf("Lex: $%s$\n", ast->children[1].terminal->lexeme);
 	TableLoc* table = tp->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
+    // // maybe lexeme for terminal tokens has some extra \n or something
+	// TableLoc* table = tp->localTable[hashVal(getTermString(ast->children[1].terminal->tokenType),TABLE_SIZE)];
 	if(lookup(table,ast->children[1].terminal->lexeme))
 	{
 		printf("line %lld : record %s being global, cannot be declared more than once.\n",ast->children[1].terminal->lineNum,ast->children[1].terminal->lexeme);
@@ -172,23 +173,26 @@ void fillGlobalUtils1(tableHeader* tp, parseTree ast)  //ast=typedef
 
 void fillGlobalRecords(tableHeader* tp,parseTree ast) //ast=typeDefs
 {
-	if(!ast)
-	return;
+	// if(!ast) return;
+	if(!ast || ast->numChild==0) return;
+
 	fillGlobalUtils1(tp,&(ast->children[0]));
-	if(ast->numChildAST==2)
-	fillGlobalRecords(tp,&(ast->children[1]));
+	// if(ast->numChildAST==2) fillGlobalRecords(tp,&(ast->children[1]));
+	if(ast->numChild==2) fillGlobalRecords(tp,&(ast->children[1]));
 }
 
 //------------------------------------------------------------------------------------
 void fillGlobalIds(tableHeader* tp,parseTree ast) //ast=declarations
 {
-	if(!tp || !ast)
-	return ;
+	// if(!tp || !ast) return;
+	if(!tp || !ast || ast->numChild==0) return;
+
 	parsetree decl = ast->children[0];
-	if(decl.numChildAST == 3)
+	// if(decl.numChildAST == 3) 
+	if(decl.numChild == 3) 
 	{
 		TableLoc* table;
-		if(decl.children[0].nonTerminal == -1)  //INT or REAL
+		if(decl.children[0].nt == -1)  //INT or REAL
 		{
 			table = tp->localTable[hashVal(decl.children[1].terminal->lexeme,TABLE_SIZE)];
 			if(lookup(table,decl.children[1].terminal->lexeme))
@@ -236,8 +240,8 @@ void fillGlobalIds(tableHeader* tp,parseTree ast) //ast=declarations
 			
 		}
 	}
-	if(ast->numChildAST == 2)
-	fillGlobalIds(tp,&(ast->children[1]));
+	// if(ast->numChildAST == 2) fillGlobalIds(tp,&(ast->children[1]));
+	if(ast->numChild == 2) fillGlobalIds(tp,&(ast->children[1]));
 }
 
 //---------------------------------------------------------------------------
@@ -254,8 +258,9 @@ void addStmtVarUtils2(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //a
 	{
 		return;
 	}
-	if(ast->numChildAST == 3)
-	return ;
+	// if(ast->numChildAST == 3) return;
+	if(ast->numChild == 3) return;
+
 	TableLoc* temp = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashVal(ast->children[1].terminal->lexeme,TABLE_SIZE)];
 	if(lookup(temp,ast->children[1].terminal->lexeme))
 	{
@@ -270,7 +275,7 @@ void addStmtVarUtils2(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //a
 	}
 	char* type;
 	int size;
-	if(ast->children[0].nonTerminal == dataType)
+	if(ast->children[0].nt == dataType)
 	{
 		type = extractDatatype(&(ast->children[0]));
 		temp = st->fTable[hashVal("global",TABLE_SIZE)]->localTable[hashVal(type,TABLE_SIZE)];
@@ -304,17 +309,17 @@ void addStmtVarUtils2(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //a
 void addStmtVarUtils1(symbolTable st,tableHeader* tp,parseTree ast,int pos) //ast = declarations
 {
 	addStmtVarUtils2(st,tp,&(ast->children[0]),pos);
-	if(ast->numChildAST == 2)
-	addStmtVarUtils1(st,tp,&(ast->children[1]),pos);
+	// if(ast->numChildAST == 2) addStmtVarUtils1(st,tp,&(ast->children[1]),pos);
+	if(ast->numChild == 2) addStmtVarUtils1(st,tp,&(ast->children[1]),pos);
 }
 
 void addStmtVar(symbolTable st,tableHeader* tp,parseTree ast,int pos)  //ast = stmts
 {
-	if(!ast || !tp)
-	return ;
-	for(int i = 0;i < ast->numChildAST; i++)
-	if(ast->children[i].nonTerminal == declarations)
-	addStmtVarUtils1(st,tp,&(ast->children[i]),pos);
+	if(!ast || !tp) return;
+	// for(int i = 0;i < ast->numChildAST; i++) {
+	for(int i = 0;i < ast->numChild; i++) {
+        if(ast->children[i].nt == declarations && ast->children[i].numChild!=0) addStmtVarUtils1(st,tp,&(ast->children[i]),pos);
+    }
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -341,10 +346,8 @@ void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param) //a
 		
 		if(!flag)
 		{
-			if(param->isInputPar)
-				param->parIndex = st->fTable[pos]->numInpPar;
-			else if(param->isOutputPar)
-				param->parIndex = st->fTable[pos]->numOutPar;
+			if(param->isInputPar) param->parIndex = st->fTable[pos]->numInpPar;
+			else if(param->isOutputPar) param->parIndex = st->fTable[pos]->numOutPar;
 			
 			st->fTable[pos]->numVar++;
 			
@@ -352,7 +355,7 @@ void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param) //a
 			char str1[] = "int"; char str2[] = "real";
 			record *parListPtr = malloc(sizeof(record));
 			
-			if(ast->children[0].nonTerminal == dataType)
+			if(ast->children[0].nt == dataType)
 			{
 				char *c = extractDatatype(&(ast->children[0]));	
 				int rhashValue = hashVal(c,TABLE_SIZE);
@@ -434,7 +437,8 @@ void addParameters(symbolTable st, parseTree ast, int pos, paramInfo* param) //a
 			//considering if any collisions are there
 			addEntryAtEnd(&(st->fTable[pos]->localTable[hashPos]),t1);
 		}		
-		if(ast->numChildAST == 3)
+		// if(ast->numChildAST == 3)
+		if(ast->numChild == 3)
 		{
 			paramInfo *param1;
 			if(param->isInputPar)
@@ -462,10 +466,8 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
         int pos = hashVal(key,TABLE_SIZE);        
         if(st->fTable[pos] != NULL)
         {
-        		if(ast->nonTerminal == function)
-                	printf("line %lld : function %s already declared before.\n",ast->children[0].terminal->lineNum,key);
-                else
-                	("_main function declared twice");
+        		if(ast->nt == function) printf("line %lld : function %s already declared before.\n",ast->children[0].terminal->lineNum,key);
+                else printf("_main function declared twice");
                 return;
         }
         
@@ -481,11 +483,11 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 		ast->tp = tp;
 		st->fTable[pos] = tp;   
 		int i;
-		if(ast->nonTerminal == function)
+		if(ast->nt == function)
 		{
-			for(i=0; i < ast->numChildAST; i++)
-			{
-				if(ast->children[i].nonTerminal == input_par)
+			// for(i=0; i < ast->numChildAST; i++) {
+			for(i=0; i < ast->numChild; i++) {
+				if(ast->children[i].nt == input_par)
 				{
 					paramInfo *param = malloc(sizeof(paramInfo));
 					param->isInputPar = true;
@@ -493,7 +495,7 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 					param->parIndex = 0;
 					addParameters(st, &(ast->children[i].children[0]), pos, param);
 				}
-				else if( ast->children[i].nonTerminal == output_par)
+				else if( ast->children[i].nt == output_par)
 				{
 					paramInfo *param = malloc(sizeof(paramInfo));
 					param->isInputPar = false;
@@ -504,9 +506,11 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 			}
 		}
 		
-		if(ast->children[ast->numChildAST-1].nonTerminal == stmts)
+		// if(ast->children[ast->numChildAST-1].nt == stmts)
+		if(ast->children[ast->numChild-1].nt == stmts)
 		{
-			addStmtVar(st,tp, &(ast->children[ast->numChildAST-1]), pos);
+			// addStmtVar(st,tp, &(ast->children[ast->numChildAST-1]), pos);
+			addStmtVar(st,tp, &(ast->children[ast->numChild-1]), pos);
 		}
 		return;
 }
@@ -514,59 +518,50 @@ void fillFuncIdsUtils2(symbolTable st,parseTree ast,char* key)  //ast = function
 //adding entries if otherFunctions are present
 void fillFuncIdsUtils1(symbolTable st,parseTree ast)  // ast = otherFunctions
 {
-        if(!st || !ast)
-                return;
+        if(!st || !ast || ast->numChild==0) return;
 
         fillFuncIdsUtils2(st,&(ast->children[0]),ast->children[0].children[0].terminal->lexeme);
      
-        if(ast->numChildAST == 2)
-        fillFuncIdsUtils1(st,&(ast->children[1]));
+        // if(ast->numChildAST == 2) fillFuncIdsUtils1(st,&(ast->children[1]));
+        if(ast->numChild == 2) fillFuncIdsUtils1(st,&(ast->children[1]));
         return;
 }
 //fill symbol table for different functions present
 void fillFuncVar(symbolTable st,parseTree ast)  // ast=program
 {
-	if(!st || !ast)
-		return ;
+	if(!st || !ast) return;
 
-	for(int i=0;i < ast->numChildAST ;i++)
-	{
-		if(ast->children[i].nonTerminal == otherFunctions)
-		{
-			fillFuncIdsUtils1(st,&(ast->children[0]));
-		}
-		else
-		{
-			fillFuncIdsUtils2(st, &(ast->children[i]), "_main");
-		}
+	// for(int i=0;i < ast->numChildAST ;i++) {
+	for(int i=0;i < ast->numChild ;i++) {
+		if(ast->children[i].nt == otherFunctions) fillFuncIdsUtils1(st,&(ast->children[0]));
+		else fillFuncIdsUtils2(st, &(ast->children[i]), "_main");
 	}
 }
 
 //----------------------------------------------------------------------------------------------------------------
 void globalRecordsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
 {
-	if(!ast || !st)
-	return ;
-	if(ast->nonTerminal == typeDefinitions)
-	{
+	if(!ast || !st) return;
+    // if(ast->nt==-1) printf("Token: %s | Childs: %d\n", getTermString(ast->terminal->tokenType), ast->numChild);
+    // else printf("Token: %s | Childs: %d\n", getNonTermString(ast->nt), ast->numChild);
+	if(ast->nt == typeDefinitions) {
 		fillGlobalRecords(tp,ast);
 		return;
 	}
-	for(int i = 0;i < ast->numChildAST;i++)
-	globalRecordsUpdate(&(ast->children[i]),st,tp);
+	// for(int i = 0;i < ast->numChildAST;i++) globalRecordsUpdate(&(ast->children[i]),st,tp);
+	for(int i = 0;i < ast->numChild;i++) globalRecordsUpdate(&(ast->children[i]),st,tp);
 }
 
 void globalIdsUpdate(parseTree ast,symbolTable st,tableHeader* tp)
 {
-	if(!ast || !st)
-	return ;
-	if(ast->nonTerminal == declarations)
-	{
+	if(!ast || !st) return;
+
+	if(ast->nt == declarations) {
 		fillGlobalIds(tp,ast);
 		return;
 	}
-	for(int i = 0;i < ast->numChildAST;i++)
-	globalIdsUpdate(&(ast->children[i]),st,tp);
+	// for(int i = 0;i < ast->numChildAST;i++) globalIdsUpdate(&(ast->children[i]),st,tp);
+	for(int i = 0;i < ast->numChild;i++) globalIdsUpdate(&(ast->children[i]),st,tp);
 }
 /*
 void printRecord(tablePointer* tp)
@@ -691,25 +686,21 @@ void printFuncVariables(record* temp,tableHeader* tp)
 }
 
 //printing functions in order of which they are present in the test file
-void printTable(tableHeader* tp)
-{
-	if(!tp)
-		return;
+void printTable(tableHeader* tp) {
+	if(!tp) return;
 	int flag=0;
-	if(strcmp(tp->fname,"global")==0)
-		flag=1;
+	if(strcmp(tp->fname,"global")==0) flag=1;
 
 	record *temp;
 
-	switch(flag)
-	{
+	switch(flag) {
 		case 0:	
 				printFuncVariables(tp->inParList,tp);
 				printFuncVariables(tp->outParList,tp);
 				printFuncVariables(tp->variables,tp);
 				break;
 		case 1:
-				;
+                ;
 				char *lexeme,*type,*scope;
 				int offset;
 				scope = tp->fname;
@@ -719,13 +710,13 @@ void printTable(tableHeader* tp)
 					char *c = temp->rname;
 					TableLoc* table;
 					table = tp->localTable[hashVal(c,TABLE_SIZE)];
-					if(!table)
-						continue;
+					if(!table) continue;
 					while(table)
 					{
 						lexeme = table->varname;
 						type = table->type;
-						printf("%s		",lexeme);
+                        if(lexeme==NULL) printf("NULL		");
+						else printf("%s		",lexeme);
 						if(table->ptr != NULL)
 						{
 							record *rPtr;
@@ -740,8 +731,9 @@ void printTable(tableHeader* tp)
 							printf("		%s		-\n",scope);
 						}
 						else
-						{
-							printf("%s		%s		-\n",type,scope);
+						{   
+                            if(type==NULL) printf("NULL		%s		-\n",scope);
+                            else printf("%s		%s		-\n",type,scope);
 						}
 						table = table->next;
 					}
@@ -754,19 +746,19 @@ void printTable(tableHeader* tp)
 
 
 //print complete symbol table
-void printSymbolTable(symbolTable st)
-{
-	if(!st)
-	return ;
+void printSymbolTable(symbolTable st) {
+	if(!st) return;
+    printf("\n===================Symbol Table=======================\n");
 	printf("\nlexeme		type		scope		offset\n\n");
 	record *temp;
 	temp = st->functions;
-	while(temp != NULL)
-	{
+	
+    while(temp!=NULL) {
 		char *c = temp->rname;
 		printTable(st->fTable[hashVal(c,TABLE_SIZE)]);
 		temp = temp->next;
 	}
+    printf("\n======================================================\n");
 }
 
 //print function name and its size

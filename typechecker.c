@@ -7,28 +7,13 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-
-#include <stdio.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include "parserDef.h"
-#include "lexer.h"
-#include "symbolTable.h"
 #include "typechecker.h"
 
+// why is this line here?
 char *idRepr(int id);
 
-typedef enum{
-integer,
-real,
-rec,
-union,
-boolean,
-error
-}types;
-
 struct tableHeader* tp;
+
 int TypeChecker(parsetree root, symbolTable s){
 	//printf("idahr\n");
 	//if(root.numChild == 0)
@@ -46,9 +31,11 @@ int TypeChecker(parsetree root, symbolTable s){
 	type2 = 8;
 	if(root.terminal == NULL){
 		switch(root.nt){
-			
 			case assignmentStmt:
+<<<<<<< HEAD
+=======
 				//printf("idahr333\n");
+>>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
 				type1 = TypeChecker(root.children[0], s);
 				
 				type2 = TypeChecker(root.children[1], s);
@@ -61,13 +48,35 @@ int TypeChecker(parsetree root, symbolTable s){
 					while(curr.terminal == NULL && curr.numChild != 0){
 						curr = curr.children[0];
 					}
+<<<<<<< HEAD
+					printf("Type error in line %llu:Type mismatch", curr.terminal->lineNum);
+=======
 					printf("line %llu:Type mismatch", curr.terminal->lineNum);
+>>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
 					break;
 				} else if(type1==real && type2==integer){
 					return real;
 				} else if(type1==real && type2==real){
 					return real;
 				}
+<<<<<<< HEAD
+
+			case booleanExpression:
+				if(root.numChild == 3){
+					type1 = TypeChecker(root.children[0], s);
+					type2 = TypeChecker(root.children[2], s);
+					if((root.children[1].terminal->tokenType == TK_AND) || (root.children[1].terminal->tokenType == TK_OR)){
+						if(type1 != boolean || type2 != boolean){
+							parsetree curr = root;
+							while(curr.terminal == NULL && curr.numChild != 0){
+			
+								curr = curr.children[0];
+							}
+							printf("Type error in line %llu: Logical operators are applied only to boolean types but your expression contins non-boolean types. \n", curr.terminal->lineNum);
+							return error;
+							break;
+						}	
+=======
 			case singleOrRecId:
 				//if(root.terminal != NULL) return root.stEntry->type;
 					//if(root.children[0].stEntry == NULL) return error;
@@ -91,8 +100,35 @@ int TypeChecker(parsetree root, symbolTable s){
 						else 
 							return rec;
 						//return rtype->type;
+>>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
 					}
-					rtype = rtype->next;
+					else{
+						if((type1!= integer && type1!= real)||(type2!=integer&&type2!=real))
+						{
+							printf("Type error in line %llu: Relational operations are applied only on int and real but your expression contains other data types.\n", root.children[0].terminal->lineNum);
+							return error;
+							break;
+						}
+						if(type1!=type2)
+						{
+							printf("Type Error in line %llu: Different types\n", root.children[0].terminal->lineNum);
+							return error;
+							break;
+						}
+						return boolean;	
+					}
+					break;
+				}
+				else if (root.numChild == 2){
+					type1 = TypeChecker(root.children[1], s);
+					if(type1 == error)
+						break;//return error;
+					else if(type1!= boolean)
+					{
+						printf("Type error in line %llu: NOT operator can be applied only to boolean types but you expression contains non-boolean values.\n", root.children[0].terminal->lineNum);
+						return error;
+					}
+					return boolean;
 				}
 
 			case arithmeticExpression:
@@ -110,6 +146,7 @@ int TypeChecker(parsetree root, symbolTable s){
 				} else if(type1==real && type2==real){
 					return real;
 				}
+				break;
 
 			case term:
 				type1 = TypeChecker(root.children[0], s);
@@ -125,6 +162,7 @@ int TypeChecker(parsetree root, symbolTable s){
 				} else if(type1==real && type2==real){
 					return real;
 				}
+				break;
 
 			case termPrime:
 				if(root.numChild == 3){
@@ -146,6 +184,8 @@ int TypeChecker(parsetree root, symbolTable s){
 					//printf("%d\n", type1);
 					return type1;
 				}
+				break;
+
 			case expPrime:
 				//printf("idhar555\n");
 				if(root.numChild == 3){
@@ -167,6 +207,29 @@ int TypeChecker(parsetree root, symbolTable s){
 					type1 = TypeChecker(root.children[1], s);
 					//printf("%d\n", type1);
 					return type1;
+<<<<<<< HEAD
+				}
+				break;	
+
+			case singleOrRecId:
+
+				record* rtype;
+				if(s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme,10000)])
+				rtype = s->fTable[hashVal("global",10000)]->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
+				else if(tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)])
+				rtype = tp->localTable[hashVal(root.children[0].terminal->lexeme, 10000)]->ptr;
+				else break ;
+
+				if(rtype == NULL) break;
+				while(rtype != NULL){
+					if(!strcmp(rtype->rname , root.children[1].terminal->lexeme)) {
+						if(strcmp(rtype->type,"int")==0)
+							return integer;
+						else if(strcmp(rtype->type,"real")==0)
+							return real;
+						else 
+							return rec;
+=======
 				}	
 			case booleanExpression:
 				if(root.numChild == 3){
@@ -206,9 +269,11 @@ int TypeChecker(parsetree root, symbolTable s){
 					else if(type1!= boolean)
 					{
 						printf("line %llu: NOT operator can only be applied to boolean types\n", root.children[0].terminal->lineNum);
+>>>>>>> 34f93c5834ce874ab8df78f5e1d005b76beabd08
 					}
-					return boolean;
-				}	
+					rtype = rtype->next;
+				}
+
 			default:
 				for(int i = 0; i < root.numChild; i++){
 					TypeChecker(root.children[i] , s);
@@ -240,14 +305,19 @@ int TypeChecker(parsetree root, symbolTable s){
 					return real;
 				else 
 					return rec;
+				break;
 			case TK_NUM:
 				return integer;
+				break;
 			case TK_RNUM:
 				return real;
+				break;
 			case TK_RECORD:
 				return rec;
+				break;
 			case TK_UNION:
-				return union;
+				return uniontype;
+				break;
 			default:
 				break;
 

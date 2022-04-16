@@ -7,11 +7,6 @@
  * Jatin Aggarwal		2018B4A70884P
  */
 
-/*
- * driver.c: contains the main function
- * provides an interface for testing the lexer and parser modules
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -134,8 +129,8 @@ int main(int argc, char *argv[])
 					end_time = clock();
 					if(!m1)
 					{ 
-						total_CPU_time +=  (double) (end_time - start_time);
-                		total_CPU_time_in_seconds +=  total_CPU_time / CLOCKS_PER_SEC;
+						total_CPU_time += ((double)end_time - start_time);
+                		total_CPU_time_in_seconds += (total_CPU_time / CLOCKS_PER_SEC);
 						nodeCount(root, &count);
 						count++; 
 					}	
@@ -151,12 +146,12 @@ int main(int argc, char *argv[])
 				}
 				start_time = clock();
 				ast = createASTDummy(root);
-				printAST(ast);
+				printAST(ast, program);
 				end_time = clock();
 				if(!m2)
 					{ 
-						total_CPU_time +=  (double) (end_time - start_time);
-                		total_CPU_time_in_seconds +=  total_CPU_time / CLOCKS_PER_SEC;
+						total_CPU_time += ((double)end_time - start_time);
+                		total_CPU_time_in_seconds += (total_CPU_time / CLOCKS_PER_SEC);
 						nodeCountAST(ast, &countAST);
 						countAST++;
 					}	
@@ -170,8 +165,8 @@ int main(int argc, char *argv[])
 				}
 				printf("\n\nParse Tree number of nodes= %d\tAllocated Memory = %ld Bytes\n",count,count*sizeof(parsetree));
 		     		printf("\nAST number of nodes= %d\tAllocated Memory = %ld Bytes\n",countAST,countAST*sizeof(parsetree));	
-		     		float compressionPerc = (float)((count-countAST)/count)*100 ;
-				printf("Compression Percentage = %f\n\n\n",compressionPerc);
+		     		double compressionPerc = (((double)count-countAST)/count)*100 ;
+				printf("Compression Percentage = %lf\n\n\n",compressionPerc);
 				printf("\n\n------------------------------------------------------------------\n\n");
 		     		break;
 
@@ -188,8 +183,8 @@ int main(int argc, char *argv[])
 		     			start_time = clock();
 		     			st = fillSymbolTable(ast);
 		     			end_time = clock();
-		     			total_CPU_time  +=  (double) (end_time - start_time);
-                			total_CPU_time_in_seconds  +=  total_CPU_time / CLOCKS_PER_SEC;
+		     			total_CPU_time  += ((double)end_time - start_time);
+                        total_CPU_time_in_seconds += (total_CPU_time / CLOCKS_PER_SEC);
 		     		}
 		     		m4++;
 		     		printSymbolTable(st);
@@ -240,20 +235,20 @@ int main(int argc, char *argv[])
 		     		{
 		     			start_time = clock();
 		     			TypeChecker(*ast, st);
-					checkFunctionSemantics(ast, st);
+                        checkFunctionSemantics(ast, st);
 		     			end_time = clock();
-		     			total_CPU_time  +=  (double) (end_time - start_time);
-                			total_CPU_time_in_seconds  +=  total_CPU_time / CLOCKS_PER_SEC;
+		     			total_CPU_time  += ((double)end_time - start_time);
+                			total_CPU_time_in_seconds += (total_CPU_time / CLOCKS_PER_SEC);
 		     		}
 				m5++;
 				printf("\n\ntotal_CPU_time:%lf\n",total_CPU_time);
-                		printf("total_CPU_time_in_seconds:%lf  seconds\n\n",total_CPU_time_in_seconds);
-		     		printf("\n\n------------------------------------------------------------------\n\n");
-		     		break;
+                printf("total_CPU_time_in_seconds:%lf  seconds\n\n",total_CPU_time_in_seconds);
+                printf("\n\n------------------------------------------------------------------\n\n");
+                break;
 		
 		     	default:
 		     		// invalid option
-		            	fprintf(stderr, "\nstage2: error: invalid option\n");
+                    fprintf(stderr, "\nstage2: error: invalid option\n");
         }
     }
 

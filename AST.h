@@ -1,11 +1,11 @@
-#include"parserDef.h"
+#include "parser.h"
 
-int useful(int node);
-// parseTree createAST(parseTree root);
-parseTree createASTDummy(parseTree root);
-void buildAST(parseTree ast,parseTree root);
-// void createASTUtils(parseTree curr, parseTree par);
-void copy(parseTree dst,parseTree src);
-// void nodeCount(parseTree root,int* ans);
 void nodeCountAST(parseTree root,int* ans);
-void printAST(parseTree root);
+int useful(int node);
+void copy(parseTree dst,parseTree src);
+// void createASTUtils(parseTree curr, parseTree par);
+// void buildAST(parseTree ast,parseTree root);
+parseTree createASTDummy(parseTree root);
+parseTree createAST(parseTree root);
+void printAST(parseTree root, nonTerminal parent);
+void printASTDetails(parseTree ast);
