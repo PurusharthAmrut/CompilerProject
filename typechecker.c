@@ -17,7 +17,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 	} 
 
 	int Atype = error + 1;
-	int Btype = Atype + 2;;
+	int Btype = Atype + 1;
 
 	if(root.nt != -1){
 		switch(root.nt){
@@ -239,7 +239,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 				else 
 					return rec;
 				break;
-				
+
 			case TK_NUM:
 				return integer;
 				break;

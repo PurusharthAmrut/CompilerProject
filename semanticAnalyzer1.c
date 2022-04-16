@@ -116,20 +116,21 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
     switch(stmt->nt) {
         case assignmentStmt:
             if(assignedVal!=NULL) {
-                if(!functionList[i]->tp) return 0;
+                if(!functionList[i]->th) return 0;
                 
-                TableLoc *tmpPtr;
+                // TableLoc *tmpPtr;
+                tablePtr *tabPtr;
                 if(stmt->children[0].terminal!=NULL) {
-                    if(s->fTable[hashVal("global", 10000)]->localTable[hashVal(stmt->children[0].terminal->lexeme, 10000)]) {
-                        tmpPtr = s->fTable[hashVal("global", 10000)]->localTable[hashVal(stmt->children[0].terminal->lexeme, 10000)];
+                    if(s->fTable[hashFuncLUT("global", 10000)]->localTable[hashFuncLUT(stmt->children[0].terminal->lexeme, 10000)]) {
+                        tabPtr = s->fTable[hashFuncLUT("global", 10000)]->localTable[hashFuncLUT(stmt->children[0].terminal->lexeme, 10000)];
                     }else {
-                        tmpPtr = functionList[i]->tp->localTable[hashVal(stmt->children[0].children[1].terminal->lexeme, 10000)];
+                        tabPtr = functionList[i]->th->localTable[hashFuncLUT(stmt->children[0].children[1].terminal->lexeme, 10000)];
                     }
                 }else {
-                    if(s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[0].children[1].terminal->lexeme, 10000)]) {
-                        tmpPtr = s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[0].children[1].terminal->lexeme, 10000)];
+                    if(s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[0].children[1].terminal->lexeme, 10000)]) {
+                        tabPtr = s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[0].children[1].terminal->lexeme, 10000)];
                     }else {
-                        tmpPtr = functionList[i]->tp->localTable[hashVal(stmt->children[0].children[1].terminal->lexeme, 10000)];
+                        tabPtr = functionList[i]->th->localTable[hashFuncLUT(stmt->children[0].children[1].terminal->lexeme, 10000)];
                     }
                 }
             }
@@ -196,38 +197,40 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
             break;
         case ioStmt:
             if(assignedVal!=NULL) {
-                if(!functionList[i]->tp) return 0;
+                if(!functionList[i]->th) return 0;
 
-                TableLoc *tmpPtr;
+                // TableLoc *tmpPtr;
+                tablePtr *tabPtr;
                 if(stmt->children[1].terminal!=NULL) {
-                    if(s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[1].terminal->lexeme, 10000)]) {
-                        tmpPtr = s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[1].terminal->lexeme, 10000)];
+                    if(s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[1].terminal->lexeme, 10000)]) {
+                        tabPtr = s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[1].terminal->lexeme, 10000)];
                     }else {
-                        tmpPtr = functionList[i]->tp->localTable[hashVal(stmt->children[1].terminal->lexeme, 10000)];
+                        tabPtr = functionList[i]->th->localTable[hashFuncLUT(stmt->children[1].terminal->lexeme, 10000)];
                     }                        
                 }else if(stmt->children[1].nt==var) {
-                    if(s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[1].children[0].children[1].terminal->lexeme, 10000)]) {
-                        tmpPtr = s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[1].children[0].children[1].terminal->lexeme, 10000)];
+                    if(s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[1].children[0].children[1].terminal->lexeme, 10000)]) {
+                        tabPtr = s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[1].children[0].children[1].terminal->lexeme, 10000)];
                     }else {
-                        tmpPtr = functionList[i]->tp->localTable[hashVal(stmt->children[1].children[0].children[1].terminal->lexeme, 10000)];
+                        tabPtr = functionList[i]->th->localTable[hashFuncLUT(stmt->children[1].children[0].children[1].terminal->lexeme, 10000)];
                     }
                 }else {
-                    if(s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[1].children[1].terminal->lexeme, 10000)]) {
-                        tmpPtr = s->fTable[hashVal("global",10000)]->localTable[hashVal(stmt->children[1].children[1].terminal->lexeme, 10000)];
+                    if(s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[1].children[1].terminal->lexeme, 10000)]) {
+                        tabPtr = s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(stmt->children[1].children[1].terminal->lexeme, 10000)];
                     }else {
-                        tmpPtr = functionList[i]->tp->localTable[hashVal(stmt->children[1].children[1].terminal->lexeme, 10000)];
+                        tabPtr = functionList[i]->th->localTable[hashFuncLUT(stmt->children[1].children[1].terminal->lexeme, 10000)];
                     }
                 }
             }
             return 0;
         case funCallStmt:
+            ;
             char *nameStr;
             nameStr = malloc(30*sizeof(char));
 
             if(stmt->numChildAST==3) strcpy(nameStr, stmt->children[1].terminal->lexeme);
             else strcpy(nameStr, stmt->children[0].terminal->lexeme);
 
-            tableHeader *callee = s->fTable[hashVal(nameStr, 10000)];
+            tableHeader *callee = s->fTable[hashFuncLUT(nameStr, 10000)];
 			
 			int idx;
 			for(int k=0; k<size; k++){
@@ -247,7 +250,7 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
 			}
 
 			parseTree outputParam = &(stmt->children[0]);
-			if(outputParam->numChildAST!=callee->numOutPar){
+			if(outputParam->numChildAST!=callee->numOfOutPar){
 				printf("Line : %llu Number of parameters required for function %s does not match number of returned parameters\n", stmt->children[1].terminal->lineNum, stmt->children[1].terminal->lexeme);
 				error = -1;
 			}
@@ -256,25 +259,26 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
 			parseTree* outputParamList = getChildren(outputParam, &outputParamSize);
 
 			for(int k=0; k<outputParamSize; k++){
-				TableLoc *tmpPtr1 = functionList[i]->tp->localTable[hashVal(outputParamList[k]->terminal->lexeme, 10000)];
-				record **recArr = (record**)malloc(callee->numOutPar*sizeof(record*));
+				tablePtr *tabPtr1 = functionList[i]->th->localTable[hashFuncLUT(outputParamList[k]->terminal->lexeme, 10000)];
+				record **recArr = (record**)malloc(callee->numOfOutPar*sizeof(record*));
 				record *recHead = callee->outParList;
 				
-                for(int m=0; m<callee->numOutPar; m++){
+                for(int m=0; m<callee->numOfOutPar; m++){
                     recArr[m] = recHead;
                     recHead = recHead->next;
 				}
 
-				if(tmpPtr1==NULL || (strcmp(tmpPtr1->type, recArr[k]->type)!=0)){
-					printf("Line :%llu type of output parameter in function %s does not match the return type\n", outputParamList[k]->terminal->lineNum, callee->fname);
+				if(tabPtr1==NULL || (strcmp(tabPtr1->type, recArr[k]->type)!=0)){
+					printf("Line :%llu type of output parameter in function %s does not match the return type\n", 
+                    outputParamList[k]->terminal->lineNum, callee->funName);
 					error = -1;
 				}
 
 				if(assignedVal!=NULL){
 					for(int m=0; m<idsSize; m++){
-						TableLoc *tmpPtr2 = functionList[i]->tp->localTable[hashVal(idsList[m]->terminal->lexeme, 10000)];
-						if(tmpPtr1==NULL || tmpPtr2==NULL) continue;	
-						if(strcmp(tmpPtr2->type, tmpPtr1->type)==0) assignedVal[m] = 1;
+						tablePtr *tabPtr2 = functionList[i]->th->localTable[hashFuncLUT(idsList[m]->terminal->lexeme, 10000)];
+						if(tabPtr1==NULL || tabPtr2==NULL) continue;	
+						if(strcmp(tabPtr2->type, tabPtr1->type)==0) assignedVal[m] = 1;
 					}
 				}
 			}
@@ -283,9 +287,9 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
 			int inputParamSize = 0;
 			parseTree *inputParamList = getChildren(inputParam, &inputParamSize); 
 
-			printf("%d, %s\n", inputParamSize, callee->fname);
+			printf("%d, %s\n", inputParamSize, callee->funName);
 			
-            if(inputParamSize!=callee->numInpPar){
+            if(inputParamSize!=callee->numOfInPar){
 				printf("Line : %llu Number of input parameters required for function %s does not match number of input parameters\n", stmt->children[1].terminal->lineNum, stmt->children[1].terminal->lexeme);
 				error = -1;
 			}
@@ -294,23 +298,25 @@ symbolTable s, int *assignedVal, parseTree tmpOutputPar, int i, int size) {
 			parseTree* inputList = getChildren(inputParam, &inputSize);
 
             for(int k=0; k<inputSize; k++){
-				if(!functionList[i]->tp) {
-					printf("Line : %llu type of input parameter in function %s does not match the input argument type\n", inputList[k]->terminal->lineNum, callee->fname);
+				if(!functionList[i]->th) {
+					printf("Line : %llu type of input parameter in function %s does not match the input argument type\n", 
+                    inputList[k]->terminal->lineNum, callee->funName);
 					error = -1;
 					continue;
 				}
 
-				TableLoc *tmpPtr1 = functionList[i]->tp->localTable[hashVal(inputList[k]->terminal->lexeme, 10000)];
-				record **recArr = (record**)malloc(callee->numInpPar*sizeof(record*));
+				tablePtr *tabPtr1 = functionList[i]->th->localTable[hashFuncLUT(inputList[k]->terminal->lexeme, 10000)];
+				record **recArr = (record**)malloc(callee->numOfInPar*sizeof(record*));
 				record *recHead = callee->inParList;
 
-				for(int m=0; m<callee->numInpPar; m++){
+				for(int m=0; m<callee->numOfInPar; m++){
                     recArr[m] = recHead;
                     recHead = recHead->next;
 				}
 
-				if(tmpPtr1==NULL || (strcmp(tmpPtr1->type, recArr[k]->type)!=0)){
-					printf("Line : %llu type of input parameter in function %s does not match the input argument type\n", inputList[k]->terminal->lineNum, callee->fname);
+				if(tabPtr1==NULL || (strcmp(tabPtr1->type, recArr[k]->type)!=0)){
+					printf("Line : %llu type of input parameter in function %s does not match the input argument type\n", 
+                    inputList[k]->terminal->lineNum, callee->funName);
 					error = -1;
 				}
 			}
@@ -329,7 +335,7 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
 
         int flag = 0;
         for(int i=0; i<size; i++) {
-            tableHeader *tmpEntry = functionList[i]->tp;
+            tableHeader *tmpEntry = functionList[i]->th;
             if(functionList[i]->children[functionList[i]->numChildAST-1].nt==stmts) {
                 parseTree tmp = &(functionList[i]->children[functionList[i]->numChildAST-1]);
 
@@ -338,11 +344,13 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
                 tmp->children[tmp->numChildAST-1].terminal->tokenType==TK_ID)) {
                     parseTree returnStmtNode = &(tmp->children[tmp->numChildAST-1]);
 
-					if(returnStmtNode->numChildAST!=0 && returnStmtNode->numChildAST != tmpEntry->numOutPar){
-						printf("Error in function %s, number of parameters does not match the number output parameters in function definition\n", tmpEntry->fname);
+					if(returnStmtNode->numChildAST!=0 && returnStmtNode->numChildAST != tmpEntry->numOfOutPar){
+						printf("Error in function %s, number of parameters does not match the number output parameters in function definition\n", 
+                        tmpEntry->funName);
 						error = -1; 
-					}else if(tmpEntry->numOutPar != 1){
-						printf("Error in function %s, number of parameters does not match the number output parameters in function definition\n", tmpEntry->fname);
+					}else if(tmpEntry->numOfOutPar != 1){
+						printf("Error in function %s, number of parameters does not match the number output parameters in function definition\n", 
+                        tmpEntry->funName);
 						error = -1; 
 					}
 
@@ -357,33 +365,34 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
 					}
 
 					for(int j=0; j<idSize; j++) {
-						if(!functionList[i]->tp) {
+						if(!functionList[i]->th) {
 							flag = 1;
 							break;
 						}
 
-						TableLoc *tmpPtr;
-						if(s->fTable[hashVal("global",10000)]->localTable[hashVal(idList[j]->terminal->lexeme, 10000)]) {
-                            tmpPtr = s->fTable[hashVal("global",10000)]->localTable[hashVal(idList[j]->terminal->lexeme, 10000)];
+                        tablePtr *tabPtr;
+						if(s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(idList[j]->terminal->lexeme, 10000)]) {
+                            tabPtr = s->fTable[hashFuncLUT("global",10000)]->localTable[hashFuncLUT(idList[j]->terminal->lexeme, 10000)];
                         }else {
-                            tmpPtr = functionList[i]->tp->localTable[hashVal(idList[j]->terminal->lexeme, 10000)];
+                            tabPtr = functionList[i]->th->localTable[hashFuncLUT(idList[j]->terminal->lexeme, 10000)];
                         }
 						
-						if(!tmpPtr || tmpPtr->type==NULL){
+						if(!tabPtr || tabPtr->type==NULL){
 							flag = 1;
 							break;
 						}
 							
-						record **recArr = (record**)malloc(tmpEntry->numOutPar*sizeof(record*));
+						record **recArr = (record**)malloc(tmpEntry->numOfOutPar*sizeof(record*));
 						record *recHead = tmpEntry->outParList;
 						
-                        for(int m=0; m<tmpEntry->numOutPar; m++) {
+                        for(int m=0; m<tmpEntry->numOfOutPar; m++) {
 							recArr[m] = recHead;
 							recHead = recHead->next;
 						}
 
-						if(recArr[j]!=NULL && strcmp(tmpPtr->type, recArr[j]->type)!=0) {
-							printf("line : %llu returned type of %s does not match expected type\n",idList[j]->terminal->lineNum, idList[j]->terminal->lexeme);
+						if(recArr[j]!=NULL && strcmp(tabPtr->type, recArr[j]->type)!=0) {
+							printf("line : %llu returned type of %s does not match expected type\n",
+                            idList[j]->terminal->lineNum, idList[j]->terminal->lexeme);
 							error=-1;
 						}
 					}
@@ -393,17 +402,17 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
                     if(functionList[i]->children[functionList[i]->numChildAST-2].nt==output_par) {
 						parseTree outputParam = &(functionList[i]->children[functionList[i]->numChildAST-2]);
 						int idsSize = 0;
-						parseTree* idsList = findChildren(outputParam, &idsSize);
+						parseTree* idsList = getChildren(outputParam, &idsSize);
 						int *assignedVal = (int*)malloc(idsSize*sizeof(int));
 						memset(assignedVal, 0, idsSize);
 
 						if(tmp->numChildAST!=1 && tmp->children[tmp->numChildAST-2].nt==otherStmts){
 							parseTree otherStmts = &(tmp->children[tmp->numChildAST-2]);
 							int stmtSize = 0;
-							parseTree *stmtList = findChildren(otherStmts, &stmtSize);
+							parseTree *stmtList = getChildren(otherStmts, &stmtSize);
 
 							for(int k=0; k <stmtSize; k++) {
-								if(checkFuncCallStmts(&(stmtList[k]->children[0]), functionList, 
+								if(checkForFunctionCallStmts(&(stmtList[k]->children[0]), functionList, 
                                 s, assignedVal, outputParam, i, size)==-1) error = -1;
 							} 
 							
@@ -418,7 +427,7 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
                     if(functionList[i]->children[functionList[i]->numChildAST - 2].nt==output_par){
 						parseTree outputParam = &(functionList[i]->children[functionList[i]->numChildAST-2]);
 						int idsSize = 0;
-						parseTree* idsList = findChildren(outputParam, &idsSize);
+						parseTree* idsList = getChildren(outputParam, &idsSize);
 						int *assignedVal = (int*)malloc(idsSize*sizeof(int));
 						memset(assignedVal, 0, idsSize);
 						if(tmp->numChildAST!=1 && tmp->children[tmp->numChildAST-2].nt==otherStmts) {
@@ -427,7 +436,7 @@ int checkSemanticsOfFunction(parseTree root, symbolTable s) {
 							parseTree *stmtList = getChildren(otherStmts, &stmtSize);
 
 							for(int k=0; k<stmtSize; k++){
-								if(checkFuncCallStmts(stmtList[k], functionList, 
+								if(checkForFunctionCallStmts(stmtList[k], functionList, 
                                 s, assignedVal, outputParam, i, size)==-1) error = -1;
 							}
 
