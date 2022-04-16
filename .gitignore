@@ -17,3 +17,8 @@ getGram2.*
 *.o
 *.out
 *.exe
+
+symbolTable2.h
+symbolTable2Def.h
+symbolTable2.c
+typechecker2.c
