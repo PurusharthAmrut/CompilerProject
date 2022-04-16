@@ -180,11 +180,15 @@ int TypeChecker(parsetree root, symbolTable sTable){
 
 			case singleOrRecId:			
 				record* rectype;
-				if(sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme,9973)])
-					rectype  = sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
-				else if(tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)])
-					rectype = tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
-				else break;
+				tablePtr* globalEntry = sTable->fTable[hashFuncLUT("global", 9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)];
+				if(globalEntry != NULL)
+					rectype  = sTable->fTable[hashFuncLUT("global", 9973)]->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;
+				else {
+					tablePtr* localEntry = tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)];
+					if (localEntry != NULL)
+						rectype = tp->localTable[hashFuncLUT(root.children[0].terminal->lexeme, 9973)]->ptr;	
+					else return error;
+				}
 
 				if(rectype == NULL) break;
 				while(rectype != NULL){
@@ -209,19 +213,24 @@ int TypeChecker(parsetree root, symbolTable sTable){
 	else{
 		switch(root.terminal->tokenType){
 			case TK_ID:			
-				if(tp == NULL) break;
+				if(tp == NULL) {
+					perror("EMPTY TABLE POINTER!");
+					return error;
+				}
 				
 				char* ch;
-				if(sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)])
-					ch = sTable->fTable[hashFuncLUT("global",9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
-				else if(tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)])
-					ch = tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
-				else
-				 {
-				 	printf("Line %llu: variable %s is not declared\n",root.terminal->lineNum,root.terminal->lexeme);	
-				 	break ;
-				 }
-				
+				tablePtr* globalEntry = sTable->fTable[hashFuncLUT("global", 9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)];
+				if(globalEntry != NULL)
+					ch = sTable->fTable[hashFuncLUT("global", 9973)]->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
+				else {
+					tablePtr* localEntry = tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)];
+					if (localEntry != NULL)
+						ch = tp->localTable[hashFuncLUT(root.terminal->lexeme, 9973)]->type;
+					else {
+						printf("ine %llu: variable %s has not been declared\n",root.terminal->lineNum,root.terminal->lexeme);	
+						return error;
+					}
+				}
 				if(strcmp(ch,"int")==0)
 					return integer;
 				else if(strcmp(ch,"real")==0)
@@ -229,6 +238,7 @@ int TypeChecker(parsetree root, symbolTable sTable){
 				else 
 					return rec;
 				break;
+				
 			case TK_NUM:
 				return integer;
 				break;
