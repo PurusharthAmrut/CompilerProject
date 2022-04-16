@@ -1,5 +1,6 @@
 %Test case 4- Simple expressions involving while statement
 _main
+	type int : c2;
 	type int : b5b567;
 	type int : c3bd;
 	type int : d3;

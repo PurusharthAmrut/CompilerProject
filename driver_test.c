@@ -1,4 +1,5 @@
-#include "symbolTable.h"
+#include "symbolTable1.h"
+// #include "symbolTable.h"
 
 int main(int argc, char *argv[]) 
 {
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
     /*========================================================================*/
 
     char *srcFilePath = "./sample_code.txt";
+    // char *srcFilePath = "./testcases_stage2_semantic_analysis/s1.txt";
     // char *srcFilePath = "./testcases_stage1/t2.txt";
     // char *srcFilePath = "./testcases_stage1/t6.txt";
     FILE *sourceFile;
@@ -82,15 +84,15 @@ int main(int argc, char *argv[])
     nodeCount(root, &count);
     count++;
 
-    printf("%lf Clocks | %lf sec | Nodes: %d", total_CPU_time, total_CPU_time_in_seconds, count);
+    // printf("%lf Clocks | %lf sec | Nodes: %d", total_CPU_time, total_CPU_time_in_seconds, count);
 
-    printf("\n==============Parser Tree Details=====================\n");
-    printParserDetails(root);
-    printf("\n======================================================\n");
+    // printf("\n==============Parser Tree Details=====================\n");
+    // printParserDetails(root);
+    // printf("\n======================================================\n");
 
-    printf("\n===============Parse Tree=============================\n");
-    printParseTree(root, program);
-    printf("\n======================================================\n");
+    // printf("\n===============Parse Tree=============================\n");
+    // printParseTree(root, program);
+    // printf("\n======================================================\n");
 
     /*========================================================================*/
 
@@ -103,7 +105,7 @@ int main(int argc, char *argv[])
     nodeCountAST(ast, &countAST);
     countAST++;
 
-    printf("%lf Clocks | %lf sec | Nodes: %d", total_CPU_time, total_CPU_time_in_seconds, countAST);
+    // printf("%lf Clocks | %lf sec | Nodes: %d", total_CPU_time, total_CPU_time_in_seconds, countAST);
 
     printf("\n=================AST Tree Details=====================\n");
     printASTDetails(ast);
@@ -113,22 +115,39 @@ int main(int argc, char *argv[])
     printAST(ast, program);
     printf("\n======================================================\n");
     
-    printf("\n\nParse Tree number of nodes= %d\tAllocated Memory = %ld Bytes\n", count, count*sizeof(parsetree));
-    printf("\nAST number of nodes= %d\tAllocated Memory = %ld Bytes\n", countAST, countAST*sizeof(parsetree));	
-    double compressionPerc = (((double)count-countAST)/count)*100;
-    printf("Compression Percentage = %lf\n\n\n",compressionPerc);
+    // printf("\n\nParse Tree number of nodes= %d\tAllocated Memory = %ld Bytes\n", count, count*sizeof(parsetree));
+    // printf("\nAST number of nodes= %d\tAllocated Memory = %ld Bytes\n", countAST, countAST*sizeof(parsetree));	
+    // double compressionPerc = (((double)count-countAST)/count)*100;
+    // printf("Compression Percentage = %lf\n\n\n",compressionPerc);
 
     /*========================================================================*/
 
-    // start_time = clock();
+    start_time = clock();
     // symbolTable st = fillSymbolTable(ast);
-    // end_time = clock();
+    symbolTable st = populateSymbolTable(ast);
+    printf("Symbol Table Filled Successfully!!\n");
+    end_time = clock();
 
-    // total_CPU_time += ((double)end_time - start_time);
-    // total_CPU_time_in_seconds += ((double)total_CPU_time/CLOCKS_PER_SEC);
+    total_CPU_time += ((double)end_time - start_time);
+    total_CPU_time_in_seconds += ((double)total_CPU_time/CLOCKS_PER_SEC);
 
-    // printSymbolTable(st);
-    // printf("Symbol Table Filled Succesfully!!\n");
+    /*========================================================================*/
+
+    printSymbolTable(st);
+
+    /*========================================================================*/
+
+    printGlobalVariables(st);
+
+    /*========================================================================*/
+
+    printFuncNameAndSizes(st);
+
+    /*========================================================================*/
+
+    printRecordsTypesAndSizes(st);
+
+    /*========================================================================*/
 
     return 0;
 }
