@@ -13,14 +13,23 @@
 int OFFSET_GLOBAL = 0;
 
 int hashFuncST(char *key, int size) {
-    long long int sum = 0;
+    // long long int sum = 0;
+    // for(int i=0; i<strlen(key); i++) {
+    //     sum *= 10;
+    //     sum += (long long int)(key[i]-'0');
+    //     if(sum<0) sum = 0;
+    // }
+    // int hashVal = sum%size;
+    // return hashVal;
+    const int p = 31, m = 1e9+7;
+    int hash = 0;
+    long p_pow = 1;
     for(int i=0; i<strlen(key); i++) {
-        sum *= 10;
-        sum += (long long int)(key[i]-'0');
-        if(sum<0) sum = 0;
+        hash = (hash + (key[i] - '0' + 1) * p_pow) % m;
+        p_pow = (p_pow * p) % m;
     }
-    int hashVal = sum%size;
-    return hashVal;
+    // printf("Key: %s | Hash: %d\n", key, (hash%9973));
+    return hash%(9973);
 }
 
 record* insertBack(record *head, record *ptr) {
@@ -313,19 +322,23 @@ void populateFuncParameters(symbolTable st, parseTree ast, int idx, paramDetail 
     // parameter_list -> dataType TK_ID [remaining_list -> parameter_list]
     int hashIdx = hashFuncST(ast->children[1].terminal->lexeme, TABLE_SIZE);
 
+    // printf("orig: %s\n", ast->children[1].terminal->lexeme);
+    // printSymbolTable(st);
+
     // checking for variable collisions with global or in scope variables
     int flag = 0;
     if(lookUpFunc(st->fTable[hashFuncST("global", TABLE_SIZE)]->localTable[hashIdx], ast->children[1].terminal->lexeme)) {
         printf("Line %lld : variable %s declared here is already declared as a global variable.\n",
         ast->children[1].terminal->lineNum, ast->children[1].terminal->lexeme);
         flag = 1;
-        return;
     }else if(lookUpFunc(st->fTable[idx]->localTable[hashIdx], ast->children[1].terminal->lexeme)) {
+        // printf("here\n");
         printf("Line %lld : variable %s declared here is already in this scope from the parent function.\n",
         ast->children[1].terminal->lineNum, ast->children[1].terminal->lexeme);
         flag = 1;
-        return;
     }
+
+    if(flag) return;
     
     if(!flag) {
         if(param->isInpPar) param->parIdx = st->fTable[idx]->numOfInPar;
@@ -410,7 +423,7 @@ void populateFuncParameters(symbolTable st, parseTree ast, int idx, paramDetail 
         paramTmp->isOutPar = true;
         paramTmp->parIdx = 0;
     }
-    populateFuncParameters(st, &(ast->children[2].children[0]), idx, paramTmp);
+    if(ast->children[2].numChild) populateFuncParameters(st, &(ast->children[2].children[0]), idx, paramTmp);
 }
 
 void populateStmtVarUtils2(symbolTable st, tableHeader *th, parseTree ast, int idx) {

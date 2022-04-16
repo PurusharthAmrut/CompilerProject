@@ -1,5 +1,7 @@
 #include "symbolTable1.h"
 // #include "symbolTable.h"
+#include "typechecker.h"
+#include "semanticAnalyzer1.h"
 
 int main(int argc, char *argv[]) 
 {
@@ -37,8 +39,7 @@ int main(int argc, char *argv[])
 
     char *srcFilePath = "./sample_code.txt";
     // char *srcFilePath = "./testcases_stage2_semantic_analysis/s1.txt";
-    // char *srcFilePath = "./testcases_stage1/t2.txt";
-    // char *srcFilePath = "./testcases_stage1/t6.txt";
+    // char *srcFilePath = "./testcases_stage2_code_generation/c8.txt";
     FILE *sourceFile;
 
     /*========================================================================*/
@@ -148,6 +149,12 @@ int main(int argc, char *argv[])
     printRecordsTypesAndSizes(st);
 
     /*========================================================================*/
+
+    // TypeChecker(*ast, st);
+
+    /*========================================================================*/
+
+    // checkSemanticsOfFunction(ast, st);
 
     return 0;
 }
